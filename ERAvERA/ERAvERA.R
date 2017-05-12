@@ -50,12 +50,16 @@ Options$ice.points<-1000000
 Options<-WeatherMap.set.option(Options,'precip.min.transparency',0.9)
 Options<-WeatherMap.set.option(Options,'fog.min.transparency',0.0)
 
-Options$mslp.base=0                         # Base value for anomalies
+Options$mslp.base=101325                    # Base value for anomalies
 Options$mslp.range=50000                    # Anomaly for max contour
 Options$mslp.step=500                       # Smaller -> more contours
-Options$mslp.tpscale=500                    # Smaller -> contours less transparent
+Options$mslp.tpscale=5                      # Smaller -> contours less transparent
 Options$mslp.lwd=2
 Options$precip.colour=c(0,0.2,0)
+# Overrides mslp options
+contour.levels<-seq(-300,300,30)
+contour.levels<-abs(contour.levels)**1.5*sign(contour.levels)
+contour.levels<-contour.levels+Options$mslp.base
 
 # Load the 0.25 degree orography
 orog<-GSDF.ncdf.load(sprintf("%s/orography/elev.0.25-deg.nc",Sys.getenv('SCRATCH')),'data',
@@ -143,6 +147,61 @@ draw.by.grid<-function(field,colour.function,selection.function,Options) {
 
 }
 
+draw.pressure<-function(mslp,selection.function,Options,colour=c(0,0,0)) {
+
+  M<-GSDF.WeatherMap:::WeatherMap.rotate.pole(mslp,Options)
+  M<-GSDF:::GSDF.pad.longitude(M) # Extras for periodic boundary conditions
+  lats<-M$dimensions[[GSDF.find.dimension(M,'lat')]]$values
+  longs<-M$dimensions[[GSDF.find.dimension(M,'lon')]]$values
+    # Need particular data format for contourLines
+  maxl<-Options$vp.lon.max+2
+  if(lats[2]<lats[1] || longs[2]<longs[1] || max(longs) > maxl ) {
+    if(lats[2]<lats[1]) lats<-rev(lats)
+    if(longs[2]<longs[1]) longs<-rev(longs)
+    longs[longs>maxl]<-longs[longs>maxl]-(maxl*2)
+    longs<-sort(longs)
+    M2<-M
+    M2$dimensions[[GSDF.find.dimension(M,'lat')]]$values<-lats
+    M2$dimensions[[GSDF.find.dimension(M,'lon')]]$values<-longs
+    M<-GSDF.regrid.2d(M,M2)
+  }
+  z<-matrix(data=M$data,nrow=length(longs),ncol=length(lats))
+  lines<-contourLines(longs,lats,z,
+                       levels=contour.levels)
+  if(!is.na(lines) && length(lines)>0) {
+     for(i in seq(1,length(lines))) {
+         tp<-min(1,(abs(lines[[i]]$level-Options$mslp.base)/
+                    Options$mslp.tpscale))
+         lt<-2
+         lwd<-2
+         if(lines[[i]]$level<=Options$mslp.base) {
+             lt<-1
+             lwd<-1
+         }
+         gp<-gpar(col=rgb(colour[1],colour[2],colour[3],tp),
+                             lwd=Options$mslp.lwd*lwd,lty=lt)
+         res<-tryCatch({
+             for(p in seq_along(lines[[i]]$x)) {
+               if(!selection.function(lines[[i]]$y[p],lines[[i]]$x[p])) {
+                 is.na(lines[[i]]$y[p])<-TRUE
+                 is.na(lines[[i]]$x[p])<-TRUE
+               }
+              }
+            grid.lines(x=unit(lines[[i]]$x,'native'),
+			y=unit(lines[[i]]$y,'native'),
+			gp=gp)
+             }, warning = function(w) {
+                 print(w)
+             }, error = function(e) {
+                print(e)
+             }, finally = {
+                # Do nothing
+             })
+     }
+  }
+}
+
+
 # Choose ERA5 points to plot
 select.ERA5<-function(lat,lon) {
   if(min(lon)<Options$vp.lon.min+180) return(FALSE)
@@ -193,6 +252,11 @@ ifile.name<-sprintf("%s/%s",Imagedir,image.name)
                             extension=0,gp=base.gp))
 
   draw.land(Options,n.levels=100)
+
+  mslp<-ERAI.get.slice.at.hour('prmsl',opt$year,opt$month,opt$day,opt$hour)
+  draw.pressure(mslp,select.ERAI,Options)
+  mslp<-ERA5.get.slice.at.hour('prmsl',opt$year,opt$month,opt$day,opt$hour)
+  draw.pressure(mslp,select.ERA5,Options)
 
   prate<-ERAI.get.slice.at.hour('prate',opt$year,opt$month,opt$day,opt$hour)
   prate$data[]<-prate$data/3
