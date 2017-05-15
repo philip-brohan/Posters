@@ -2,7 +2,7 @@
 
 # Just make the streamlines for later rendering.
 
-library(GSDF.ERA5)
+library(GSDF.ERAI)
 library(GSDF.WeatherMap)
 
 year<-2016
@@ -33,12 +33,12 @@ Options$ice.points<-100000
 
 
     s<-NULL
-    sf.name<-sprintf("%s/streamlines.ERA5.rd",
+    sf.name<-sprintf("%s/streamlines.ERAI.rd",
                            Imagedir,year,month,day,hour)
 
-    uwnd<-ERA5.get.slice.at.hour('uwnd.10m',year,month,day,hour)
-    vwnd<-ERA5.get.slice.at.hour('vwnd.10m',year,month,day,hour)
-    t.actual<-ERA5.get.slice.at.hour('air.2m',year,month,day,hour)
+    uwnd<-ERAI.get.slice.at.hour('uwnd.10m',year,month,day,hour)
+    vwnd<-ERAI.get.slice.at.hour('vwnd.10m',year,month,day,hour)
+    t.actual<-ERAI.get.slice.at.hour('air.2m',year,month,day,hour)
     t.normal<-readRDS(sprintf("%s/ERA5/oper/climtologies.test/air.2m.%02d.Rdata",
                            Sys.getenv('SCRATCH'),hour))
     #t.normal<-t.actual

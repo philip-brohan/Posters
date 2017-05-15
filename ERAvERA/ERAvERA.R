@@ -73,6 +73,8 @@ if(FALSE) {
 
 # Get the ERA Interim grid data
 gi<-readRDS('ERA_grids/ERAI_grid.Rdata')
+w<-which(gi$max.lon>360)
+if(length(w)>0) gi$max.lon[w]<-360
 g5<-readRDS('ERA_grids/ERA5_grid.Rdata')
 
 # Plot the orography - raster background, fast
@@ -163,62 +165,69 @@ draw.by.grid<-function(field,colour.function,selection.function,Options) {
   }
 
 }
+
+# Boxes that straddle the date line need to be rationalised and duplicated
+polish.longitudes<-function(lats,lons) {
+   w<-which(abs(lons[1,]-lons[2,])>200 |
+            abs(lons[2,]-lons[3,])>200 |
+            abs(lons[3,]-lons[4,])>200 |
+            abs(lons[4,]-lons[1,])>200)
+   lat.extras<-array(dim=c(4,length(w)))
+   lon.extras<-array(dim=c(4,length(w)))
+   for(i in seq_along(w)) {
+       w2<-which(lons[,w[i]]>0)
+       lons[w2,w[i]]<-lons[w2,w[i]]-360
+       lon.extras[,i]<-lons[,w[i]]+360
+       lat.extras[,i]<-lats[,w[i]]
+   }
+   return(list(lat=cbind(lats,lat.extras),
+               lon=cbind(lons,lon.extras)))
+}
+    
+
 # Draw a field, point by point - using a reduced gaussian grid
 draw.by.rgg<-function(field,grid,colour.function,selection.function,Options) {
 
     field<-GSDF:::GSDF.pad.longitude(field) # Extras for periodic boundary conditions
-    value.points<-GSDF.interpolate.2d(field,grid$centre.lon,grid$centre$lat)
-    col<-colour.function(value.point)
-    for(group in unique(col)) {
+    value.points<-GSDF.interpolate.2d(field,grid$centre.lon,grid$centre.lat)
+    col<-colour.function(value.points)
+    for(group in unique(na.omit(col))) {        
         w<-which(col==group)
-        
-
-  d.lat<-grid$V5[1]-grid$V5[2]
-  for(lat.i in seq_along(grid$V5)) {
-    lat<-grid$V5[lat.i]
-    d.lon<-360/grid$V2[lat.i]
-    for(lon.i in seq(1,grid$V2[lat.i])) {
-      lon<-(lon.i-0.5)*d.lon
-      value.point<-GSDF.interpolate.2d(field,lon,lat)
-      if(is.na(value.point)) next
-      col<-colour.function(value.point)
-      if(is.null(col)) next 
-      gp<-gpar(col=rgb(0.8,0.8,0.8,1),fill=col,lwd=0.1)
-      #gp<-gpar(col=rgb(0.7,1.0,0.7,1),fill=col,lwd=0.1)
-      x<-lon
-      dx<-d.lon*1
-      if(x<Options$vp.lon.min-dx/2) x<-x+360
-      if(x>Options$vp.lon.max+dx/2) x<-x-360
-      y<-lat
-      dy<-d.lat*1
-      p.x<-c(x-dx/2,x+dx/2,x+dx/2,x-dx/2)
-      p.y<-c(y-dy/2,y-dy/2,y+dy/2,y+dy/2)
-      p.r<-GSDF.ll.to.rg(p.y,p.x,Options$pole.lat,Options$pole.lon,polygon=TRUE)
-      if(max(diff(p.r$lon))>45) next # Projection bug
-      if(max(p.r$lon)<Options$vp.lon.min) p.r$lon<-p.r$lon+360
-      if(min(p.r$lon)>Options$vp.lon.max) p.r$lon<-p.r$lon-360
-      if(!selection.function(p.r$lat,p.r$lon)) next
-      grid.polygon(x=unit(p.r$lon,'native'),
-                   y=unit(p.r$lat,'native'),
-                   gp=gp)
-      if(min(p.r$lon)<Options$vp.lon.min) {
-        p.r$lon<-p.r$lon+360
-        if(!selection.function(p.r$lat,p.r$lon)) next
-        grid.polygon(x=unit(p.r$lon,'native'),
-                     y=unit(p.r$lat,'native'),
+        vert.lon<-array(dim=c(4,length(w)))
+        vert.lon[1,]<-grid$min.lon[w]
+        vert.lon[2,]<-grid$max.lon[w]
+        vert.lon[3,]<-grid$max.lon[w]
+        vert.lon[4,]<-grid$min.lon[w]
+        vert.lat<-array(dim=c(4,length(w)))
+        vert.lat[1,]<-grid$min.lat[w]
+        vert.lat[2,]<-grid$min.lat[w]
+        vert.lat[3,]<-grid$max.lat[w]
+        vert.lat[4,]<-grid$max.lat[w]
+        w<-which(vert.lon-Options$pole.lon==180)
+        if(length(w)>0) vert.lon[w]<-vert.lon[w]+0.0001
+        for(v in seq(1,4)) {
+            p.r<-GSDF.ll.to.rg(vert.lat[v,],vert.lon[v,],Options$pole.lat,Options$pole.lon)
+            vert.lat[v,]<-p.r$lat
+            vert.lon[v,]<-p.r$lon
+        }
+        w<-which(vert.lon>Options$vp.lon.max)
+        if(length(w)>0) vert.lon[w]<-vert.lon[w]-360
+        w<-which(vert.lon<Options$vp.lon.min)
+        if(length(w)>0) vert.lon[w]<-vert.lon[w]+360
+        pl<-polish.longitudes(vert.lat,vert.lon)
+        vert.lat<-pl$lat
+        vert.lon<-pl$lon
+        inside<-array(data=selection.function(vert.lat,vert.lon),
+                      dim=c(4,length(vert.lat[1,])))
+        w<-which(inside[1,] & inside[2,] & inside[3,] & inside[4,])
+        vert.lat<-vert.lat[,w]
+        vert.lon<-vert.lon[,w]
+        gp<-gpar(col=rgb(0.8,0.8,0.8,1),fill=group,lwd=0.1)
+        grid.polygon(x=unit(as.vector(vert.lon),'native'),
+                     y=unit(as.vector(vert.lat),'native'),
+                     id.lengths=rep(4,dim(vert.lat)[2]),
                      gp=gp)
-      }
-      if(max(p.r$lon)>Options$vp.lon.max) {
-         p.r$lon<-p.r$lon-360
-         if(!selection.function(p.r$lat,p.r$lon)) next
-         grid.polygon(x=unit(p.r$lon,'native'),
-                      y=unit(p.r$lat,'native'),
-                      gp=gp)
-    
-      }
     }
-  }
-
 }
 
 draw.pressure<-function(mslp,selection.function,Options,colour=c(0,0,0)) {
@@ -275,70 +284,125 @@ draw.pressure<-function(mslp,selection.function,Options,colour=c(0,0,0)) {
   }
 }
 
-draw.precipitation<-function(prate,colour.function,selection.function,Options) {
+draw.precipitation<-function(prate,value.function,selection.function,Options) {
     prate<-GSDF.WeatherMap:::WeatherMap.rotate.pole(prate,Options)
-    for(lat in seq(-90,90,0.1)) {
-        for(lon in seq(-180,180,0.1)) {
-          jtr<-runif(4,min=-0.05,max=0.05)
-          value.point<-GSDF.interpolate.2d(prate,lon,lat)
-          if(is.na(value.point)) next
-          col<-colour.function(value.point)
-          if(is.null(col)) next 
-          gp<-gpar(col=col,fill=col,lwd=0.3)
-          pln<-c(lon+0.025+jtr[1],lon-0.025+jtr[1]+jtr[2]/5)
-          plt<-c(lat+0.05+jtr[3],lat-0.05+jtr[3]+jtr[4]/5)
-          if(!selection.function(plt,pln)) next
-          grid.lines(x=unit(pln,'native'),
-                     y=unit(plt,'native'),
-                     gp=gp)
-      }
+
+    res<-0.1
+    lon.points<-seq(-180,180,res)+Options$vp.lon.min+180
+    lat.points<-seq(-90,90,res)
+    lon.ex<-sort(rep(lon.points,length(lat.points)))
+    lat.ex<-rep(lat.points,length(lon.points))
+    value.points<-GSDF.interpolate.2d(prate,lon.ex,lat.ex)
+    value<-value.function(value.points)
+    w<-which(is.na(value))
+    if(length(w)>0) {
+        lon.ex<-lon.ex[-w]
+        lat.ex<-lat.ex[-w]
+        value<-value[-w]
     }
+    scale<-runif(length(lon.ex),min=0.03,max=0.07)*2*value
+    lat.jitter<-runif(length(lon.ex),min=res*-1/2,max=res/2)
+    lon.jitter<-runif(length(lon.ex),min=res*-1/2,max=res/2)
+    vert.lat<-array(dim=c(2,length(lat.ex)))
+    vert.lat[1,]<-lat.ex+lat.jitter+scale
+    vert.lat[2,]<-lat.ex+lat.jitter-scale
+    vert.lon<-array(dim=c(2,length(lon.ex)))
+    vert.lon[1,]<-lon.ex+lon.jitter+scale/2
+    vert.lon[2,]<-lon.ex+lon.jitter-scale/2
+    inside<-array(data=selection.function(vert.lat,vert.lon),
+                  dim=c(2,length(vert.lat[1,])))
+    w<-which(inside[1,] & inside[2,])
+    vert.lat<-vert.lat[,w]
+    vert.lon<-vert.lon[,w]
+    gp<-gpar(col=rgb(0,0.2,0,1,1),fill=rgb(0,0.2,0,1,1),lwd=0.25)
+    grid.polyline(x=unit(as.vector(vert.lon),'native'),
+                  y=unit(as.vector(vert.lat),'native'),
+                  id.lengths=rep(2,dim(vert.lat)[2]),
+                  gp=gp)
+    
 }
+
+draw.streamlines<-function(s,selection.function,Options) {
+
+    gp<-set.streamline.GC(Options)
+    inside<-array(data=selection.function(s[['y']],s[['x']]),
+                  dim=c(length(s[['x']][,1]),3))
+    w<-which(inside[,1] & inside[,2] & inside[,3])
+    s[['x']]<-s[['x']][w,]
+    s[['y']]<-s[['y']][w,]
+    grid.xspline(x=unit(as.vector(t(s[['x']])),'native'),
+                 y=unit(as.vector(t(s[['y']])),'native'),
+                 id.lengths=rep(Options$wind.vector.points,length(s[['x']][,1])),
+                 shape=s[['shape']],
+                 arrow=Options$wind.vector.arrow,
+                 gp=gp)
+ }
+
 
 # Use a sigmoid as the boundary between the reanalyses
 boundary<-function(lat) {
-    return(Options$vp.lon.min+180+240*(0.5-(1/(1+exp(lat*-5/90)))))
+    return(Options$vp.lon.min+180+360*(0.5-(1/(1+exp(lat*-5/90)))))
 }
 
 # Choose ERA5 points to plot
 select.ERA5<-function(lat,lon) {
   lat.boundary<-boundary(lat)
-  if(any(lon<lat.boundary)) return(FALSE)
-  return(TRUE)
+  result<-rep(TRUE,length(lat))
+  w<-which(lon<lat.boundary)
+  if(length(w)>0) result[w]<-FALSE
+  return(result)
 }
 # Choose ERAI points to plot
 select.ERAI<-function(lat,lon) {
   lat.boundary<-boundary(lat)
-  if(any(lon>lat.boundary)) return(FALSE)
-  return(TRUE)
+  result<-rep(TRUE,length(lat))
+  w<-which(lon>lat.boundary)
+  if(length(w)>0) result[w]<-FALSE
+  return(result)
 }
 
-# Colour function for precipitation
-set.precip.colour<-function(rate) {
-  col<-c(0,0.2,0,1)
+# Intensity function for precipitation
+set.precip.value<-function(rate) {
   min.threshold<-0.0025
   max.threshold<-0.03
   rate<-sqrt(rate)
-  if(rate<min.threshold) return(NULL)
-  value<-max(0,min(1,rate/max.threshold))
-  if(runif(1,0,1)>value) return(NULL)
-  return(rgb(col[1],col[2],col[3],1))
+  result<-rep(NA,length(rate))
+  value<-pmax(0,pmin(1,rate/max.threshold))
+  w<-which(runif(length(rate),0,1)<value & rate>min.threshold)
+  if(length(w)>0) result[w]<-value[w]
+  return(result)
 }
 
 # Colour function for t2m
 set.t2m.colour<-function(temperature,Trange=7) {
 
-  if(temperature>0) {
-     temperature<-max(0,min(Trange,temperature))
-     temperature<-sqrt(temperature)/Trange
-     return(rgb(1,0,0,min(temperature,0.8)))
+  result<-rep(NA,length(temperature))
+  w<-which(temperature>0)
+  if(length(w)>0) {
+     temperature[w]<-pmax(0,pmin(Trange,temperature[w]))
+     temperature[w]<-sqrt(temperature[w])/Trange
+     temperature[w]<-round(temperature[w],1)
+     result[w]<-rgb(1,0,0,pmin(temperature[w],0.5))
   }
-  temperature<-temperature*-1
-  temperature<-max(0,min(Trange,temperature))
-  temperature<-sqrt(temperature)/Trange
-  temperature<-round(temperature,1)
-  return(rgb(0,0,1,min(temperature,0.8)))
+  w<-which(temperature<0)
+  if(length(w)>0) {
+     temperature[w]<-temperature[w]*-1
+     temperature[w]<-pmax(0,pmin(Trange,temperature[w]))
+     temperature[w]<-sqrt(temperature[w])/Trange
+     temperature[w]<-round(temperature[w],1)
+     result[w]<-rgb(0,0,1,pmin(temperature[w],0.5))
+ }
+ return(result)
 }
+
+# Colour function for streamlines
+set.streamline.GC<-function(Options) {
+
+   alpha<-255
+   return(gpar(col=rgb(125,125,125,alpha,maxColorValue=255),
+               fill=rgb(125,125,125,alpha,maxColorValue=255),lwd=Options$wind.vector.lwd))
+}
+
 
 
 # Make the actual plot
@@ -377,7 +441,6 @@ ifile.name<-sprintf("%s/%s",Imagedir,image.name)
   t2m$data[]<-t2m$data-t2n$data
   draw.by.rgg(t2m,gi,set.t2m.colour,select.ERAI,Options)
 
-  q('no')
 
   t2m<-ERA5.get.slice.at.hour('air.2m',opt$year,opt$month,opt$day,opt$hour)
   t2n<-readRDS(sprintf("%s/ERA5/oper/climtologies.test/air.2m.%02d.Rdata",
@@ -386,28 +449,22 @@ ifile.name<-sprintf("%s/%s",Imagedir,image.name)
   draw.by.rgg(t2m,g5,set.t2m.colour,select.ERA5,Options)
 
   mslp<-ERAI.get.slice.at.hour('prmsl',opt$year,opt$month,opt$day,opt$hour)
-  #mn<-readRDS(sprintf("%s/ERA_Interim/climtologies.test/prmsl.%02d.Rdata",
-  #                         Sys.getenv('SCRATCH'),opt$hour))
-  #mslp$data[]<-mslp$data-mn$data
   draw.pressure(mslp,select.ERAI,Options)
   mslp<-ERA5.get.slice.at.hour('prmsl',opt$year,opt$month,opt$day,opt$hour)
-  #mn<-readRDS(sprintf("%s/ERA5/oper/climtologies.test/prmsl.%02d.Rdata",
-  #                         Sys.getenv('SCRATCH'),opt$hour))
-  #mslp$data[]<-mslp$data-mn$data
   draw.pressure(mslp,select.ERA5,Options)
 
+  streamlines<-readRDS('streamlines.ERAI.rd')
+  draw.streamlines(streamlines,select.ERAI,Options)
+  streamlines<-readRDS('streamlines.ERA5.rd')
+  draw.streamlines(streamlines,select.ERA5,Options)
+ 
   prate<-ERAI.get.slice.at.hour('prate',opt$year,opt$month,opt$day,opt$hour)
   prate$data[]<-prate$data/3
-  draw.precipitation(prate,set.precip.colour,select.ERAI,Options)
+  draw.precipitation(prate,set.precip.value,select.ERAI,Options)
 
   prate<-ERA5.get.slice.at.hour('prate',opt$year,opt$month,opt$day,opt$hour)
   prate$data[]<-prate$data/3
-  draw.precipitation(prate,set.precip.colour,select.ERA5,Options)
-
-  #draw.by.rgg(prate,gi,set.precip.colour,select.ERAI,Options)
-  #prate<-ERA5.get.slice.at.hour('prate',opt$year,opt$month,opt$day,opt$hour)
-  #prate$data[]<-prate$data/3
-  #draw.by.rgg(prate,g5,set.precip.colour,select.ERA5,Options)
+  draw.precipitation(prate,set.precip.value,select.ERA5,Options)
 
   # Mark the boundary
   gp<-gpar(col=rgb(1,1,0),fill=rgb(1,1,0),lwd=4)
