@@ -19,13 +19,12 @@ opt = list(
 Imagedir<-sprintf(".",Sys.getenv('SCRATCH'))
 
 Options<-WeatherMap.set.option(NULL)
-Options<-WeatherMap.set.option(Options,'land.colour',rgb(150,150,150,255,
+Options<-WeatherMap.set.option(Options,'land.colour',rgb(100,100,100,255,
                                                        maxColorValue=255))
 Options<-WeatherMap.set.option(Options,'sea.colour',rgb(200,200,200,255,
                                                        maxColorValue=255))
 Options<-WeatherMap.set.option(Options,'ice.colour',rgb(250,250,250,255,
                                                        maxColorValue=255))
-Options<-WeatherMap.set.option(Options,'background.resolution','high')
 Options<-WeatherMap.set.option(Options,'pole.lon',160)
 Options<-WeatherMap.set.option(Options,'pole.lat',45)
 
@@ -37,20 +36,13 @@ Options$vp.lon.min<- -180+50
 Options$vp.lon.max<-  180+50
 Options<-WeatherMap.set.option(Options,'wrap.spherical',F)
 
-Options<-WeatherMap.set.option(Options,'wind.vector.points',3)
-Options<-WeatherMap.set.option(Options,'wind.vector.scale',0.2)
-Options<-WeatherMap.set.option(Options,'wind.vector.move.scale',1)
-Options<-WeatherMap.set.option(Options,'wind.vector.density',0.5)
-Options<-WeatherMap.set.option(Options,'wind.vector.lwd',1.5)
 Options$ice.points<-1000000
-Options<-WeatherMap.set.option(Options,'precip.min.transparency',0.9)
-Options<-WeatherMap.set.option(Options,'fog.min.transparency',0.0)
 
 Options$mslp.base=101325                    # Base value for anomalies
 Options$mslp.range=50000                    # Anomaly for max contour
 Options$mslp.step=500                       # Smaller -> more contours
 Options$mslp.tpscale=5                      # Smaller -> contours less transparent
-Options$mslp.lwd=2
+Options$mslp.lwd=1
 Options$precip.colour=c(0,0.2,0)
 # Overrides mslp options
 contour.levels<-seq(-300,300,30)
@@ -220,6 +212,7 @@ draw.by.rgg<-function(field,grid,colour.function,selection.function,Options) {
         inside<-array(data=selection.function(vert.lat,vert.lon),
                       dim=c(4,length(vert.lat[1,])))
         w<-which(inside[1,] & inside[2,] & inside[3,] & inside[4,])
+        if(length(w)==0) next
         vert.lat<-vert.lat[,w]
         vert.lon<-vert.lon[,w]
         gp<-gpar(col=rgb(0.8,0.8,0.8,1),fill=group,lwd=0.1)
@@ -287,7 +280,7 @@ draw.pressure<-function(mslp,selection.function,Options,colour=c(0,0,0)) {
 draw.precipitation<-function(prate,value.function,selection.function,Options) {
     prate<-GSDF.WeatherMap:::WeatherMap.rotate.pole(prate,Options)
 
-    res<-0.1
+    res<-0.2
     lon.points<-seq(-180,180,res)+Options$vp.lon.min+180
     lat.points<-seq(-90,90,res)
     lon.ex<-sort(rep(lon.points,length(lat.points)))
@@ -300,7 +293,7 @@ draw.precipitation<-function(prate,value.function,selection.function,Options) {
         lat.ex<-lat.ex[-w]
         value<-value[-w]
     }
-    scale<-runif(length(lon.ex),min=0.03,max=0.07)*2*value
+    scale<-runif(length(lon.ex),min=0.03,max=0.07)*4*value
     lat.jitter<-runif(length(lon.ex),min=res*-1/2,max=res/2)
     lon.jitter<-runif(length(lon.ex),min=res*-1/2,max=res/2)
     vert.lat<-array(dim=c(2,length(lat.ex)))
@@ -314,7 +307,7 @@ draw.precipitation<-function(prate,value.function,selection.function,Options) {
     w<-which(inside[1,] & inside[2,])
     vert.lat<-vert.lat[,w]
     vert.lon<-vert.lon[,w]
-    gp<-gpar(col=rgb(0,0.2,0,1,1),fill=rgb(0,0.2,0,1,1),lwd=0.25)
+    gp<-gpar(col=rgb(0,0.2,0,1,1),fill=rgb(0,0.2,0,1,1),lwd=0.5)
     grid.polyline(x=unit(as.vector(vert.lon),'native'),
                   y=unit(as.vector(vert.lat),'native'),
                   id.lengths=rep(2,dim(vert.lat)[2]),
@@ -374,33 +367,35 @@ set.precip.value<-function(rate) {
 }
 
 # Colour function for t2m
-set.t2m.colour<-function(temperature,Trange=7) {
+set.t2m.colour<-function(temperature,Trange=3) {
 
   result<-rep(NA,length(temperature))
   w<-which(temperature>0)
   if(length(w)>0) {
+     temperature[w]<-sqrt(temperature[w])
      temperature[w]<-pmax(0,pmin(Trange,temperature[w]))
-     temperature[w]<-sqrt(temperature[w])/Trange
+     temperature[w]<-temperature[w]/Trange
      temperature[w]<-round(temperature[w],1)
-     result[w]<-rgb(1,0,0,pmin(temperature[w],0.5))
+     result[w]<-rgb(1,0,0,temperature[w]*0.6)
   }
   w<-which(temperature<0)
   if(length(w)>0) {
-     temperature[w]<-temperature[w]*-1
+     temperature[w]<-sqrt(temperature[w]*-1)
      temperature[w]<-pmax(0,pmin(Trange,temperature[w]))
-     temperature[w]<-sqrt(temperature[w])/Trange
+     temperature[w]<-temperature[w]/Trange
      temperature[w]<-round(temperature[w],1)
-     result[w]<-rgb(0,0,1,pmin(temperature[w],0.5))
+     result[w]<-rgb(0,0,1,temperature[w]*0.6)
  }
  return(result)
 }
+
 
 # Colour function for streamlines
 set.streamline.GC<-function(Options) {
 
    alpha<-255
    return(gpar(col=rgb(125,125,125,alpha,maxColorValue=255),
-               fill=rgb(125,125,125,alpha,maxColorValue=255),lwd=Options$wind.vector.lwd))
+               fill=rgb(125,125,125,alpha,maxColorValue=255),lwd=1.5))
 }
 
 
