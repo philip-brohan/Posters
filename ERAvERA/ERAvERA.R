@@ -72,8 +72,8 @@ if(FALSE) {
 }
 
 # Get the ERA Interim grid data
-gi<-read.table('ERA_grids/ERAI_grid.txt')
-g5<-read.table('ERA_grids/ERA5_grid.txt')
+gi<-readRDS('ERA_grids/ERAI_grid.Rdata')
+g5<-readRDS('ERA_grids/ERA5_grid.Rdata')
 
 # Plot the orography - raster background, fast
 draw.land<-function(Options,n.levels=20) {
@@ -166,7 +166,13 @@ draw.by.grid<-function(field,colour.function,selection.function,Options) {
 # Draw a field, point by point - using a reduced gaussian grid
 draw.by.rgg<-function(field,grid,colour.function,selection.function,Options) {
 
-  field<-GSDF:::GSDF.pad.longitude(field) # Extras for periodic boundary conditions
+    field<-GSDF:::GSDF.pad.longitude(field) # Extras for periodic boundary conditions
+    value.points<-GSDF.interpolate.2d(field,grid$centre.lon,grid$centre$lat)
+    col<-colour.function(value.point)
+    for(group in unique(col)) {
+        w<-which(col==group)
+        
+
   d.lat<-grid$V5[1]-grid$V5[2]
   for(lat.i in seq_along(grid$V5)) {
     lat<-grid$V5[lat.i]
@@ -330,6 +336,7 @@ set.t2m.colour<-function(temperature,Trange=7) {
   temperature<-temperature*-1
   temperature<-max(0,min(Trange,temperature))
   temperature<-sqrt(temperature)/Trange
+  temperature<-round(temperature,1)
   return(rgb(0,0,1,min(temperature,0.8)))
 }
 
@@ -369,6 +376,8 @@ ifile.name<-sprintf("%s/%s",Imagedir,image.name)
                            Sys.getenv('SCRATCH'),opt$hour))
   t2m$data[]<-t2m$data-t2n$data
   draw.by.rgg(t2m,gi,set.t2m.colour,select.ERAI,Options)
+
+  q('no')
 
   t2m<-ERA5.get.slice.at.hour('air.2m',opt$year,opt$month,opt$day,opt$hour)
   t2n<-readRDS(sprintf("%s/ERA5/oper/climtologies.test/air.2m.%02d.Rdata",
