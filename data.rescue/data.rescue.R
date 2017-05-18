@@ -203,6 +203,34 @@ set.pole<-function(step,Options) {
   Options<-WeatherMap.set.option(Options,'vp.lon.max',min.lon+360)
   return(Options)
 }
+
+# Want to plot obs coverage rather than observations - make pseudo
+#  observations indicating coverage.
+plot.obs.coverage<-function(obs,Options) {
+    if(Options$pole.lon!=0 || Options$pole.lat!=90) {
+	   l2<-GSDF.ll.to.rg(obs$Latitude,obs$Longitude,Options$pole.lat,Options$pole.lon)
+	   obs$Longitude<-l2$lon
+	   obs$Latitude<-l2$lat
+  }
+  if(length(obs$Latitude)<1) return()
+  lon.m<-Options$lon.min
+  if(!is.null(Options$vp.lon.min)) lon.m<-Options$vp.lon.min
+  w<-which(obs$Longitude<lon.m)
+  if(length(w)>0) obs$Longitude[w]<-obs$Longitude[w]+360
+  lon.m<-Options$lon.max
+  if(!is.null(Options$vp.lon.max)) lon.m<-Options$vp.lon.max
+  w<-which(obs$Longitude>lon.m)
+  if(length(w)>0) obs$Longitude[w]<-obs$Longitude[w]-360
+  # Filter to .5/degree lat and lon
+  idx<-sprintf("%4d%4d",as.integer(obs$Latitude*1),as.integer(obs$Longitude*1))
+  w<-which(duplicated(idx))
+  if(length(w)>0) obs<-obs[-w,]
+  gp<-gpar(col=Options$obs.colour,fill=Options$obs.colour)
+  grid.points(x=unit(obs$Longitude,'native'),
+              y=unit(obs$Latitude,'native'),
+              size=unit(Options$obs.size,'native'),
+              pch=21,gp=gp)
+}  
   
 # Make a sub plot
 sub.plot<-function(year,month,day,hour,Options) {
@@ -237,7 +265,7 @@ sub.plot<-function(year,month,day,hour,Options) {
   WeatherMap.draw.precipitation(prate,Options)
   
   obs<-TWCR.get.obs(year,month,day,hour,version='3.5.1')
-  WeatherMap.draw.obs(obs,Options)
+  plot.obs.coverage(obs,Options)
 
   Options$label=sprintf("%04d-%02d-%02d:%02d",year,month,day,as.integer(hour))
     Options<-WeatherMap.set.option(Options,'land.colour',Options$sea.colour)
@@ -245,6 +273,7 @@ sub.plot<-function(year,month,day,hour,Options) {
 
   popViewport()
 }
+
 
 # Make the full plot
 
