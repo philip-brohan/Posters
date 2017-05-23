@@ -111,6 +111,57 @@ polish.longitudes<-function(lats,lons) {
 }
     
 
+# Sub-divide the grid for regions where higher resolution is necessary
+double.resolution<-function(lats,lons) {
+  if(!is.array(lons)) lons<-array(data=lons,dim=c(4,length(lons)/4))
+  if(!is.array(lats)) lats<-array(data=lats,dim=c(4,length(lats)/4))
+  sub.lons<-array(dim=c(4,length(lons)))
+  sub.lats<-array(dim=c(4,length(lats)))
+  sub.idx<-seq(1,length(lons),4)
+  # bottom left
+  sub.lons[1,sub.idx]<-lons[1,]
+  sub.lons[2,sub.idx]<-(lons[1,]+lons[2,])/2
+  sub.lons[3,sub.idx]<-(lons[1,]+lons[2,]+
+                        lons[3,]+lons[4,])/4
+  sub.lons[4,sub.idx]<-(lons[1,]+lons[4,])/2
+  sub.lats[1,sub.idx]<-lats[1,]
+  sub.lats[2,sub.idx]<-(lats[1,]+lats[2,])/2
+  sub.lats[3,sub.idx]<-(lats[1,]+lats[2,]+
+                        lats[3,]+lats[4,])/4
+  sub.lats[4,sub.idx]<-(lats[1,]+lats[4,])/2
+  # bottom right
+  sub.lons[1,sub.idx+1]<-sub.lons[2,sub.idx]
+  sub.lons[2,sub.idx+1]<-lons[2,]
+  sub.lons[3,sub.idx+1]<-(lons[2,]+lons[3,])/2
+  sub.lons[4,sub.idx+1]<-sub.lons[3,sub.idx]
+  sub.lats[1,sub.idx+1]<-sub.lats[2,sub.idx]
+  sub.lats[2,sub.idx+1]<-lats[2,]
+  sub.lats[3,sub.idx+1]<-(lats[2,]+lats[3,])/2
+  sub.lats[4,sub.idx+1]<-sub.lats[3,sub.idx]
+  # Top right
+  sub.lons[1,sub.idx+2]<-sub.lons[3,sub.idx]
+  sub.lons[2,sub.idx+2]<-sub.lons[3,sub.idx+1]
+  sub.lons[3,sub.idx+2]<-lons[3,]
+  sub.lons[4,sub.idx+2]<-(lons[3,]+lons[4,])/2
+  sub.lats[1,sub.idx+2]<-sub.lats[3,sub.idx]
+  sub.lats[2,sub.idx+2]<-sub.lats[3,sub.idx+1]
+  sub.lats[3,sub.idx+2]<-lats[3,]
+  sub.lats[4,sub.idx+2]<-(lats[3,]+lats[4,])/2
+  # Top left
+  sub.lons[1,sub.idx+3]<-sub.lons[4,sub.idx]
+  sub.lons[2,sub.idx+3]<-sub.lons[3,sub.idx]
+  sub.lons[3,sub.idx+3]<-sub.lons[4,sub.idx+2]
+  sub.lons[4,sub.idx+3]<-lons[4,]
+  sub.lats[1,sub.idx+3]<-sub.lats[4,sub.idx]
+  sub.lats[2,sub.idx+3]<-sub.lats[3,sub.idx]
+  sub.lats[3,sub.idx+3]<-sub.lats[4,sub.idx+2]
+  sub.lats[4,sub.idx+3]<-lats[4,]
+
+  return(list(lats=sub.lats,lons=sub.lons))
+}
+                        
+  
+
 # Draw a field, point by point - using a reduced gaussian grid
 draw.by.rgg<-function(field,grid,colour.function,selection.function,Options) {
 
@@ -145,11 +196,56 @@ draw.by.rgg<-function(field,grid,colour.function,selection.function,Options) {
         vert.lon<-pl$lon
         inside<-array(data=selection.function(vert.lat,vert.lon),
                       dim=c(4,length(vert.lat[1,])))
+        # Fill in the fiddly area near the boundary
+        w<-which((inside[1,] | inside[2,] | inside[3,] | inside[4,]) &
+                 !(inside[1,] & inside[2,] & inside[3,] & inside[4,]))
+        boundary.lat<-vert.lat[,w]
+        boundary.lon<-vert.lon[,w]
+        while(length(boundary.lon)>0) {
+           bp<-double.resolution(boundary.lat,boundary.lon)
+           boundary.lat<-bp$lats
+           boundary.lon<-bp$lons
+           gp<-gpar(col=rgb(0.8,0.8,0.8,0),fill=group,lwd=0)
+           inside<-array(data=selection.function(boundary.lat,boundary.lon),
+                         dim=c(4,length(boundary.lat[1,])))
+           w<-which(inside[1,] & inside[2,] & inside[3,] & inside[4,])
+           if(length(w)>0) {
+              grid.polygon(x=unit(as.vector(boundary.lon[,w]),'native'),
+                           y=unit(as.vector(boundary.lat[,w]),'native'),
+                           id.lengths=rep(4,length(w)),
+                           gp=gp)
+           }
+           w<-which((inside[1,] | inside[2,] | inside[3,] | inside[4,]) &
+                    !(inside[1,] & inside[2,] & inside[3,] & inside[4,]))
+           if(length(w)==0) break
+           boundary.lat<-boundary.lat[,w]
+           boundary.lon<-boundary.lon[,w]
+           if(!is.array(boundary.lon)) boundary.lon<-array(data=boundary.lon,
+                                                           dim=c(4,length(boundary.lon)/4))
+           if(!is.array(boundary.lat)) boundary.lat<-array(data=boundary.lat,
+                                                           dim=c(4,length(boundary.lat)/4))
+           d.lat<-abs(boundary.lat[2,]-boundary.lat[1,])+
+                  abs(boundary.lat[3,]-boundary.lat[2,])+
+                  abs(boundary.lat[4,]-boundary.lat[3,])+
+                  abs(boundary.lat[4,]-boundary.lat[1,])
+           d.lon<-abs(boundary.lon[2,]-boundary.lon[1,])+
+                  abs(boundary.lon[3,]-boundary.lon[2,])+
+                  abs(boundary.lon[4,]-boundary.lon[3,])+
+                  abs(boundary.lon[4,]-boundary.lon[1,])
+           w<-which(d.lat>0.1 | d.lon>0.1)
+           if(length(w)==0) break
+           boundary.lat<-boundary.lat[,w]
+           boundary.lon<-boundary.lon[,w]           
+        }
+        # add all the normal points inside the boundaries
+        inside<-array(data=selection.function(vert.lat,vert.lon),
+                      dim=c(4,length(vert.lat[1,])))
         w<-which(inside[1,] & inside[2,] & inside[3,] & inside[4,])
         if(length(w)<2) next
         vert.lat<-vert.lat[,w]
         vert.lon<-vert.lon[,w]
-        gp<-gpar(col=rgb(0.8,0.8,0.8,1),fill=group,lwd=0.1)
+#        gp<-gpar(col=rgb(0.8,0.8,0.8,1),fill=group,lwd=0.1)
+        gp<-gpar(col=rgb(1,1,1,0.25),fill=group,lwd=0.01)
         grid.polygon(x=unit(as.vector(vert.lon),'native'),
                      y=unit(as.vector(vert.lat),'native'),
                      id.lengths=rep(4,dim(vert.lat)[2]),
@@ -316,7 +412,7 @@ set.precip.value<-function(rate) {
 }
 
 # Colour function for t2m
-set.t2m.colour<-function(temperature,Trange=3) {
+set.t2m.colour<-function(temperature,Trange=7) {
 
   result<-rep(NA,length(temperature))
   w<-which(temperature>0)
@@ -376,7 +472,7 @@ ifile.name<-sprintf("%s/%s",Imagedir,image.name)
 
   icec<-ERAI.get.slice.at.hour('icec',opt$year,opt$month,opt$day,opt$hour)
   ip<-WeatherMap.rectpoints(Options$ice.points,Options)
-  #WeatherMap.draw.ice(ip$lat,ip$lon,icec,Options)
+  WeatherMap.draw.ice(ip$lat,ip$lon,icec,Options)
   draw.land.flat(Options)
 
   t2m<-ERAI.get.slice.at.hour('air.2m',opt$year,opt$month,opt$day,opt$hour)
@@ -401,10 +497,12 @@ ifile.name<-sprintf("%s/%s",Imagedir,image.name)
   mslp<-CERA20C.get.slice.at.hour('prmsl',opt$year,opt$month,opt$day,opt$hour)
   draw.pressure(mslp,select.CERA20C,Options)
 
-  #streamlines<-readRDS('streamlines.ERAI.rd')
-  #draw.streamlines(streamlines,select.ERAI,Options)
-  #streamlines<-readRDS('streamlines.TWCR.rd')
-  #draw.streamlines(streamlines,select.TWCR,Options)
+  streamlines<-readRDS('streamlines.ERAI.rd')
+  draw.streamlines(streamlines,select.ERAI,Options)
+  streamlines<-readRDS('streamlines.TWCR.rd')
+  draw.streamlines(streamlines,select.TWCR,Options)
+  streamlines<-readRDS('streamlines.CERA20C.rd')
+  draw.streamlines(streamlines,select.CERA20C,Options)
  
   prate<-ERAI.get.slice.at.hour('prate',opt$year,opt$month,opt$day,opt$hour)
   prate$data[]<-prate$data/3
@@ -419,7 +517,7 @@ ifile.name<-sprintf("%s/%s",Imagedir,image.name)
   draw.precipitation(prate,set.precip.value,select.CERA20C,Options)
 
   # Mark the boundary
-  gp<-gpar(col=rgb(1,1,0),fill=rgb(1,1,0),lwd=2)
+  gp<-gpar(col=rgb(1,1,0.5),fill=rgb(1,1,0.5),lwd=2)
   grid.lines(x=unit(c(centre.lon,centre.lon+(90-centre.lat)*2),'native'),
              y=unit(c(centre.lat,90),'native'),
              gp=gp)
