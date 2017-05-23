@@ -28,7 +28,7 @@ Options<-WeatherMap.set.option(Options,'wrap.spherical',F)
 Options<-WeatherMap.set.option(Options,'wind.vector.points',3)
 Options<-WeatherMap.set.option(Options,'wind.vector.scale',0.2)
 Options<-WeatherMap.set.option(Options,'wind.vector.move.scale',1)
-Options<-WeatherMap.set.option(Options,'wind.vector.density',l $SCRATCH0.5)
+Options<-WeatherMap.set.option(Options,'wind.vector.density',0.5)
 Options$ice.points<-100000
 
 

@@ -44,10 +44,9 @@ Options$mslp.step=500                       # Smaller -> more contours
 Options$mslp.tpscale=5                      # Smaller -> contours less transparent
 Options$mslp.lwd=1
 Options$precip.colour=c(0,0.2,0)
-# Overrides mslp options
-contour.levels<-seq(-300,300,30)
-contour.levels<-abs(contour.levels)**1.5*sign(contour.levels)
-contour.levels<-contour.levels+Options$mslp.base
+contour.levels<-seq(Options$mslp.base-Options$mslp.range,
+                    Options$mslp.base+Options$mslp.range,
+                    Options$mslp.step)
 
 # Load the 0.25 degree orography
 orog<-GSDF.ncdf.load(sprintf("%s/orography/elev.0.25-deg.nc",Sys.getenv('SCRATCH')),'data',
@@ -63,16 +62,26 @@ if(FALSE) {
     is.na(orog$data[orog$data==0])<-TRUE
 }
 
+TWCR.get.member.at.hour<-function(variable,year,month,day,hour,member=1,version='3.5.1') {
+
+       t<-TWCR.get.members.slice.at.hour(variable,year,month,day,
+                                  hour,version=version)
+       t<-GSDF.select.from.1d(t,'ensemble',member)
+       gc()
+       return(t)
+}
+
 # Get the ERA Interim grid data
 gi<-readRDS('ERA_grids/ERAI_grid.Rdata')
-#w<-which(gi$max.lon>360)
-#if(length(w)>0) gi$max.lon[w]<-360
 
 # And the CERA20C grid data (same as ERA40
 gc<-readRDS('ERA_grids/ERA40_grid.Rdata')
 
 # And the 20CR grid data
 gt<-readRDS('ERA_grids/TWCR_grid.Rdata')
+
+# And the ERA5 grid - use for precip
+g5<-readRDS('ERA_grids/ERA5_grid.Rdata')
 
 # Plot the orography - raster background, fast
 draw.land.flat<-function(Options) {
@@ -163,7 +172,8 @@ double.resolution<-function(lats,lons) {
   
 
 # Draw a field, point by point - using a reduced gaussian grid
-draw.by.rgg<-function(field,grid,colour.function,selection.function,Options) {
+draw.by.rgg<-function(field,grid,colour.function,selection.function,Options,
+                      grid.colour=rgb(1,1,1,0.25),grid.lwd=0.01) {
 
     field<-GSDF:::GSDF.pad.longitude(field) # Extras for periodic boundary conditions
     value.points<-GSDF.interpolate.2d(field,grid$centre.lon,grid$centre.lat)
@@ -244,8 +254,7 @@ draw.by.rgg<-function(field,grid,colour.function,selection.function,Options) {
         if(length(w)<2) next
         vert.lat<-vert.lat[,w]
         vert.lon<-vert.lon[,w]
-#        gp<-gpar(col=rgb(0.8,0.8,0.8,1),fill=group,lwd=0.1)
-        gp<-gpar(col=rgb(1,1,1,0.25),fill=group,lwd=0.01)
+        gp<-gpar(col=grid.colour,fill=group,lwd=grid.lwd)
         grid.polygon(x=unit(as.vector(vert.lon),'native'),
                      y=unit(as.vector(vert.lat),'native'),
                      id.lengths=rep(4,dim(vert.lat)[2]),
@@ -366,11 +375,6 @@ draw.streamlines<-function(s,selection.function,Options) {
 centre.lat<-7.36
 centre.lon<-50-38.8
 
-# Use a sigmoid as the boundary between the reanalyses
-boundary<-function(lat) {
-    return(Options$vp.lon.min+180+360*(0.5-(1/(1+exp(lat*-5/90)))))
-}
-
 # Choose TWCR points to plot
 select.TWCR<-function(lat,lon) {
   lat.boundary<-centre.lat+(lon-centre.lon)*0.1
@@ -403,16 +407,30 @@ select.CERA20C<-function(lat,lon) {
 set.precip.value<-function(rate) {
   min.threshold<-0.0025
   max.threshold<-0.03
-  rate<-sqrt(rate)
+  rate<-sqrt(pmax(0,rate))
   result<-rep(NA,length(rate))
   value<-pmax(0,pmin(1,rate/max.threshold))
   w<-which(runif(length(rate),0,1)<value & rate>min.threshold)
   if(length(w)>0) result[w]<-value[w]
   return(result)
 }
+# Colour function for precipitation
+set.precip.colour<-function(rate) {
+  min.threshold<-0.0025
+  max.threshold<-0.03
+  rate<-sqrt(pmax(0,rate))
+  result<-rep(NA,length(rate))
+  value<-pmax(0,pmin(0.9,rate/max.threshold))
+  w<-which(is.na(value))
+  if(length(w)>0) value[w]<-0
+  result<-rgb(0,0.2,0,value)
+  w<-which(rate<min.threshold)
+  is.na(result[w])<-TRUE
+  return(result)
+}
 
 # Colour function for t2m
-set.t2m.colour<-function(temperature,Trange=7) {
+set.t2m.colour<-function(temperature,Trange=5) {
 
   result<-rep(NA,length(temperature))
   w<-which(temperature>0)
@@ -421,7 +439,7 @@ set.t2m.colour<-function(temperature,Trange=7) {
      temperature[w]<-pmax(0,pmin(Trange,temperature[w]))
      temperature[w]<-temperature[w]/Trange
      temperature[w]<-round(temperature[w],1)
-     result[w]<-rgb(1,0,0,temperature[w]*0.6)
+     result[w]<-rgb(1,0,0,temperature[w]*0.8)
   }
   w<-which(temperature<0)
   if(length(w)>0) {
@@ -429,7 +447,7 @@ set.t2m.colour<-function(temperature,Trange=7) {
      temperature[w]<-pmax(0,pmin(Trange,temperature[w]))
      temperature[w]<-temperature[w]/Trange
      temperature[w]<-round(temperature[w],1)
-     result[w]<-rgb(0,0,1,temperature[w]*0.6)
+     result[w]<-rgb(0,0,1,temperature[w]*0.8)
  }
  return(result)
 }
@@ -480,8 +498,9 @@ ifile.name<-sprintf("%s/%s",Imagedir,image.name)
   t2m$data[]<-t2m$data-t2n$data
   draw.by.rgg(t2m,gi,set.t2m.colour,select.ERAI,Options)
 
-  t2m<-TWCR.get.slice.at.hour('air.2m',opt$year,opt$month,opt$day,opt$hour,version='3.5.1')
+  t2m<-TWCR.get.member.at.hour('air.2m',opt$year,opt$month,opt$day,opt$hour,version='3.5.1')
   t2n<-TWCR.get.slice.at.hour('air.2m',opt$year,opt$month,opt$day,opt$hour,version='3.4.1',type='normal')
+  t2n<-GSDF.regrid.2d(t2n,t2m)
   t2m$data[]<-t2m$data-t2n$data
   draw.by.rgg(t2m,gt,set.t2m.colour,select.TWCR,Options)
 
@@ -492,7 +511,7 @@ ifile.name<-sprintf("%s/%s",Imagedir,image.name)
 
   mslp<-ERAI.get.slice.at.hour('prmsl',opt$year,opt$month,opt$day,opt$hour)
   draw.pressure(mslp,select.ERAI,Options)
-  mslp<-TWCR.get.slice.at.hour('prmsl',opt$year,opt$month,opt$day,opt$hour,version='3.5.1')
+  mslp<-TWCR.get.member.at.hour('prmsl',opt$year,opt$month,opt$day,opt$hour,version='3.5.1')
   draw.pressure(mslp,select.TWCR,Options)
   mslp<-CERA20C.get.slice.at.hour('prmsl',opt$year,opt$month,opt$day,opt$hour)
   draw.pressure(mslp,select.CERA20C,Options)
@@ -506,15 +525,15 @@ ifile.name<-sprintf("%s/%s",Imagedir,image.name)
  
   prate<-ERAI.get.slice.at.hour('prate',opt$year,opt$month,opt$day,opt$hour)
   prate$data[]<-prate$data/3
-  draw.precipitation(prate,set.precip.value,select.ERAI,Options)
+  draw.by.rgg(prate,g5,set.precip.colour,select.ERAI,Options,grid.colour=rgb(0,0.2,0,0),grid.lwd=0.0)
 
-  prate<-TWCR.get.slice.at.hour('prate',opt$year,opt$month,opt$day,opt$hour,version='3.5.1')
-  prate$data[]<-prate$data*3
-  draw.precipitation(prate,set.precip.value,select.TWCR,Options)
+  prate<-TWCR.get.member.at.hour('prate',opt$year,opt$month,opt$day,opt$hour,version='3.5.1')
+  #prate$data[]<-prate$data*3
+  draw.by.rgg(prate,g5,set.precip.colour,select.TWCR,Options,grid.colour=rgb(0,0.2,0,0.0001),grid.lwd=0.0)
 
   prate<-CERA20C.get.slice.at.hour('prate',opt$year,opt$month,opt$day,opt$hour)
-  prate$data[]<-prate$data/3
-  draw.precipitation(prate,set.precip.value,select.CERA20C,Options)
+  prate$data[]<-prate$data/6
+  draw.by.rgg(prate,g5,set.precip.colour,select.CERA20C,Options,grid.colour=rgb(0,0.2,0,0),grid.lwd=0.0)
 
   # Mark the boundary
   gp<-gpar(col=rgb(1,1,0.5),fill=rgb(1,1,0.5),lwd=2)
