@@ -83,6 +83,12 @@ gt<-readRDS('ERA_grids/TWCR_grid.Rdata')
 # And the ERA5 grid - use for precip
 g5<-readRDS('ERA_grids/ERA5_grid.Rdata')
 
+gp<-g5
+gp$min.lon<-gp$min.lon+(gp$centre.lon-gp$min.lon)*0.05
+gp$min.lat<-gp$min.lat+(gp$centre.lat-gp$min.lat)*0.05
+gp$max.lon<-gp$max.lon+(gp$centre.lon-gp$max.lon)*0.05
+gp$max.lat<-gp$max.lat+(gp$centre.lat-gp$max.lat)*0.05
+
 # Plot the orography - raster background, fast
 draw.land.flat<-function(Options) {
    land<-GSDF.WeatherMap:::WeatherMap.rotate.pole(GSDF:::GSDF.pad.longitude(orog),Options)
@@ -173,7 +179,7 @@ double.resolution<-function(lats,lons) {
 
 # Draw a field, point by point - using a reduced gaussian grid
 draw.by.rgg<-function(field,grid,colour.function,selection.function,Options,
-                      grid.colour=rgb(1,1,1,0.25),grid.lwd=0.01) {
+                      grid.colour=rgb(1,1,1,0.25),grid.lwd=0.01,grid.lty=1) {
 
     field<-GSDF:::GSDF.pad.longitude(field) # Extras for periodic boundary conditions
     value.points<-GSDF.interpolate.2d(field,grid$centre.lon,grid$centre.lat)
@@ -254,7 +260,8 @@ draw.by.rgg<-function(field,grid,colour.function,selection.function,Options,
         if(length(w)<2) next
         vert.lat<-vert.lat[,w]
         vert.lon<-vert.lon[,w]
-        gp<-gpar(col=grid.colour,fill=group,lwd=grid.lwd)
+        gp<-gpar(col=grid.colour,fill=group,lwd=grid.lwd,lty=grid.lty)
+        #gp<-gpar(col=rgb(0.8,0.8,0.8,0),fill=group,lwd=0)
         grid.polygon(x=unit(as.vector(vert.lon),'native'),
                      y=unit(as.vector(vert.lat),'native'),
                      id.lengths=rep(4,dim(vert.lat)[2]),
@@ -372,8 +379,8 @@ draw.streamlines<-function(s,selection.function,Options) {
 
 
 # Centre point for boundary functions
-centre.lat<-7.36
-centre.lon<-50-38.8
+centre.lat<-7.36-0.5
+centre.lon<-50-38.8-1
 
 # Choose TWCR points to plot
 select.TWCR<-function(lat,lon) {
@@ -418,9 +425,9 @@ set.precip.value<-function(rate) {
 set.precip.colour<-function(rate) {
   min.threshold<-0.0025
   max.threshold<-0.03
-  rate<-sqrt(pmax(0,rate))
+  rate<-sqrt(pmax(0,rate,na.rm=TRUE))
   result<-rep(NA,length(rate))
-  value<-pmax(0,pmin(0.9,rate/max.threshold))
+  value<-pmax(0,pmin(0.9,rate/max.threshold,na.rm=TRUE),na.rm=TRUE)
   w<-which(is.na(value))
   if(length(w)>0) value[w]<-0
   result<-rgb(0,0.2,0,value)
@@ -473,7 +480,7 @@ ifile.name<-sprintf("%s/%s",Imagedir,image.name)
          height=33.1,
          bg=Options$sea.colour,
          family='Helvetica',
-         pointsize=24)
+     pointsize=24)
 
   base.gp<-gpar(fontfamily='Helvetica',fontface='bold',col='black')
   lon.min<-Options$lon.min
@@ -525,15 +532,14 @@ ifile.name<-sprintf("%s/%s",Imagedir,image.name)
  
   prate<-ERAI.get.slice.at.hour('prate',opt$year,opt$month,opt$day,opt$hour)
   prate$data[]<-prate$data/3
-  draw.by.rgg(prate,g5,set.precip.colour,select.ERAI,Options,grid.colour=rgb(0,0.2,0,0),grid.lwd=0.0)
+  draw.by.rgg(prate,g5,set.precip.colour,select.ERAI,Options,grid.colour=rgb(0,0.2,0,0),grid.lwd=1)
 
   prate<-TWCR.get.member.at.hour('prate',opt$year,opt$month,opt$day,opt$hour,version='3.5.1')
-  #prate$data[]<-prate$data*3
-  draw.by.rgg(prate,g5,set.precip.colour,select.TWCR,Options,grid.colour=rgb(0,0.2,0,0.0001),grid.lwd=0.0)
+  draw.by.rgg(prate,g5,set.precip.colour,select.TWCR,Options,grid.colour=rgb(1,1,1,0),grid.lwd=1)
 
   prate<-CERA20C.get.slice.at.hour('prate',opt$year,opt$month,opt$day,opt$hour)
   prate$data[]<-prate$data/6
-  draw.by.rgg(prate,g5,set.precip.colour,select.CERA20C,Options,grid.colour=rgb(0,0.2,0,0),grid.lwd=0.0)
+  draw.by.rgg(prate,g5,set.precip.colour,select.CERA20C,Options,grid.colour=rgb(0,0.2,0,0),grid.lwd=1)
 
   # Mark the boundary
   gp<-gpar(col=rgb(1,1,0.5),fill=rgb(1,1,0.5),lwd=2)
