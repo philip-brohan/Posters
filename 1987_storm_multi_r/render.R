@@ -54,9 +54,8 @@ orog<-GSDF.ncdf.load(sprintf("%s/orography/elev.0.25-deg.nc",Sys.getenv('SCRATCH
 orog$data[orog$data<0]<-0 # sea-surface, not sea-bottom
 is.na(orog$data[orog$data==0])<-TRUE
 # 1-km orography (slow, needs lots of ram)
-if(FALSE) {
-    orog<-GSDF.ncdf.load(sprintf("%s/orography/ETOPO2v2c_f4.nc",Sys.getenv('SCRATCH')),'z',
-                                 lat.name='y',lon.name='x',
+if(TRUE) {
+    orog<-GSDF.ncdf.load(sprintf("%s/orography/ETOPO2v2c_ud.nc",Sys.getenv('SCRATCH')),'z',
                                  lat.range=c(-90,90),lon.range=c(-180,360))
     orog$data[orog$data<0]<-0 # sea-surface, not sea-bottom
     is.na(orog$data[orog$data==0])<-TRUE
@@ -445,7 +444,7 @@ set.t2m.colour<-function(temperature,Trange=5) {
      temperature[w]<-sqrt(temperature[w])
      temperature[w]<-pmax(0,pmin(Trange,temperature[w]))
      temperature[w]<-temperature[w]/Trange
-     temperature[w]<-round(temperature[w],1)
+     temperature[w]<-round(temperature[w],2)
      result[w]<-rgb(1,0,0,temperature[w]*0.8)
   }
   w<-which(temperature<0)
@@ -453,7 +452,7 @@ set.t2m.colour<-function(temperature,Trange=5) {
      temperature[w]<-sqrt(temperature[w]*-1)
      temperature[w]<-pmax(0,pmin(Trange,temperature[w]))
      temperature[w]<-temperature[w]/Trange
-     temperature[w]<-round(temperature[w],1)
+     temperature[w]<-round(temperature[w],2)
      result[w]<-rgb(0,0,1,temperature[w]*0.8)
  }
  return(result)
@@ -531,14 +530,14 @@ ifile.name<-sprintf("%s/%s",Imagedir,image.name)
   draw.streamlines(streamlines,select.CERA20C,Options)
  
   prate<-ERAI.get.slice.at.hour('prate',opt$year,opt$month,opt$day,opt$hour)
-  prate$data[]<-prate$data/3
+  prate$data[]<-prate$data/3.6 # Convert to Kg/m/s
   draw.by.rgg(prate,g5,set.precip.colour,select.ERAI,Options,grid.colour=rgb(0,0.2,0,0),grid.lwd=1)
 
   prate<-TWCR.get.member.at.hour('prate',opt$year,opt$month,opt$day,opt$hour,version='3.5.1')
   draw.by.rgg(prate,g5,set.precip.colour,select.TWCR,Options,grid.colour=rgb(1,1,1,0),grid.lwd=1)
 
   prate<-CERA20C.get.slice.at.hour('prate',opt$year,opt$month,opt$day,opt$hour)
-  prate$data[]<-prate$data/6
+  prate$data[]<-prate$data/3.6 # Convert to Kg/m/s
   draw.by.rgg(prate,g5,set.precip.colour,select.CERA20C,Options,grid.colour=rgb(0,0.2,0,0),grid.lwd=1)
 
   # Mark the boundary
