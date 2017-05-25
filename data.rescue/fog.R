@@ -5,12 +5,8 @@ orig<-readPNG('small.png')
 
 # Blurred version
 blurred<-orig
-sigma=6
-for(ch in seq(1,3)) {
-    o2<-blur(as.im(blurred[,,ch]),sigma=sigma)
-    blurred[,,ch]<-o2$v
-}
-writePNG(blurred,target='blurred.png')
+system('convert small.png -blur 0x10 blurred.png')
+blurred<-readPNG('small.png')
 # Blended blurred
 blended<-orig
 max.x<-dim(orig)[2]
