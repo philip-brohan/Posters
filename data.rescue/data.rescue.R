@@ -297,8 +297,8 @@ ifile.name<-sprintf("%s/%s",Imagedir,image.name)
        #Options<-set.pole(count,Options)
        pushViewport(viewport(x=unit((i-0.5)/4,'npc'),
                              y=unit((5.5-j)/5,'npc'),
-                             width=unit((1/5)*1.1,'npc'),
-                             height=unit((1/5)/sqrt(2)*1.1,'npc'),
+                             width=unit((1/5)*1.2,'npc'),
+                             height=unit((1/5)/sqrt(2)*1.31,'npc'),
                              clip='on'))
           grid.polygon(x=unit(c(0,1,1,0),'npc'),
                        y=unit(c(0,0,1,1),'npc'),
