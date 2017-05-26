@@ -1,7 +1,7 @@
 #!/usr/bin/Rscript --no-save
 
 # Calculate the Fog of ignorance for each image
-#  This script shouls parallel the main plot script, except it
+#  This script should parallel the main plot script, except it
 #  plots only fog.
 
 library(GSDF.TWCR)
@@ -19,15 +19,21 @@ Options<-WeatherMap.set.option(Options,'sea.colour',rgb(200,200,200,255,
                                                        maxColorValue=255))
 Options<-WeatherMap.set.option(Options,'ice.colour',rgb(250,250,250,255,
                                                        maxColorValue=255))
-Options<-WeatherMap.set.option(Options,'pole.lon',160)
-Options<-WeatherMap.set.option(Options,'pole.lat',45)
+#Options<-WeatherMap.set.option(Options,'pole.lon',160)
+#Options<-WeatherMap.set.option(Options,'pole.lat',45)
+Options<-WeatherMap.set.option(Options,'pole.lon',180)
+Options<-WeatherMap.set.option(Options,'pole.lat',90)
 
 Options<-WeatherMap.set.option(Options,'lat.min',-90)
 Options<-WeatherMap.set.option(Options,'lat.max',90)
-Options<-WeatherMap.set.option(Options,'lon.min',-190+50)
-Options<-WeatherMap.set.option(Options,'lon.max',190+50)
-Options$vp.lon.min<- -180+50
-Options$vp.lon.max<-  180+50
+#Options<-WeatherMap.set.option(Options,'lon.min',-190+50)
+#Options<-WeatherMap.set.option(Options,'lon.max',190+50)
+#Options$vp.lon.min<- -180+50
+#Options$vp.lon.max<-  180+50
+Options<-WeatherMap.set.option(Options,'lon.min',-190)
+Options<-WeatherMap.set.option(Options,'lon.max',190)
+Options$vp.lon.min<- -180
+Options$vp.lon.max<-  180
 Options<-WeatherMap.set.option(Options,'wrap.spherical',F)
 Options$precip.colour=c(0,0.2,0)
 Options$label.xp=0.995
@@ -49,7 +55,8 @@ contour.levels<-abs(contour.levels)**1.5*sign(contour.levels)
 contour.levels<-contour.levels+Options$mslp.base
 
 fog.threshold<-exp(2)
-Options$fog.colour<-c(1,0,0)
+Options$fog.colour<-c(0,0,0)
+Options$fog.min.transparency<-1
 get.member.at.hour<-function(variable,year,month,day,hour,member,version='3.5.1') {
 
        t<-TWCR.get.members.slice.at.hour(variable,year,month,day,
@@ -105,6 +112,10 @@ sub.plot<-function(year,month,day,hour,Options) {
     WeatherMap.draw.fog(fog,Options)
 
   popViewport()
+  f2<-fog
+  f2$dimensions[[1]]$values<-seq(-180,178,2)
+  fog<-GSDF.regrid.2d(fog,f2)
+  return(fog)
 }
 
 # Make a background plot - half density fog
@@ -136,6 +147,7 @@ background.plot<-function(year,month,day,hour,Options) {
     WeatherMap.draw.fog(fog,Options)
 
   popViewport()
+  return(fog)
 }
 
 
@@ -147,7 +159,7 @@ ifile.name<-sprintf("%s/%s",Imagedir,image.name)
  pdf(ifile.name,
          width=46.8,
          height=33.1,
-         bg=rgb(1,0.15,0.15),
+         bg='white',
          family='Helvetica',
          pointsize=12)
 
@@ -155,7 +167,9 @@ ifile.name<-sprintf("%s/%s",Imagedir,image.name)
 
  base.date<-lubridate::ymd_hms("1860-01-22:06:00:00")
  count<-0
+ fogs<-list()
  for(j in seq(1,5)) {
+    fogs[[j]]<-list()
     for(i in seq(1,4)) {
        date<-base.date+years(8*count)+hours(400*count)
        pushViewport(viewport(x=unit((i-0.5)/4,'npc'),
@@ -163,17 +177,162 @@ ifile.name<-sprintf("%s/%s",Imagedir,image.name)
                              width=unit((1/5)*1.2,'npc'),
                              height=unit((1/5)/sqrt(2)*1.31,'npc'),
                              clip='on'))
-          grid.polygon(x=unit(c(0.01,0.99,0.99,0.01),'npc'),
-                       y=unit(c(0.01,0.01,0.99,0.99),'npc'),
+          grid.polygon(x=unit(c(0,1,1,0),'npc'),
+                       y=unit(c(0,0,1,1),'npc'),
                        gp=gpar(col='white',fill='white'))
-          sub.plot(lubridate::year(date),
-                   lubridate::month(date),
-                   lubridate::day(date),
-                   lubridate::hour(date),
-                   Options)
+          fogs[[j]][[i]]<-sub.plot(lubridate::year(date),
+                                   lubridate::month(date),
+                                   lubridate::day(date),
+                                   lubridate::hour(date),
+                                   Options)
        popViewport()
        count<-count+1
      }
   }
-  dev.off()
+
+  # Fill in the gaps between plots
+ for(j in seq(1,5)) {
+    for(i in seq(1,4)) {
+      #print(sprintf("%d %d",j,i))
+      dms<-dim(fogs[[j]][[i]]$data)
+      # above
+      pushViewport(viewport(x=unit((i-0.5)/4,'npc'),
+                            y=unit((5-(j-1))/5,'npc'),
+                            width=unit((1/5)*1.2,'npc'),
+                            height=unit((1/5-(1/5)/sqrt(2)*1.31)/2,'npc'),
+                            just=c('center','top'),
+                            clip='on'))
+
+          if(j==1) { # Top row
+            data<-fogs[[j]][[i]]$data[,1,1]
+          } else {
+            data<-fogs[[j]][[i]]$data[,1,1]*2/3+fogs[[j-1]][[i]]$data[,dms[2],1]*1/3
+          }
+          for(p in seq_along(data)) {
+            gp<-gpar(col=rgb(0,0,0,data[p]),fill=rgb(0,0,0,data[p]),lwd=0)
+            nd<-length(data)
+            grid.polygon(x=unit(c((p-1)/nd,p/nd,p/nd,(p-1)/nd),'npc'),
+                         y=unit(c(0,0,1,1),'npc'),
+                         gp=gp)
+          }
+                
+      popViewport()
+
+      # left upper corner
+      pushViewport(viewport(x=unit(((i)-0.5)/4-((1/5)*1.2)/2-(1/4-(1/5)*1.2)/2,'npc'),
+                            y=unit((5-(j-1))/5,'npc'),
+                            width=unit((1/4-(1/5)*1.2)/2,'npc'),
+                            height=unit((1/5-(1/5)/sqrt(2)*1.31)/2,'npc'),
+                            just=c('left','top'),
+                            clip='on'))
+            gp<-gpar(col=rgb(0,0,0,data[1]),fill=rgb(0,0,0,data[1]),lwd=0)
+            grid.polygon(x=unit(c(0,1,1,0),'npc'),
+                         y=unit(c(0,0,1,1),'npc'),
+                         gp=gp)
+      popViewport()
+      # right upper corner
+      pushViewport(viewport(x=unit(((i)-0.5)/4+((1/5)*1.2)/2,'npc'),
+                            y=unit((5-(j-1))/5,'npc'),
+                            width=unit((1/4-(1/5)*1.2)/2,'npc'),
+                            height=unit((1/5-(1/5)/sqrt(2)*1.31)/2,'npc'),
+                            just=c('left','top'),
+                            clip='on'))
+            gp<-gpar(col=rgb(0,0,0,data[length(data)]),fill=rgb(0,0,0,data[length(data)]),lwd=0)
+            grid.polygon(x=unit(c(0,1,1,0),'npc'),
+                         y=unit(c(0,0,1,1),'npc'),
+                         gp=gp)
+      popViewport()
+      
+      # below
+      pushViewport(viewport(x=unit((i-0.5)/4,'npc'),
+                            y=unit((5.5-j)/5-(1/5)/sqrt(2)*1.31/2,'npc'),
+                            width=unit((1/5)*1.2,'npc'),
+                            height=unit((1/5-(1/5)/sqrt(2)*1.31)/2,'npc'),
+                            just=c('center','top'),
+                            clip='on'))
+      
+          if(j==5) { # bottom row
+            data<-fogs[[j]][[i]]$data[,dms[2],1]
+          } else {
+            data<-fogs[[j]][[i]]$data[,dms[2],1]*2/3+fogs[[j+1]][[i]]$data[,1,1]*1/3
+          }
+          for(p in seq_along(data)) {
+            gp<-gpar(col=rgb(0,0,0,data[p]),fill=rgb(0,0,0,data[p]),lwd=0)
+            nd<-length(data)
+            grid.polygon(x=unit(c((p-1)/nd,p/nd,p/nd,(p-1)/nd),'npc'),
+                         y=unit(c(0,0,1,1),'npc'),
+                         gp=gp)
+          }
+       popViewport()
+      # left lower corner
+      pushViewport(viewport(x=unit(((i)-0.5)/4-((1/5)*1.2)/2-(1/4-(1/5)*1.2)/2,'npc'),
+                            y=unit((5.5-j)/5-(1/5)/sqrt(2)*1.31/2,'npc'),
+                            width=unit((1/4-(1/5)*1.2)/2,'npc'),
+                            height=unit((1/5-(1/5)/sqrt(2)*1.31)/2,'npc'),
+                            just=c('left','top'),
+                            clip='on'))
+            gp<-gpar(col=rgb(0,0,0,data[1]),fill=rgb(0,0,0,data[1]),lwd=0)
+            grid.polygon(x=unit(c(0,1,1,0),'npc'),
+                         y=unit(c(0,0,1,1),'npc'),
+                         gp=gp)
+      popViewport()
+      # right lower corner
+      pushViewport(viewport(x=unit(((i)-0.5)/4+((1/5)*1.2)/2,'npc'),
+                            y=unit((5.5-j)/5-(1/5)/sqrt(2)*1.31/2,'npc'),
+                            width=unit((1/4-(1/5)*1.2)/2,'npc'),
+                            height=unit((1/5-(1/5)/sqrt(2)*1.31)/2,'npc'),
+                            just=c('left','top'),
+                            clip='on'))
+            gp<-gpar(col=rgb(0,0,0,data[length(data)]),fill=rgb(0,0,0,data[length(data)]),lwd=0)
+            grid.polygon(x=unit(c(0,1,1,0),'npc'),
+                         y=unit(c(0,0,1,1),'npc'),
+                         gp=gp)
+      popViewport()
+      
+      # right
+      pushViewport(viewport(x=unit(((i)-0.5)/4+((1/5)*1.2)/2,'npc'),
+                            y=unit((5.5-j)/5,'npc'),
+                            width=unit((1/4-(1/5)*1.2)/2,'npc'),
+                            height=unit((1/5)/sqrt(2)*1.31,'npc'),
+                            just=c('left','center'),
+                            clip='on'))
+      
+          if(i==4) { # right hand side
+            data<-rev(fogs[[j]][[i]]$data[dms[1],,1])
+          } else {
+            data<-rev(fogs[[j]][[i]]$data[dms[1],,1]*2/3+fogs[[j]][[i+1]]$data[1,,1]*1/3)
+          }
+          for(p in seq_along(data)) {
+            gp<-gpar(col=rgb(0,0,0,data[p]),fill=rgb(0,0,0,data[p]),lwd=0)
+            nd<-length(data)
+            grid.polygon(y=unit(c((p-1)/nd,p/nd,p/nd,(p-1)/nd),'npc'),
+                         x=unit(c(0,0,1,1),'npc'),
+                         gp=gp)
+          }
+       popViewport()
+      # left
+      pushViewport(viewport(x=unit(((i)-0.5)/4-((1/5)*1.2)/2-(1/4-(1/5)*1.2)/2,'npc'),
+                            y=unit((5.5-j)/5,'npc'),
+                            width=unit((1/4-(1/5)*1.2)/2,'npc'),
+                            height=unit((1/5)/sqrt(2)*1.31,'npc'),
+                            just=c('left','center'),
+                            clip='on'))
+      
+          if(i==1) { # left hand side
+            data<-rev(fogs[[j]][[i]]$data[1,,1])
+          } else {
+            data<-rev(fogs[[j]][[i]]$data[1,,1]*2/3+fogs[[j]][[i-1]]$data[dms[1],,1]*1/3)
+          }
+          for(p in seq_along(data)) {
+            gp<-gpar(col=rgb(0,0,0,data[p]),fill=rgb(0,0,0,data[p]),lwd=0)
+            nd<-length(data)
+            grid.polygon(y=unit(c((p-1)/nd,p/nd,p/nd,(p-1)/nd),'npc'),
+                         x=unit(c(0,0,1,1),'npc'),
+                         gp=gp)
+          }
+      popViewport()
+    }
+  }
+
+dev.off()
 

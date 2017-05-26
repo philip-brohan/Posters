@@ -18,15 +18,20 @@ Options<-WeatherMap.set.option(Options,'sea.colour',rgb(200,200,200,255,
                                                        maxColorValue=255))
 Options<-WeatherMap.set.option(Options,'ice.colour',rgb(250,250,250,255,
                                                        maxColorValue=255))
-Options<-WeatherMap.set.option(Options,'pole.lon',160)
-Options<-WeatherMap.set.option(Options,'pole.lat',45)
+#Options<-WeatherMap.set.option(Options,'pole.lon',160)
+#Options<-WeatherMap.set.option(Options,'pole.lat',45)
 
 Options<-WeatherMap.set.option(Options,'lat.min',-90)
 Options<-WeatherMap.set.option(Options,'lat.max',90)
-Options<-WeatherMap.set.option(Options,'lon.min',-190+50)
-Options<-WeatherMap.set.option(Options,'lon.max',190+50)
-Options$vp.lon.min<- -180+50
-Options$vp.lon.max<-  180+50
+#Options<-WeatherMap.set.option(Options,'lon.min',-190+50)
+#Options<-WeatherMap.set.option(Options,'lon.max',190+50)
+#Options$vp.lon.min<- -180+50
+#Options$vp.lon.max<-  180+50
+Options<-WeatherMap.set.option(Options,'lon.min',-190)
+Options<-WeatherMap.set.option(Options,'lon.max',190)
+Options$vp.lon.min<- -180
+Options$vp.lon.max<-  180
+
 Options<-WeatherMap.set.option(Options,'wrap.spherical',F)
 Options$precip.colour=c(0,0.2,0)
 Options$label.xp=0.995
@@ -283,7 +288,7 @@ ifile.name<-sprintf("%s/%s",Imagedir,image.name)
  pdf(ifile.name,
          width=46.8,
          height=33.1,
-         bg=rgb(220,220,220,255,maxColorValue=255),
+         bg=rgb(255,255,255,255,maxColorValue=255),
          family='Helvetica',
          pointsize=12)
 
@@ -293,6 +298,7 @@ ifile.name<-sprintf("%s/%s",Imagedir,image.name)
  count<-0
  for(j in seq(1,5)) {
     for(i in seq(1,4)) {
+      print(sprintf("%d %d",j,i))
        date<-base.date+years(8*count)+hours(400*count)
        #Options<-set.pole(count,Options)
        pushViewport(viewport(x=unit((i-0.5)/4,'npc'),
@@ -310,6 +316,7 @@ ifile.name<-sprintf("%s/%s",Imagedir,image.name)
                    Options)
        popViewport()
        count<-count+1
+       gc(verbose=FALSE)
      }
   }
   dev.off()
