@@ -4,7 +4,7 @@
 
 library(grid)
 
-Imagedir<-sprintf(".",Sys.getenv('SCRATCH'))
+Imagedir<-sprintf("%s/Posters/data.rescue",Sys.getenv('SCRATCH'))
 
 image.name<-"layout.pdf"
 ifile.name<-sprintf("%s/%s",Imagedir,image.name)

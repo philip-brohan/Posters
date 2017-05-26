@@ -10,7 +10,7 @@ library(grid)
 library(lubridate)
 library(jpeg)
 
-Imagedir<-sprintf(".",Sys.getenv('SCRATCH'))
+Imagedir<-sprintf("%s/Posters/data.rescue",Sys.getenv('SCRATCH'))
 
 Options<-WeatherMap.set.option(NULL)
 Options<-WeatherMap.set.option(Options,'land.colour',rgb(100,100,100,255,
