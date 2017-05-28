@@ -8,7 +8,6 @@ library(GSDF.TWCR)
 library(GSDF.WeatherMap)
 library(grid)
 library(lubridate)
-library(jpeg)
 
 Imagedir<-sprintf("%s/Posters/data.rescue",Sys.getenv('SCRATCH'))
 
@@ -109,6 +108,10 @@ sub.plot<-function(year,month,day,hour,Options) {
                                              type='normal')
     fog<-TWCR.relative.entropy(prmsl.normal,prmsl.sd,prmsl,prmsl.spread)
     fog$data[]<-1-pmin(fog.threshold,pmax(0,fog$data))/fog.threshold
+    ex.lon<-GSDF.roll.dimensions(fog,1,2)
+    ex.lat<-GSDF.roll.dimensions(fog,2,1)
+    w<-which(ex.lat< -85 & ex.lat> -90 & ex.lon>135 & ex.lon< 180)
+    fog$data[w]<-pmin(fog$data[w],0.5)
     WeatherMap.draw.fog(fog,Options)
 
   popViewport()
@@ -165,7 +168,7 @@ ifile.name<-sprintf("%s/%s",Imagedir,image.name)
 
   base.gp<-gpar(fontfamily='Helvetica',fontface='bold',col='black')
 
- base.date<-lubridate::ymd_hms("1860-01-22:06:00:00")
+ base.date<-lubridate::ymd_hms("1862-01-22:06:00:00")
  count<-0
  fogs<-list()
  for(j in seq(1,5)) {
@@ -252,7 +255,7 @@ ifile.name<-sprintf("%s/%s",Imagedir,image.name)
                             clip='on'))
       
           if(j==5) { # bottom row
-            data<-fogs[[j]][[i]]$data[,dms[2],1]
+            data<-fogs[[j]][[i]]$data[,dms[2],1]*0 # set bottom all to 0
           } else {
             data<-fogs[[j]][[i]]$data[,dms[2],1]*2/3+fogs[[j+1]][[i]]$data[,1,1]*1/3
           }

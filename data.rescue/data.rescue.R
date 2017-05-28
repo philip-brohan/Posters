@@ -7,7 +7,6 @@ library(GSDF.TWCR)
 library(GSDF.WeatherMap)
 library(grid)
 library(lubridate)
-library(jpeg)
 
 Imagedir<-sprintf("%s/Posters/data.rescue",Sys.getenv('SCRATCH'))
 
@@ -35,7 +34,7 @@ Options$vp.lon.max<-  180
 Options<-WeatherMap.set.option(Options,'wrap.spherical',F)
 Options$precip.colour=c(0,0.2,0)
 Options$label.xp=0.995
-Options<-WeatherMap.set.option(Options,'obs.size',1.0)
+Options<-WeatherMap.set.option(Options,'obs.size',0.5)
 Options<-WeatherMap.set.option(Options,'obs.colour',rgb(255,215,0,255,
                                                        maxColorValue=255))
 
@@ -85,7 +84,7 @@ draw.land.flat<-function(Options,n.levels=20) {
                    height=unit(180,'native'))  
 }
 
-draw.temperature<-function(temperature,Options,Trange=1) {
+Draw.temperature<-function(temperature,Options,Trange=1) {
 
   Options.local<-Options
   Options.local$fog.min.transparency<-0.5
@@ -96,6 +95,24 @@ draw.temperature<-function(temperature,Options,Trange=1) {
   tminus<-temperature
   tminus$data[]<-tminus$data*-1
   tminus$data[]<-pmax(0,pmin(Trange,tminus$data))/Trange
+  Options.local$fog.colour<-c(0,0,1)
+  WeatherMap.draw.fog(tminus,Options.local)
+}
+draw.temperature<-function(temperature,Options,Trange=1) {
+
+  temperature$data<-temperature$data+0.7 # Shift climatology
+  Options.local<-Options
+  Options.local$fog.min.transparency<-0.8
+  Options.local$fog.resolution<-0.25
+  tplus<-temperature
+  tplus$data[]<-pmax(0,pmin(Trange,tplus$data))
+  tplus$data[]<-sqrt(tplus$data[])/Trange
+  Options.local$fog.colour<-c(1,0,0)
+  WeatherMap.draw.fog(tplus,Options.local)
+  tminus<-temperature
+  tminus$data[]<-tminus$data*-1
+  tminus$data[]<-pmax(0,pmin(Trange,tminus$data))
+  tminus$data[]<-sqrt(tminus$data[])/Trange
   Options.local$fog.colour<-c(0,0,1)
   WeatherMap.draw.fog(tminus,Options.local)
 }
@@ -261,7 +278,7 @@ sub.plot<-function(year,month,day,hour,Options) {
   t2n<-TWCR.get.slice.at.hour('air.2m',year,month,day,hour,type='normal',version='3.4.1')
   t2n<-GSDF.regrid.2d(t2n,t2m)
   t2m$data[]<-t2m$data-t2n$data
-  draw.temperature(t2m,Options,Trange=10)
+  draw.temperature(t2m,Options,Trange=7)
   
   prmsl<-get.member.at.hour('prmsl',year,month,day,hour,1,version='3.5.1')
   draw.pressure(prmsl,Options)
@@ -294,7 +311,7 @@ ifile.name<-sprintf("%s/%s",Imagedir,image.name)
 
   base.gp<-gpar(fontfamily='Helvetica',fontface='bold',col='black')
 
- base.date<-lubridate::ymd_hms("1860-01-22:06:00:00")
+ base.date<-lubridate::ymd_hms("1862-01-22:06:00:00")
  count<-0
  for(j in seq(1,5)) {
     for(i in seq(1,4)) {
@@ -309,11 +326,13 @@ ifile.name<-sprintf("%s/%s",Imagedir,image.name)
           grid.polygon(x=unit(c(0,1,1,0),'npc'),
                        y=unit(c(0,0,1,1),'npc'),
                        gp=gpar(col=Options$sea.colour,fill=Options$sea.colour))
+        #if(count==0 || count==19) {
           sub.plot(lubridate::year(date),
                    lubridate::month(date),
                    lubridate::day(date),
                    lubridate::hour(date),
                    Options)
+      #}
        popViewport()
        count<-count+1
        gc(verbose=FALSE)
