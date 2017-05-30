@@ -18,11 +18,11 @@ opt = list(
 Imagedir<-"."
 
 Options<-WeatherMap.set.option(NULL)
-Options<-WeatherMap.set.option(Options,'land.colour',rgb(100,100,100,255,
+Options<-WeatherMap.set.option(Options,'land.colour',rgb(150,150,150,255,
                                                        maxColorValue=255))
 Options<-WeatherMap.set.option(Options,'sea.colour',rgb(200,200,200,255,
                                                        maxColorValue=255))
-Options<-WeatherMap.set.option(Options,'ice.colour',rgb(250,250,250,255,
+Options<-WeatherMap.set.option(Options,'ice.colour',rgb(230,230,230,255,
                                                        maxColorValue=255))
 range<-75
 Options<-WeatherMap.set.option(Options,'lat.min',range*-1)
@@ -34,14 +34,17 @@ Options<-WeatherMap.set.option(Options,'pole.lat',181)
 Options$vp.lon.min<-Options$lon.min
 Options$vp.lon.max<-Options$lon.max
 Options<-WeatherMap.set.option(Options,'wrap.spherical',F)
+Options<-WeatherMap.set.option(Options,'obs.size',1)
+Options<-WeatherMap.set.option(Options,'obs.colour',rgb(255,215,0,255,
+                                                       maxColorValue=255))
 
 Options$ice.points<-1000000
 
 Options$mslp.base=101325                    # Base value for anomalies
 Options$mslp.range=50000                    # Anomaly for max contour
-Options$mslp.step=500                       # Smaller -> more contours
+Options$mslp.step=1000                       # Smaller -> more contours
 Options$mslp.tpscale=5                      # Smaller -> contours less transparent
-Options$mslp.lwd=2
+Options$mslp.lwd=10.0
 Options$precip.colour=c(0,0.2,0)
 contour.levels<-seq(Options$mslp.base-Options$mslp.range,
                     Options$mslp.base+Options$mslp.range,
@@ -285,7 +288,7 @@ upline<-function(line) {
     return(result)
 }
 
-draw.pressure<-function(mslp,selection.function,Options,colour=c(0,0,0)) {
+draw.pressure<-function(mslp,selection.function,Options,colour=c(0,0,0,1)) {
 
   M<-GSDF.WeatherMap:::WeatherMap.rotate.pole(mslp,Options)
   M<-GSDF:::GSDF.pad.longitude(M) # Extras for periodic boundary conditions
@@ -308,7 +311,7 @@ draw.pressure<-function(mslp,selection.function,Options,colour=c(0,0,0)) {
                        levels=contour.levels)
   if(!is.na(lines) && length(lines)>0) {
       for(i in seq(1,length(lines))) {
-         lines[[i]]<-upline(upline(lines[[i]]))
+         #lines[[i]]<-upline(upline(lines[[i]]))
          tp<-min(1,(abs(lines[[i]]$level-Options$mslp.base)/
                     Options$mslp.tpscale))
          lt<-5
@@ -317,7 +320,7 @@ draw.pressure<-function(mslp,selection.function,Options,colour=c(0,0,0)) {
              lt<-1
              lwd<-1
          }
-         gp<-gpar(col=rgb(colour[1],colour[2],colour[3],tp),
+         gp<-gpar(col=rgb(colour[1],colour[2],colour[3],colour[4]),
                              lwd=Options$mslp.lwd*lwd,lty=lt)
          res<-tryCatch({
              for(p in seq_along(lines[[i]]$x)) {
@@ -326,7 +329,7 @@ draw.pressure<-function(mslp,selection.function,Options,colour=c(0,0,0)) {
                  is.na(lines[[i]]$x[p])<-TRUE
                }
               }
-            grid.lines(x=unit(lines[[i]]$x,'native'),
+            grid.xspline(x=unit(lines[[i]]$x,'native'),
 			y=unit(lines[[i]]$y,'native'),
 			gp=gp)
              }, warning = function(w) {
@@ -462,6 +465,33 @@ set.ice.colour<-function(ice) {
     result[w]<-rgb(1,1,1,ice[w]*1.0)
     return(result)
 }
+# Want to plot obs coverage rather than observations - make pseudo
+#  observations indicating coverage.
+plot.obs.coverage<-function(obs,Options) {
+    if(Options$pole.lon!=0 || Options$pole.lat!=90) {
+	   l2<-GSDF.ll.to.rg(obs$Latitude,obs$Longitude,Options$pole.lat,Options$pole.lon)
+	   obs$Longitude<-l2$lon
+	   obs$Latitude<-l2$lat
+  }
+  if(length(obs$Latitude)<1) return()
+  lon.m<-Options$lon.min
+  if(!is.null(Options$vp.lon.min)) lon.m<-Options$vp.lon.min
+  w<-which(obs$Longitude<lon.m)
+  if(length(w)>0) obs$Longitude[w]<-obs$Longitude[w]+360
+  lon.m<-Options$lon.max
+  if(!is.null(Options$vp.lon.max)) lon.m<-Options$vp.lon.max
+  w<-which(obs$Longitude>lon.m)
+  if(length(w)>0) obs$Longitude[w]<-obs$Longitude[w]-360
+  # Filter to .5/degree lat and lon
+  idx<-sprintf("%4d%4d",as.integer(obs$Latitude*1),as.integer(obs$Longitude*1))
+  w<-which(duplicated(idx))
+  if(length(w)>0) obs<-obs[-w,]
+  gp<-gpar(col=Options$obs.colour,fill=Options$obs.colour)
+  grid.points(x=unit(obs$Longitude,'native'),
+              y=unit(obs$Latitude,'native'),
+              size=unit(Options$obs.size,'native'),
+              pch=21,gp=gp)
+}  
 
 
 # Colour function for streamlines
@@ -512,32 +542,14 @@ pushViewport(viewport(x=unit(1/4,'npc'),y=unit(1/2,'npc'),
   draw.by.rgg(icec,g5,set.ice.colour,function(lat,lon) return(rep(TRUE,length(lat))),Options)
   draw.land.flat(Options)
 
-  t2n<-CERA20C.get.slice.at.hour('air.2m',opt$year,opt$month,opt$day,opt$hour,type='normal')
-
-  for(vertical in seq(0,10)) {
-      for(horizontal in seq(0,7)) {
-        member<-(vertical*8+horizontal)%%10
-        d.lat<-(lat.max-lat.min)/11
-        d.lon<-(lon.max-lon.min)/8
+  for(member in seq(0,9)) {
                  
      select.CERA20C<-function(lat,lon) {
-        result<-rep(FALSE,length(lat))
-        w<-which(lat>=lat.min+vertical*d.lat & lat<lat.min+(vertical+1)*d.lat &
-                 lon>=lon.min+horizontal*d.lon & lon<lon.min+(horizontal+1)*d.lon)
-        result[w]<-TRUE
+        result<-rep(TRUE,length(lat))
         return(result)
      }
      mslp<-CERA20C.get.slice.at.hour('prmsl',opt$year,opt$month,opt$day,opt$hour,member=member)
-     draw.pressure(mslp,select.CERA20C,Options)
-     # Mark the boundary
-     gp<-gpar(col=rgb(1,1,0.5),fill=rgb(1,1,0.5,0),lwd=1)
-          x<-c(lon.min+horizontal*d.lon,lon.min+(horizontal+1)*d.lon)
-          y<-c(lat.min+vertical*d.lat,lat.min+(vertical+1)*d.lat)
-          
-          grid.polygon(x=unit(c(x[1],x[2],x[2],x[1]),'native'),
-                y=unit(c(y[1],y[1],y[2],y[2]),'native'),
-                       gp=gp)
-      }
+     draw.pressure(mslp,select.CERA20C,Options,colour=c(0,0,1,0.1))
 
   }
 popViewport()
@@ -569,37 +581,19 @@ pushViewport(viewport(x=unit(3/4,'npc'),y=unit(1/2,'npc'),
   draw.by.rgg(icec,g5,set.ice.colour,function(lat,lon) return(rep(TRUE,length(lat))),Options)
   draw.land.flat(Options)
 
-  t2n<-TWCR.get.slice.at.hour('air.2m',opt$year,opt$month,opt$day,opt$hour,type='normal',version='3.4.1')
-
-  for(vertical in seq(0,10)) {
-      for(horizontal in seq(0,7)) {
-        member<-(vertical*8+horizontal)%%56+1
-        d.lat<-(lat.max-lat.min)/11
-        d.lon<-(lon.max-lon.min)/8
+  for(member in seq(1,56)) {
                  
      select.TWCR<-function(lat,lon) {
-        result<-rep(FALSE,length(lat))
-        w<-which(lat>=lat.min+vertical*d.lat & lat<lat.min+(vertical+1)*d.lat &
-                 lon>=lon.min+horizontal*d.lon & lon<lon.min+(horizontal+1)*d.lon)
-        result[w]<-TRUE
+        result<-rep(TRUE,length(lat))
         return(result)
      }
-     t2m<-TWCR.get.member.at.hour('air.2m',opt$year,opt$month,opt$day,opt$hour,member=member,version='3.5.1')
-     t2m$data[]<-as.vector(t2m$data)-as.vector(t2n$data)
-     draw.by.rgg(t2m,gc,set.t2m.colour,select.TWCR,Options)
      mslp<-TWCR.get.member.at.hour('prmsl',opt$year,opt$month,opt$day,opt$hour,member=member,version='3.5.1')
-     draw.pressure(mslp,select.TWCR,Options)
-      # Mark the boundary
-     gp<-gpar(col=rgb(1,1,0.5),fill=rgb(1,1,0.5,0),lwd=1)
-          x<-c(lon.min+horizontal*d.lon,lon.min+(horizontal+1)*d.lon)
-          y<-c(lat.min+vertical*d.lat,lat.min+(vertical+1)*d.lat)
-          
-          grid.polygon(x=unit(c(x[1],x[2],x[2],x[1]),'native'),
-                y=unit(c(y[1],y[1],y[2],y[2]),'native'),
-                       gp=gp)
-      }
+     draw.pressure(mslp,select.TWCR,Options,colour=c(0,0,1,0.01))
 
-  }
+ }
+  obs<-TWCR.get.obs(opt$year,opt$month,opt$day,opt$hour,version='3.5.1')
+  plot.obs.coverage(obs,Options)
+
 popViewport()
 popViewport() # End of 20CR half
 
