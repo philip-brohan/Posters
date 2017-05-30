@@ -71,12 +71,18 @@ TWCR.get.member.at.hour<-function(variable,year,month,day,hour,member=1,version=
 
 # Get the CERA20C grid data (same as ERA40)
 gc<-readRDS('ERA_grids/ERA40_grid.Rdata')
+w<-which(gc$centre.lat<0)
+gc<-gc[w,]
 
 # And the 20CR grid data
 gt<-readRDS('ERA_grids/TWCR_grid.Rdata')
+w<-which(gt$centre.lat<0)
+gt<-gt[w,]
 
 # And the ERA5 grid - use for precip
 g5<-readRDS('ERA_grids/ERA5_grid.Rdata')
+w<-which(g5$centre.lat<0)
+g5<-g5[w,]
 
 gp<-g5
 gp$min.lon<-gp$min.lon+(gp$centre.lon-gp$min.lon)*0.05
@@ -172,7 +178,7 @@ double.resolution<-function(lats,lons) {
                         
 # Draw a field, point by point - using a reduced gaussian grid
 draw.by.rgg<-function(field,grid,colour.function,selection.function,Options,
-                      grid.colour=rgb(1,1,1,0.25),grid.lwd=0.01,grid.lty=1) {
+                      grid.colour=rgb(0.8,0.8,0.8,0),grid.lwd=0,grid.lty=0) {
 
     field<-GSDF:::GSDF.pad.longitude(field) # Extras for periodic boundary conditions
     value.points<-GSDF.interpolate.2d(field,grid$centre.lon,grid$centre.lat)
@@ -411,13 +417,13 @@ set.precip.colour<-function(rate) {
 set.t2m.colour<-function(temperature,Trange=5) {
 
   result<-rep(NA,length(temperature))
-  w<-which(temperature>0)
+  w<-which(temperature>=0)
   if(length(w)>0) {
      temperature[w]<-sqrt(temperature[w])
      temperature[w]<-pmax(0,pmin(Trange,temperature[w]))
      temperature[w]<-temperature[w]/Trange
      temperature[w]<-round(temperature[w],2)
-     result[w]<-rgb(1,0,0,temperature[w]*0.8)
+     result[w]<-rgb(1,0,0,temperature[w]*0.5)
   }
   w<-which(temperature<0)
   if(length(w)>0) {
@@ -425,9 +431,18 @@ set.t2m.colour<-function(temperature,Trange=5) {
      temperature[w]<-pmax(0,pmin(Trange,temperature[w]))
      temperature[w]<-temperature[w]/Trange
      temperature[w]<-round(temperature[w],2)
-     result[w]<-rgb(0,0,1,temperature[w]*0.8)
+     result[w]<-rgb(0,0,1,temperature[w]*0.5)
  }
  return(result)
+}
+
+#Colour function for ice
+set.ice.colour<-function(ice) {
+    result<-rep(NA,length(ice))
+    w<-which(ice>0) 
+    ice[w]<-round(ice[w],2)
+    result[w]<-rgb(1,1,1,ice[w]*1.0)
+    return(result)
 }
 
 
@@ -476,8 +491,7 @@ pushViewport(viewport(x=unit(1/4,'npc'),y=unit(1/2,'npc'),
 
 
   icec<-CERA20C.get.slice.at.hour('icec',opt$year,opt$month,opt$day,opt$hour)
-  ip<-WeatherMap.rectpoints(Options$ice.points,Options)
-  WeatherMap.draw.ice(ip$lat,ip$lon,icec,Options)
+  draw.by.rgg(icec,g5,set.ice.colour,function(lat,lon) return(rep(TRUE,length(lat))),Options)
   draw.land.flat(Options)
 
   t2n<-CERA20C.get.slice.at.hour('air.2m',opt$year,opt$month,opt$day,opt$hour,type='normal')
@@ -485,8 +499,10 @@ pushViewport(viewport(x=unit(1/4,'npc'),y=unit(1/2,'npc'),
   for(member in seq(0,9)) {
                  
      select.CERA20C<-function(lat,lon) {
+        lon.min<-Options$vp.lon.min
+        d.lon<-(Options$vp.lon.max-Options$vp.lon.min)/10
         result<-rep(FALSE,length(lat))
-        w<-which(lon>=sin(member*36*(pi/180))*lat & lon<sin((member+1)*36*(pi/180))*lat)
+        w<-which(lon>=lon.min+member*d.lon & lon<lon.min+(member+1)*d.lon)
         result[w]<-TRUE
         return(result)
      }
@@ -495,8 +511,9 @@ pushViewport(viewport(x=unit(1/4,'npc'),y=unit(1/2,'npc'),
      draw.by.rgg(t2m,gc,set.t2m.colour,select.CERA20C,Options)
      # Mark the boundary
      gp<-gpar(col=rgb(1,1,0.5),fill=rgb(1,1,0.5),lwd=1)
-     grid.lines(x=unit(c(0,sin(member*36*(pi/180))*90),'native'),
-                y=unit(c(0,cos(member*36*(pi/180))*90),'native'),
+     x<-Options$vp.lon.min+member*(Options$vp.lon.max-Options$vp.lon.min)/10
+     grid.lines(x=unit(c(x,x),'native'),
+                y=unit(c(Options$lat.min,Options$lat.max),'native'),
                 gp=gp)
 
  }
@@ -525,17 +542,29 @@ pushViewport(viewport(x=unit(3/4,'npc'),y=unit(1/2,'npc'),
   pushViewport(dataViewport(c(lon.min,lon.max),c(lat.min,lat.max),
                             extension=0,gp=base.gp,clip='on'))
 
-  icec<-CERA20C.get.slice.at.hour('icec',opt$year,opt$month,opt$day,opt$hour)
-  ip<-WeatherMap.rectpoints(Options$ice.points,Options)
-  WeatherMap.draw.ice(ip$lat,ip$lon,icec,Options)
-  draw.land.flat(Options)
+  icec<-TWCR.get.slice.at.hour('icec',opt$year,opt$month,opt$day,opt$hour,version='3.5.1')
+  draw.by.rgg(icec,g5,set.ice.colour,function(lat,lon) return(rep(TRUE,length(lat))),Options)
+
+  t2n<-TWCR.get.slice.at.hour('air.2m',opt$year,opt$month,opt$day,opt$hour,type='normal',version='3.4.1')
 
   for(member in seq(1,56)) {
                  
-     # Mark the boundary
+     select.TWCR<-function(lat,lon) {
+        lon.min<-Options$vp.lon.min
+        d.lon<-(Options$vp.lon.max-Options$vp.lon.min)/56
+        result<-rep(FALSE,length(lat))
+        w<-which(lon>=lon.min+member*d.lon & lon<lon.min+(member+1)*d.lon)
+        result[w]<-TRUE
+        return(result)
+     }
+     t2m<-TWCR.get.member.at.hour('air.2m',opt$year,opt$month,opt$day,opt$hour,member=member,version='3.5.1')
+     t2m$data[]<-as.vector(t2m$data)-as.vector(t2n$data)
+     draw.by.rgg(t2m,g5,set.t2m.colour,select.TWCR,Options)
+      # Mark the boundary
      gp<-gpar(col=rgb(1,1,0.5),fill=rgb(1,1,0.5),lwd=1)
-     grid.lines(x=unit(c(0,sin(member*(360/56)*(pi/180))*90),'native'),
-                y=unit(c(0,cos(member*(360/56)*(pi/180))*90),'native'),
+     x<-Options$vp.lon.min+member*(Options$vp.lon.max-Options$vp.lon.min)/56
+     grid.lines(x=unit(c(x,x),'native'),
+                y=unit(c(Options$lat.min,Options$lat.max),'native'),
                 gp=gp)
 
   }
