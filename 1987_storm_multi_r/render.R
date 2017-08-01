@@ -1,4 +1,4 @@
-#!/usr/bin/Rscript --no-save
+#!/usr/bin/env Rscript
 
 # The weather of the great storm of 1987 - in three reanalyses
 # Print quality - A0 format
@@ -19,7 +19,7 @@ opt = list(
 Imagedir<-"."
 
 Options<-WeatherMap.set.option(NULL)
-Options<-WeatherMap.set.option(Options,'land.colour',rgb(100,100,100,255,
+Options<-WeatherMap.set.option(Options,'land.colour',rgb(100,100,100,155,
                                                        maxColorValue=255))
 Options<-WeatherMap.set.option(Options,'sea.colour',rgb(200,200,200,255,
                                                        maxColorValue=255))
@@ -178,7 +178,7 @@ double.resolution<-function(lats,lons) {
 
 # Draw a field, point by point - using a reduced gaussian grid
 draw.by.rgg<-function(field,grid,colour.function,selection.function,Options,
-                      grid.colour=rgb(1,1,1,0.25),grid.lwd=0.01,grid.lty=1) {
+                      grid.colour=rgb(1,1,1,0.25),grid.lwd=0.01,grid.lty='blank',fill=TRUE) {
 
     field<-GSDF:::GSDF.pad.longitude(field) # Extras for periodic boundary conditions
     value.points<-GSDF.interpolate.2d(field,grid$centre.lon,grid$centre.lat)
@@ -224,7 +224,7 @@ draw.by.rgg<-function(field,grid,colour.function,selection.function,Options,
            inside<-array(data=selection.function(boundary.lat,boundary.lon),
                          dim=c(4,length(boundary.lat[1,])))
            w<-which(inside[1,] & inside[2,] & inside[3,] & inside[4,])
-           if(length(w)>0) {
+           if(length(w)>0 && fill) {
               grid.polygon(x=unit(as.vector(boundary.lon[,w]),'native'),
                            y=unit(as.vector(boundary.lat[,w]),'native'),
                            id.lengths=rep(4,length(w)),
@@ -256,10 +256,15 @@ draw.by.rgg<-function(field,grid,colour.function,selection.function,Options,
         inside<-array(data=selection.function(vert.lat,vert.lon),
                       dim=c(4,length(vert.lat[1,])))
         w<-which(inside[1,] & inside[2,] & inside[3,] & inside[4,])
-        if(length(w)<2) next
+        if(length(w)==0) next
         vert.lat<-vert.lat[,w]
         vert.lon<-vert.lon[,w]
-        gp<-gpar(col=grid.colour,fill=group,lwd=grid.lwd,lty=grid.lty)
+        if(length(w)==1) {
+            vert.lat<-array(data=vert.lat,dim=c(4,1))
+            vert.lon<-array(data=vert.lon,dim=c(4,1))
+        }
+        gp<-gpar(col=group,fill=group,lwd=grid.lwd,lty=grid.lty)
+        if(!fill) gp<-gpar(col=group,fill=rgb(1,1,1,0),lwd=grid.lwd,lty=grid.lty)
         #gp<-gpar(col=rgb(0.8,0.8,0.8,0),fill=group,lwd=0)
         grid.polygon(x=unit(as.vector(vert.lon),'native'),
                      y=unit(as.vector(vert.lat),'native'),
@@ -303,14 +308,17 @@ draw.pressure<-function(mslp,selection.function,Options,colour=c(0,0,0)) {
                              lwd=Options$mslp.lwd*lwd,lty=lt)
          res<-tryCatch({
              for(p in seq_along(lines[[i]]$x)) {
-               if(!selection.function(lines[[i]]$y[p],lines[[i]]$x[p])) {
+                 if(!selection.function(lines[[i]]$y[p],lines[[i]]$x[p])) {
                  is.na(lines[[i]]$y[p])<-TRUE
                  is.na(lines[[i]]$x[p])<-TRUE
                }
-              }
+           }
+             #w<-which(is.finite(lines[[i]]$x) & is.finite(lines[[i]]$y))
+             #if(length(w)>1) {
             grid.lines(x=unit(lines[[i]]$x,'native'),
-			y=unit(lines[[i]]$y,'native'),
-			gp=gp)
+                         y=unit(lines[[i]]$y,'native'),
+ 			 gp=gp)
+            #}
              }, warning = function(w) {
                  print(w)
              }, error = function(e) {
@@ -436,24 +444,25 @@ set.precip.colour<-function(rate) {
 }
 
 # Colour function for t2m
-set.t2m.colour<-function(temperature,Trange=5) {
+set.t2m.colour<-function(temperature,Trange=6) {
 
   result<-rep(NA,length(temperature))
   w<-which(temperature>0)
   if(length(w)>0) {
-     temperature[w]<-sqrt(temperature[w])
+     temperature[w]<-temperature[w]**0.75
      temperature[w]<-pmax(0,pmin(Trange,temperature[w]))
      temperature[w]<-temperature[w]/Trange
-     temperature[w]<-round(temperature[w],2)
-     result[w]<-rgb(1,0,0,temperature[w]*0.8)
+     temperature[w]<-round(temperature[w],1)
+     result[w]<-rgb(1,0,0,temperature[w]*0.6)
   }
   w<-which(temperature<0)
   if(length(w)>0) {
-     temperature[w]<-sqrt(temperature[w]*-1)
+     temperature[w]<-temperature[w]*-1
+     temperature[w]<-temperature[w]**0.75
      temperature[w]<-pmax(0,pmin(Trange,temperature[w]))
      temperature[w]<-temperature[w]/Trange
-     temperature[w]<-round(temperature[w],2)
-     result[w]<-rgb(0,0,1,temperature[w]*0.8)
+     temperature[w]<-round(temperature[w],1)
+     result[w]<-rgb(0,0,1,temperature[w]*0.6)
  }
  return(result)
 }
@@ -462,9 +471,9 @@ set.t2m.colour<-function(temperature,Trange=5) {
 # Colour function for streamlines
 set.streamline.GC<-function(Options) {
 
-   alpha<-255
-   return(gpar(col=rgb(125,125,125,alpha,maxColorValue=255),
-               fill=rgb(125,125,125,alpha,maxColorValue=255),lwd=1.5))
+    alpha<-55
+    col<-0 # 125
+   return(gpar(col=rgb(col,col,col,alpha,maxColorValue=255),lwd=1.5))
 }
 
 
@@ -474,7 +483,7 @@ set.streamline.GC<-function(Options) {
 image.name<-sprintf("1987_storm.pdf",year,month,day,hour)
 ifile.name<-sprintf("%s/%s",Imagedir,image.name)
 
- pdf(ifile.name,
+ cairo_pdf(ifile.name,
          width=46.8,
          height=33.1,
          bg=Options$sea.colour,
@@ -494,33 +503,36 @@ ifile.name<-sprintf("%s/%s",Imagedir,image.name)
   pushViewport(dataViewport(c(lon.min,lon.max),c(lat.min,lat.max),
                             extension=0,gp=base.gp))
 
-  icec<-ERAI.get.slice.at.hour('icec',opt$year,opt$month,opt$day,opt$hour)
-  ip<-WeatherMap.rectpoints(Options$ice.points,Options)
-  WeatherMap.draw.ice(ip$lat,ip$lon,icec,Options)
+  #icec<-ERAI.get.slice.at.hour('icec',opt$year,opt$month,opt$day,opt$hour)
+  #ip<-WeatherMap.rectpoints(Options$ice.points,Options)
+  #WeatherMap.draw.ice(ip$lat,ip$lon,icec,Options)
   draw.land.flat(Options)
 
   t2m<-ERAI.get.slice.at.hour('air.2m',opt$year,opt$month,opt$day,opt$hour)
   t2n<-ERAI.get.slice.at.hour('air.2m',opt$year,opt$month,opt$day,opt$hour,type='normal')
   t2m$data[]<-t2m$data-t2n$data
-  draw.by.rgg(t2m,gi,set.t2m.colour,select.ERAI,Options)
+  draw.by.rgg(t2m,g5,set.t2m.colour,select.ERAI,Options,grid.lwd=0.01,grid.colour=rgb(1,1,.5,0),grid.lty='blank')
+  draw.by.rgg(t2m,g5,set.t2m.colour,select.ERAI,Options,grid.lwd=0.1,grid.colour=rgb(1,1,.5,.5),grid.lty=1,fill=FALSE)
 
   t2m<-TWCR.get.member.at.hour('air.2m',opt$year,opt$month,opt$day,opt$hour,version='3.5.1')
   t2n<-TWCR.get.slice.at.hour('air.2m',opt$year,opt$month,opt$day,opt$hour,version='3.4.1',type='normal')
   t2n<-GSDF.regrid.2d(t2n,t2m)
   t2m$data[]<-t2m$data-t2n$data
-  draw.by.rgg(t2m,gt,set.t2m.colour,select.TWCR,Options)
+  draw.by.rgg(t2m,g5,set.t2m.colour,select.CERA20C,Options,grid.lwd=0.01,grid.colour=rgb(1,1,.5,0),grid.lty='blank')
+  draw.by.rgg(t2m,gt,set.t2m.colour,select.CERA20C,Options,grid.lwd=0.1,grid.colour=rgb(1,1,.5,1),grid.lty=1,fill=FALSE)
 
   t2m<-CERA20C.get.slice.at.hour('air.2m',opt$year,opt$month,opt$day,opt$hour)
   t2n<-CERA20C.get.slice.at.hour('air.2m',opt$year,opt$month,opt$day,opt$hour,type='normal')
   t2m$data[]<-as.vector(t2m$data)-as.vector(t2n$data)
-  draw.by.rgg(t2m,gc,set.t2m.colour,select.CERA20C,Options)
+  draw.by.rgg(t2m,g5,set.t2m.colour,select.TWCR,Options,grid.lwd=0.01,grid.colour=rgb(1,1,.5,0),grid.lty='blank')
+  draw.by.rgg(t2m,gc,set.t2m.colour,select.TWCR,Options,grid.lwd=0.1,grid.colour=rgb(1,1,.5,1),grid.lty=1,fill=FALSE)
 
   mslp<-ERAI.get.slice.at.hour('prmsl',opt$year,opt$month,opt$day,opt$hour)
   draw.pressure(mslp,select.ERAI,Options)
   mslp<-TWCR.get.member.at.hour('prmsl',opt$year,opt$month,opt$day,opt$hour,version='3.5.1')
-  draw.pressure(mslp,select.TWCR,Options)
-  mslp<-CERA20C.get.slice.at.hour('prmsl',opt$year,opt$month,opt$day,opt$hour)
   draw.pressure(mslp,select.CERA20C,Options)
+  mslp<-CERA20C.get.slice.at.hour('prmsl',opt$year,opt$month,opt$day,opt$hour)
+  draw.pressure(mslp,select.TWCR,Options)
 
   streamlines<-readRDS('streamlines.ERAI.rd')
   draw.streamlines(streamlines,select.ERAI,Options)
@@ -531,14 +543,17 @@ ifile.name<-sprintf("%s/%s",Imagedir,image.name)
  
   prate<-ERAI.get.slice.at.hour('prate',opt$year,opt$month,opt$day,opt$hour)
   prate$data[]<-prate$data/3.6 # Convert to Kg/m/s
-  draw.by.rgg(prate,g5,set.precip.colour,select.ERAI,Options,grid.colour=rgb(0,0.2,0,0),grid.lwd=1)
+  draw.by.rgg(prate,g5,set.precip.colour,select.ERAI,Options,grid.lwd=0.01,grid.colour=rgb(1,1,.5,0),grid.lty='blank')
+  draw.by.rgg(prate,g5,set.precip.colour,select.ERAI,Options,grid.lwd=0.1,grid.colour=rgb(1,1,.5,1),grid.lty=1,fill=FALSE)
 
   prate<-TWCR.get.member.at.hour('prate',opt$year,opt$month,opt$day,opt$hour,version='3.5.1')
-  draw.by.rgg(prate,g5,set.precip.colour,select.TWCR,Options,grid.colour=rgb(1,1,1,0),grid.lwd=1)
+  draw.by.rgg(prate,g5,set.precip.colour,select.CERA20C,Options,grid.lwd=0.01,grid.colour=rgb(1,1,.5,0),grid.lty='blank')
+  draw.by.rgg(prate,gt,set.precip.colour,select.CERA20C,Options,grid.lwd=0.1,grid.colour=rgb(1,1,.5,1),grid.lty=1,fill=FALSE)
 
   prate<-CERA20C.get.slice.at.hour('prate',opt$year,opt$month,opt$day,opt$hour)
   prate$data[]<-prate$data/3.6 # Convert to Kg/m/s
-  draw.by.rgg(prate,g5,set.precip.colour,select.CERA20C,Options,grid.colour=rgb(0,0.2,0,0),grid.lwd=1)
+  draw.by.rgg(prate,g5,set.precip.colour,select.TWCR,Options,grid.lwd=0.01,grid.colour=rgb(1,1,.5,0),grid.lty='blank')
+  draw.by.rgg(prate,gc,set.precip.colour,select.TWCR,Options,grid.lwd=0.1,grid.colour=rgb(1,1,.5,1),grid.lty=1,fill=FALSE)
 
   # Mark the boundary
   gp<-gpar(col=rgb(1,1,0.5),fill=rgb(1,1,0.5),lwd=2)

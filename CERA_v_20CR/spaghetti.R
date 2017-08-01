@@ -56,8 +56,8 @@ orog<-GSDF.ncdf.load(sprintf("%s/orography/elev.0.25-deg.nc",Sys.getenv('SCRATCH
 orog$data[orog$data<0]<-0 # sea-surface, not sea-bottom
 is.na(orog$data[orog$data==0])<-TRUE
 # 1-km orography (slow, needs lots of ram)
-if(FALSE) {
-    orog<-GSDF.ncdf.load(sprintf("%s/orography/ETOPO2v2c_ud.nc",Sys.getenv('SCRATCH')),'z',
+if(TRUE) {
+    orog<-GSDF.ncdf.load(sprintf("%s/orography/ETOPO2v2c_ud_rl.nc",Sys.getenv('SCRATCH')),'z',
                                  lat.range=c(-90,90),lon.range=c(-180,360))
     orog$data[orog$data<0]<-0 # sea-surface, not sea-bottom
     is.na(orog$data[orog$data==0])<-TRUE

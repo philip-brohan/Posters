@@ -1,4 +1,4 @@
-#!/usr/bin/Rscript --no-save
+#!/usr/bin/env Rscript
 
 # Just make the streamlines for later rendering.
 
