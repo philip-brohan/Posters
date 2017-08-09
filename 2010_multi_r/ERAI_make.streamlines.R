@@ -10,7 +10,7 @@ month<-12
 day<-18
 hour<-6
 
-Imagedir<-'.'
+Imagedir<-sprintf("%s/Posters/2010_multi_r",Sys.getenv('SCRATCH'))
 if(!file.exists(Imagedir)) dir.create(Imagedir,recursive=TRUE)
 
 Options<-WeatherMap.set.option(NULL)

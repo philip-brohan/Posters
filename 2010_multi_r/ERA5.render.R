@@ -14,7 +14,7 @@ opt = list(
   hour = 6
   )
 
-Imagedir<-"."
+Imagedir<-sprintf("%s/Posters/2010_multi_r",Sys.getenv('SCRATCH'))
 
 Options<-WeatherMap.set.option(NULL)
 Options<-WeatherMap.set.option(Options,'land.colour',rgb(200,200,200,255,
@@ -347,7 +347,7 @@ ifile.name<-sprintf("%s/%s",Imagedir,image.name)
   mslp<-ERA5.get.slice.at.hour('prmsl',opt$year,opt$month,opt$day,opt$hour)
   draw.pressure(mslp,Options)
 
-  streamlines<-readRDS('ERA5.streamlines.rd')
+  streamlines<-readRDS(sprintf("%s/ERA5.streamlines.rd",Imagedir))
   draw.streamlines(streamlines,Options)
  
   prate<-ERA5.get.slice.at.hour('prate',opt$year,opt$month,opt$day,opt$hour,fc.init=18)

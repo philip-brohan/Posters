@@ -14,7 +14,7 @@ opt = list(
   hour = 6
   )
 
-Imagedir<-"."
+Imagedir<-sprintf("%s/Posters/2010_multi_r",Sys.getenv('SCRATCH'))
 
 Options<-WeatherMap.set.option(NULL)
 Options<-WeatherMap.set.option(Options,'land.colour',rgb(200,200,200,255,
@@ -357,7 +357,7 @@ ifile.name<-sprintf("%s/%s",Imagedir,image.name)
   mslp<-TWCR.get.member.at.hour('prmsl',opt$year,opt$month,opt$day,opt$hour,member=1,version='3.5.1')
   draw.pressure(mslp,Options)
 
-  streamlines<-readRDS('20CR2c.streamlines.rd')
+  streamlines<-readRDS(sprintf("%s/20CR2c.streamlines.rd",Imagedir))
   draw.streamlines(streamlines,Options)
  
   prate<-TWCR.get.member.at.hour('prate',opt$year,opt$month,opt$day,opt$hour,member=1,version='3.5.1')

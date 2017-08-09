@@ -5,7 +5,9 @@
 
 library(png)
 
-twcr2c<-readPNG('20CR2c.png')
+Imagedir<-sprintf("%s/Posters/2010_multi_r",Sys.getenv('SCRATCH'))
+
+twcr2c<-readPNG(sprintf("%s/20CR2c.png",Imagedir))
 
 # Background image - uniform yellow
 bg<-twcr2c
@@ -41,7 +43,7 @@ rm(twcr2c)
 gc('no')
 
 # ERA5 sector
-era5<-readPNG('ERA5.png')
+era5<-readPNG(sprintf("%s/ERA5.png",Imagedir))
 w<-which(atan2(coord.y-e-c.y,coord.x-c.x)<.75*pi &
          atan2(coord.y-e-c.y,coord.x-c.x)> .25*pi)
 for(col in seq(1,4)) {
@@ -53,7 +55,7 @@ rm(era5)
 gc('no')
 
 # CERA20C sector
-cera20c<-readPNG('CERA20C.png')
+cera20c<-readPNG(sprintf("%s/CERA20C.png",Imagedir))
 w<-which(atan2(coord.y+e-c.y,coord.x-c.x)<.25*pi &
          atan2(coord.y-e-c.y,coord.x-c.x)> -.25*pi)
 for(col in seq(1,4)) {
@@ -65,7 +67,7 @@ rm(cera20c)
 gc('no')
 
 # ERAI sector
-erai<-readPNG('ERAI.png')
+erai<-readPNG(sprintf("%s/ERAI.png",Imagedir))
 w<-which(atan2(coord.y+e-c.y,coord.x-c.x)< -.25*pi &
          atan2(coord.y+e-c.y,coord.x-c.x)> -.75*pi)
 for(col in seq(1,4)) {
@@ -77,5 +79,5 @@ rm(erai)
 gc('no')
 
 
-writePNG(bg,'merged.png')
+writePNG(bg,sprintf("%s/merged.png",Imagedir))
 
