@@ -5,6 +5,7 @@
 
 library(GSDF.TWCR)
 library(GSDF.WeatherMap)
+library(RColorBrewer)
 library(grid)
 
 opt = list(
@@ -17,7 +18,7 @@ opt = list(
 Imagedir<-sprintf("%s/Posters/2010_multi_r",Sys.getenv('SCRATCH'))
 
 Options<-WeatherMap.set.option(NULL)
-Options<-WeatherMap.set.option(Options,'land.colour',rgb(200,200,200,255,
+Options<-WeatherMap.set.option(Options,'land.colour',rgb(150,150,150,255,
                                                        maxColorValue=255))
 Options<-WeatherMap.set.option(Options,'sea.colour',rgb(255,255,255,255,
                                                        maxColorValue=255))
@@ -41,7 +42,7 @@ Options$mslp.base=101325                    # Base value for anomalies
 Options$mslp.range=50000                    # Anomaly for max contour
 Options$mslp.step=500                       # Smaller -> more contours
 Options$mslp.tpscale=5                      # Smaller -> contours less transparent
-Options$mslp.lwd=2
+Options$mslp.lwd=3
 Options$precip.colour=c(0,0.2,0)
 contour.levels<-seq(Options$mslp.base-Options$mslp.range,
                     Options$mslp.base+Options$mslp.range,
@@ -123,45 +124,53 @@ polish.longitudes<-function(lats,lons) {
                lon=cbind(lons,lon.extras)))
 }
                          
-Draw.temperature<-function(temperature,Options,Trange=1) {
-
-  Options.local<-Options
-  Options.local$fog.min.transparency<-0.8
-  Options.local$fog.resolution<-0.25
-  tplus<-temperature
-  tplus$data[]<-pmax(0,pmin(Trange,tplus$data))
-  tplus$data[]<-sqrt(tplus$data[])/Trange
-  Options.local$fog.colour<-c(1,0,0)
-  WeatherMap.draw.fog(tplus,Options.local)
-  tminus<-temperature
-  tminus$data[]<-tminus$data*-1
-  tminus$data[]<-pmax(0,pmin(Trange,tminus$data))
-  tminus$data[]<-sqrt(tminus$data[])/Trange
-  Options.local$fog.colour<-c(0,0,1)
-  WeatherMap.draw.fog(tminus,Options.local)
+# ColorBrewer colours are opaque - make semitransparent
+add.alpha <- function(col, alpha=1){
+  apply(sapply(col, col2rgb)/255, 2, 
+                     function(x) 
+                       rgb(x[1], x[2], x[3], alpha=alpha))  
 }
+Draw.temperature<-function(fog,Options,Trange=1) {
+
+  fog<-GSDF.WeatherMap:::WeatherMap.rotate.pole(fog,Options)
+  # 11.colours from CB RdBu
+  n.colours<-11
+  fog.colours<-add.alpha(rev(brewer.pal(11,'RdBu')),0.25)
+
+  plot.colours<-rep(fog.colours[[1]],length(fog$data))
+  # scale data to the range 0-1
+  s<-sign(fog$data)
+  fog$data[]<-fog$data/Trange
+  #fog$data[]<-s*sqrt(fog$data/s)
+  fog$data[]<-pmax(0.01,pmin(0.99,fog$data+0.5))
+  lats<-rev(seq(Options$lat.min,Options$lat.max,Options$fog.resolution))
+  longs<-seq(Options$lon.min,Options$lon.max,Options$fog.resolution)
+  full.lats<-matrix(data=rep(lats,length(longs)),ncol=length(longs),byrow=F)
+  full.longs<-matrix(data=rep(longs,length(lats)),ncol=length(longs),byrow=T)
+  plot.colours<-GSDF.interpolate.ll(fog,as.vector(full.lats),as.vector(full.longs),
+                                    greedy=Options$greedy)
+  plot.colours<-fog.colours[as.integer(plot.colours*n.colours)+1]
+  dl<-longs[2]-longs[1]
+    grid.raster(matrix(plot.colours, ncol=length(longs), byrow=F),
+                x=unit((Options$lon.min+Options$lon.max)/2,'native'),
+                y=unit((Options$lat.min+Options$lat.max)/2,'native'),
+                width=unit(Options$lon.max-Options$lon.min,'native'),
+                height=unit(Options$lat.max-Options$lat.min,'native'))
+}
+
+
 # Colour function for t2m
 
-set.t2m.colour<-function(temperature,Trange=8) {
+set.t2m.colour<-function(temperature,Trange=10) {
 
   result<-rep(NA,length(temperature))
-  w<-which(temperature>0)
-  if(length(w)>0) {
-     temperature[w]<-sqrt(temperature[w])
-     temperature[w]<-pmax(0,pmin(Trange,temperature[w]))
-     temperature[w]<-temperature[w]/Trange
-     temperature[w]<-round(temperature[w],2)
-     result[w]<-rgb(1,0,0,temperature[w]*Options$fog.min.transparency)
-  }
-  w<-which(temperature<0)
-  if(length(w)>0) {
-     temperature[w]<-temperature[w]*-1
-     temperature[w]<-sqrt(temperature[w])
-     temperature[w]<-pmax(0,pmin(Trange,temperature[w]))
-     temperature[w]<-temperature[w]/Trange
-     temperature[w]<-round(temperature[w],2)
-     result[w]<-rgb(0,0,1,temperature[w]*Options$fog.min.transparency)
- }
+  n.colours<-11
+  t.colours<-add.alpha(rev(brewer.pal(11,'RdBu')),0.25)
+  s<-sign(temperature)
+  temperature<-temperature/Trange
+  temperature<-pmax(0.01,pmin(0.99,temperature+0.5))
+  
+  result<-t.colours[as.integer(temperature*n.colours)+1]
  return(result)
 }
 
@@ -299,18 +308,35 @@ set.precip.colour<-function(rate) {
 set.streamline.GC<-function(Options) {
 
    alpha<-155
-   return(gpar(col=rgb(125,125,125,alpha,maxColorValue=255),
+   return(gpar(col=rgb(0,0,0,alpha,maxColorValue=255),
                fill=rgb(125,125,125,alpha,maxColorValue=255),lwd=1.5))
 }
 
 draw.label<-function(Options,label) {
-    label.gp<-gpar(family='Helvetica',font=1,col='black')
+    label.gp<-gpar(family='Helvetica',font=1,col='black',cex=1.3)
     xp<-unit(0.99,'npc')
-    yp<-unit(0.01*16/9,'npc')    
+    yp<-unit(0.005*16/9,'npc')    
     tg<-textGrob(label,x=xp,y=yp,
                               hjust=1,vjust=0,
                               gp=label.gp)
-   bg.gp<-gpar(col=rgb(1,1,1,0),fill=rgb(0.75,0.75,0.75,0.35))
+   bg.gp<-gpar(col=rgb(1,1,1,0),fill=rgb(1,1,1,0.55))
+   h<-heightDetails(tg)*1.3
+   w<-widthDetails(tg)*1.3
+   b<-unit(0.3,'char') # border
+   grid.polygon(x=unit.c(xp+b,xp-w-b,xp-w-b,xp+b),
+                y=unit.c(yp+h+b,yp+h+b,yp-b,yp-b),
+                gp=bg.gp)
+   grid.draw(tg)
+}
+
+draw.name<-function(Options) {
+    label.gp<-gpar(family='Helvetica',font=1,col='black')
+    xp<-unit(0.035,'npc')
+    yp<-unit(0.93,'npc')    
+    tg<-textGrob('20CRv2c',x=xp,y=yp,
+                              hjust=1,vjust=0,
+                              gp=label.gp)
+   bg.gp<-gpar(col=rgb(1,1,1,0),fill=rgb(1,1,1,0.55))
    h<-heightDetails(tg)
    w<-widthDetails(tg)
    b<-unit(0.2,'char') # border
@@ -351,7 +377,7 @@ ifile.name<-sprintf("%s/%s",Imagedir,image.name)
   t2n<-TWCR.get.slice.at.hour('air.2m',opt$year,opt$month,opt$day,opt$hour,version='3.4.1',type='normal')
   t2n<-GSDF.regrid.2d(t2n,t2m)
   t2m$data[]<-as.vector(t2m$data)-as.vector(t2n$data)
-  Draw.temperature(t2m,Options,Trange=7)
+  Draw.temperature(t2m,Options,Trange=10)
   draw.grid(t2m,gt,set.t2m.colour,Options,grid.lwd=0.5,grid.lty=1)
 
   mslp<-TWCR.get.member.at.hour('prmsl',opt$year,opt$month,opt$day,opt$hour,member=1,version='3.5.1')
@@ -367,6 +393,8 @@ ifile.name<-sprintf("%s/%s",Imagedir,image.name)
   # Add the label
    draw.label(Options,sprintf("%04d-%02d-%02d:%02d",opt$year,opt$month,
                               opt$day,opt$hour))
+  # Add the name
+   draw.name(Options)
 
  dev.off()
 
