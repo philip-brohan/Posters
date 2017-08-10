@@ -9,9 +9,9 @@ library(grid)
 
 opt = list(
   year = 2010,
-  month = 12,
-  day = 18,
-  hour = 6
+  month = 9,
+  day = 16,
+  hour = 12
   )
 
 Imagedir<-sprintf("%s/Posters/2010_multi_r",Sys.getenv('SCRATCH'))

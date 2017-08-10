@@ -17,11 +17,11 @@ bg[,,2]<-1
 bg[,,3]<-0.5
 
 # With of separator
-e<-0.0002
+e<-0.0003
 
 # Centre point
-c.x<-0.4
-c.y<-0.45
+c.x<-0.4-0.006
+c.y<-0.45-0.065
 
 # Coordinates on 0-1 for each pixel
 coord.y<-rep(seq(1,length(bg[,1,1]))/length(bg[,1,1]),length(bg[1,,1]))
@@ -31,8 +31,8 @@ coord.x<-aperm(coord.x)
 coord.x<-as.vector(coord.x)
 
 # 20CR sector
-w<-which(atan2(coord.y+e-c.y,coord.x-c.x)>.75*pi |
-         atan2(coord.y-e-c.y,coord.x-c.x)< -.75*pi |
+w<-which(atan2(coord.y+e-c.y,coord.x-c.x)>.55*pi |
+         atan2(coord.y-e-c.y,coord.x-c.x)< -.69*pi |
          atan2(coord.y-e-c.y,coord.x-c.x)*atan2(coord.y+e-c.y,coord.x-c.x)<0)
 for(col in seq(1,4)) {
     t<-as.vector(bg[,,col])
@@ -44,8 +44,8 @@ gc('no')
 
 # ERA5 sector
 era5<-readPNG(sprintf("%s/ERA5.png",Imagedir))
-w<-which(atan2(coord.y-e-c.y,coord.x-c.x)<.75*pi &
-         atan2(coord.y-e-c.y,coord.x-c.x)> .25*pi)
+w<-which(atan2(coord.y-e-c.y,coord.x-c.x)<.55*pi &
+         atan2(coord.y-e-c.y,coord.x-c.x)> .10*pi)
 for(col in seq(1,4)) {
     t<-as.vector(bg[,,col])
     t[w]<-as.vector(era5[,,col])[w]
@@ -56,7 +56,7 @@ gc('no')
 
 # CERA20C sector
 cera20c<-readPNG(sprintf("%s/CERA20C.png",Imagedir))
-w<-which(atan2(coord.y+e-c.y,coord.x-c.x)<.25*pi &
+w<-which(atan2(coord.y+e-c.y,coord.x-c.x)<.10*pi &
          atan2(coord.y-e-c.y,coord.x-c.x)> -.25*pi)
 for(col in seq(1,4)) {
     t<-as.vector(bg[,,col])
@@ -69,7 +69,7 @@ gc('no')
 # ERAI sector
 erai<-readPNG(sprintf("%s/ERAI.png",Imagedir))
 w<-which(atan2(coord.y+e-c.y,coord.x-c.x)< -.25*pi &
-         atan2(coord.y+e-c.y,coord.x-c.x)> -.75*pi)
+         atan2(coord.y+e-c.y,coord.x-c.x)> -.69*pi)
 for(col in seq(1,4)) {
     t<-as.vector(bg[,,col])
     t[w]<-as.vector(erai[,,col])[w]

@@ -11,9 +11,9 @@ library(grid)
 
 opt = list(
   year = 2010,
-  month = 12,
-  day = 18,
-  hour = 6
+  month = 9,
+  day = 16,
+  hour = 12
   )
 
 Imagedir<-sprintf("%s/Posters/2010_multi_r",Sys.getenv('SCRATCH'))
@@ -338,9 +338,6 @@ ifile.name<-sprintf("%s/%s",Imagedir,image.name)
   pushViewport(dataViewport(c(lon.min,lon.max),c(lat.min,lat.max),
                             extension=0,gp=base.gp))
 
-  icec<-ERAI.get.slice.at.hour('icec',opt$year,opt$month,opt$day,opt$hour)
-  ip<-WeatherMap.rectpoints(Options$ice.points,Options)
-  WeatherMap.draw.ice(ip$lat,ip$lon,icec,Options)
   draw.land.flat(Options)
 
   t2m<-ERAI.get.slice.at.hour('air.2m',opt$year,opt$month,opt$day,opt$hour)
