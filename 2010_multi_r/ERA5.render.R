@@ -155,7 +155,7 @@ set.t2m.colour<-function(temperature,Trange=10) {
 
   result<-rep(NA,length(temperature))
   n.colours<-11
-  t.colours<-add.alpha(rev(brewer.pal(11,'RdBu')),0.25)
+  t.colours<-add.alpha(rev(brewer.pal(11,'RdBu')),1.0)
   s<-sign(temperature)
   temperature<-temperature/Trange
   temperature<-pmax(0.01,pmin(0.99,temperature+0.5))

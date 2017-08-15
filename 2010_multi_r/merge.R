@@ -30,10 +30,11 @@ coord.x<-array(dim=c(length(bg[1,,1]),length(bg[,1,1])),data=coord.x)
 coord.x<-aperm(coord.x)
 coord.x<-as.vector(coord.x)
 
-# 20CR sector
-w<-which(atan2(coord.y+e-c.y,coord.x-c.x)>.685*pi |
-         atan2(coord.y-e-c.y,coord.x-c.x)< -.65*pi |
-         atan2(coord.y-e-c.y,coord.x-c.x)*atan2(coord.y+e-c.y,coord.x-c.x)<0)
+es1<-e/abs(cos(.685*pi))
+es2<-e/abs(cos(-.65*pi))
+w<-which(atan2(coord.y+es1-c.y,coord.x-c.x)>.685*pi |
+         atan2(coord.y-es2-c.y,coord.x-c.x)< -.65*pi |
+         atan2(coord.y-es2-c.y,coord.x-c.x)*atan2(coord.y+es1-c.y,coord.x-c.x)<0)
 for(col in seq(1,4)) {
     t<-as.vector(bg[,,col])
     t[w]<-as.vector(twcr2c[,,col])[w]
@@ -42,9 +43,11 @@ for(col in seq(1,4)) {
 rm(twcr2c)
 gc()
 
+es1<-e/abs(cos(.685*pi))
+es2<-e/abs(cos(.35*pi))
 cera20c<-readPNG(sprintf("%s/CERA20C.png",Imagedir))
-w<-which(atan2(coord.y-e-c.y,coord.x-c.x)<.685*pi &
-         atan2(coord.y-e-c.y,coord.x-c.x)> .35*pi)
+w<-which(atan2(coord.y-es1-c.y,coord.x-c.x)<.685*pi &
+         atan2(coord.y-es2-c.y,coord.x-c.x)> .35*pi)
 for(col in seq(1,4)) {
     t<-as.vector(bg[,,col])
     t[w]<-as.vector(cera20c[,,col])[w]
@@ -53,9 +56,11 @@ for(col in seq(1,4)) {
 rm(cera20c)
 gc()
 
+es1<-e/abs(cos(.35*pi))
+es2<-e/abs(cos(-.10*pi))
 era5<-readPNG(sprintf("%s/ERA5.png",Imagedir))
-w<-which(atan2(coord.y+e-c.y,coord.x-c.x)<.35*pi &
-         atan2(coord.y-e-c.y,coord.x-c.x)> -.10*pi)
+w<-which(atan2(coord.y+es1-c.y,coord.x-c.x)<.35*pi &
+         atan2(coord.y-es2-c.y,coord.x-c.x)> -.10*pi)
 for(col in seq(1,4)) {
     t<-as.vector(bg[,,col])
     t[w]<-as.vector(era5[,,col])[w]
@@ -64,10 +69,11 @@ for(col in seq(1,4)) {
 rm(era5)
 gc()
 
-# ERAI sector
+es1<-e/abs(cos(-.10*pi))
+es2<-e/abs(cos(-.65*pi))
 erai<-readPNG(sprintf("%s/ERAI.png",Imagedir))
-w<-which(atan2(coord.y+e-c.y,coord.x-c.x)< -.10*pi &
-         atan2(coord.y+e-c.y,coord.x-c.x)> -.65*pi)
+w<-which(atan2(coord.y+es1-c.y,coord.x-c.x)< -.10*pi &
+         atan2(coord.y+es2-c.y,coord.x-c.x)> -.65*pi)
 for(col in seq(1,4)) {
     t<-as.vector(bg[,,col])
     t[w]<-as.vector(erai[,,col])[w]
