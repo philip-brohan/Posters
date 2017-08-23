@@ -11,7 +11,7 @@ twcr2c<-readPNG(sprintf("%s/20CR2c.png",Imagedir))
 
 # Background image - uniform yellow
 bg<-twcr2c
-bg[,,4]<-1 # Opaque
+#bg[,,4]<-1 # Opaque
 bg[,,1]<-1 # Yellow
 bg[,,2]<-1
 bg[,,3]<-0.5
@@ -35,52 +35,52 @@ es2<-e/abs(cos(-.65*pi))
 w<-which(atan2(coord.y+es1-c.y,coord.x-c.x)>.685*pi |
          atan2(coord.y-es2-c.y,coord.x-c.x)< -.65*pi |
          atan2(coord.y-es2-c.y,coord.x-c.x)*atan2(coord.y+es1-c.y,coord.x-c.x)<0)
-for(col in seq(1,4)) {
+for(col in seq(1,3)) {
     t<-as.vector(bg[,,col])
     t[w]<-as.vector(twcr2c[,,col])[w]
     bg[,,col]<-t
 }
 rm(twcr2c)
-gc()
+g<-gc()
 
 es1<-e/abs(cos(.685*pi))
 es2<-e/abs(cos(.35*pi))
 cera20c<-readPNG(sprintf("%s/CERA20C.png",Imagedir))
 w<-which(atan2(coord.y-es1-c.y,coord.x-c.x)<.685*pi &
          atan2(coord.y-es2-c.y,coord.x-c.x)> .35*pi)
-for(col in seq(1,4)) {
+for(col in seq(1,3)) {
     t<-as.vector(bg[,,col])
     t[w]<-as.vector(cera20c[,,col])[w]
     bg[,,col]<-t
 }
 rm(cera20c)
-gc()
+g<-gc()
 
 es1<-e/abs(cos(.35*pi))
 es2<-e/abs(cos(-.10*pi))
 era5<-readPNG(sprintf("%s/ERA5.png",Imagedir))
 w<-which(atan2(coord.y+es1-c.y,coord.x-c.x)<.35*pi &
          atan2(coord.y-es2-c.y,coord.x-c.x)> -.10*pi)
-for(col in seq(1,4)) {
+for(col in seq(1,3)) {
     t<-as.vector(bg[,,col])
     t[w]<-as.vector(era5[,,col])[w]
     bg[,,col]<-t
 }
 rm(era5)
-gc()
+g<-gc()
 
 es1<-e/abs(cos(-.10*pi))
 es2<-e/abs(cos(-.65*pi))
 erai<-readPNG(sprintf("%s/ERAI.png",Imagedir))
 w<-which(atan2(coord.y+es1-c.y,coord.x-c.x)< -.10*pi &
          atan2(coord.y+es2-c.y,coord.x-c.x)> -.65*pi)
-for(col in seq(1,4)) {
+for(col in seq(1,3)) {
     t<-as.vector(bg[,,col])
     t[w]<-as.vector(erai[,,col])[w]
     bg[,,col]<-t
 }
 rm(erai)
-gc()
+g<-gc()
 
 
 writePNG(bg,sprintf("%s/merged.png",Imagedir))

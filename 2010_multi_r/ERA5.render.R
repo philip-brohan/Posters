@@ -42,7 +42,7 @@ Options$mslp.base=101325                    # Base value for anomalies
 Options$mslp.range=50000                    # Anomaly for max contour
 Options$mslp.step=500                       # Smaller -> more contours
 Options$mslp.tpscale=5                      # Smaller -> contours less transparent
-Options$mslp.lwd=3
+Options$mslp.lwd=12
 Options$precip.colour=c(0,0.2,0)
 contour.levels<-seq(Options$mslp.base-Options$mslp.range,
                     Options$mslp.base+Options$mslp.range,
@@ -71,7 +71,7 @@ gc<-readRDS('ERA_grids/ERA40_grid.Rdata')
 gt<-readRDS('ERA_grids/TWCR_grid.Rdata')
 
 # And the ERA5 grid
-g5<-readRDS('ERA_grids/ERA5_grid.Rdata')
+g5<-readRDS('ERA_grids/ERA5_grid_ENDA.Rdata')
 
 gp<-g5
 gp$min.lon<-gp$min.lon+(gp$centre.lon-gp$min.lon)*0.05
@@ -299,7 +299,7 @@ set.streamline.GC<-function(Options) {
 
    alpha<-155
    return(gpar(col=rgb(0,0,0,alpha,maxColorValue=255),
-               fill=rgb(125,125,125,alpha,maxColorValue=255),lwd=1.5))
+               fill=rgb(125,125,125,alpha,maxColorValue=255),lwd=6.0))
 }
 
 draw.label<-function(Options,label) {
@@ -338,15 +338,15 @@ draw.name<-function(Options) {
 
 # Make the actual plot
 
-image.name<-sprintf("ERA5.pdf",year,month,day,hour)
+image.name<-"ERA5.png"
 ifile.name<-sprintf("%s/%s",Imagedir,image.name)
 
- pdf(ifile.name,
-         width=46.8,
-         height=33.1,
-         bg=Options$sea.colour,
-         family='Helvetica',
-     pointsize=24)
+png(ifile.name,
+    width=14038,
+    height=9929,
+    bg=Options$sea.colour,
+    type='cairo-png',
+    pointsize=96)
 
   base.gp<-gpar(fontfamily='Helvetica',fontface='bold',col='black')
   lon.min<-Options$lon.min
@@ -367,7 +367,7 @@ ifile.name<-sprintf("%s/%s",Imagedir,image.name)
   t2n<-ERA5.get.slice.at.hour('air.2m',opt$year,opt$month,opt$day,opt$hour,type='normal')
   t2m$data[]<-t2m$data-t2n$data
   Draw.temperature(t2m,Options,Trange=10)
-  draw.grid(t2m,g5,set.t2m.colour,Options,grid.lwd=0.5,grid.lty=1)
+  draw.grid(t2m,g5,set.t2m.colour,Options,grid.lwd=2.0,grid.lty=1)
 
   mslp<-ERA5.get.slice.at.hour('prmsl',opt$year,opt$month,opt$day,opt$hour)
   draw.pressure(mslp,Options)
@@ -378,7 +378,7 @@ ifile.name<-sprintf("%s/%s",Imagedir,image.name)
   prate<-ERA5.get.slice.at.hour('prate',opt$year,opt$month,opt$day,opt$hour,fc.init=18)
   prate$data[]<-prate$data/3.6 # Convert to Kg/m/s
   WeatherMap.draw.precipitation(prate,Options)
-  draw.grid(prate,g5,set.precip.colour,Options,grid.lwd=0.5,grid.lty=1)
+  draw.grid(prate,g5,set.precip.colour,Options,grid.lwd=2.0,grid.lty=1)
 
   # Add the label
    draw.label(Options,sprintf("%04d-%02d-%02d:%02d",opt$year,opt$month,

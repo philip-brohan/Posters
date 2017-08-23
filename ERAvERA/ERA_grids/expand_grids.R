@@ -35,3 +35,6 @@ saveRDS(eI,'ERAI_grid.Rdata')
 
 e5<-expand_grid('ERA5_grid.txt')
 saveRDS(e5,'ERA5_grid.Rdata')
+
+e5e<-expand_grid('ERA5_grid_ENDA.txt')
+saveRDS(e5e,'ERA5_grid_ENDA.Rdata')
