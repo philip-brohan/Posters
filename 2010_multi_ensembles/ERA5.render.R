@@ -381,15 +381,9 @@ png(ifile.name,
   draw.streamlines(streamlines,Options)
  
   prate<-ERA5.get.member.at.hour('prate',opt$year,opt$month,opt$day,opt$hour)
-  prate$data[]<-prate$data/3.6 # Convert to Kg/m/s
+  prate$data[]<-prate$data/(3.6*3) # Convert to Kg/m/s
   WeatherMap.draw.precipitation(prate,Options)
   draw.grid(prate,g5,set.precip.colour,Options,grid.lwd=2.0,grid.lty=1)
-
-  # Add the label
-   draw.label(Options,sprintf("%04d-%02d-%02d:%02d",opt$year,opt$month,
-                              opt$day,opt$hour))
-  # Add the name
-   draw.name(Options)
 
 
   dev.off()

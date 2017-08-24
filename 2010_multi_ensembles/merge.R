@@ -14,7 +14,7 @@ bg[,,2]<-1
 bg[,,3]<-0.5
 
 # Width of separator
-e<-0.004
+e<-0
 
 # Centre point
 c.x<-0.4-0.006
@@ -29,13 +29,13 @@ coord.x<-as.vector(coord.x)
 
 # Range for 20CR2c
 t2c.max<-  0.53*pi
-t2c.min<- -0.05*pi
+t2c.min<- -0.12*pi
 
 # Add a 20CR2c slice
 add.t2c.slice<-function(member,bg) {
   image<-readPNG(sprintf("%s/20CR2c_%02d.png",Imagedir,member))
-  s.max<-t2c.min+(t2c.max-t2c.min)*member/56
-  s.min<-t2c.min+(t2c.max-t2c.min)*(member-1)/56
+  s.max<-t2c.min+(t2c.max-t2c.min)*member/10
+  s.min<-t2c.min+(t2c.max-t2c.min)*(member-1)/10
   es1<-e/abs(cos(s.max))
   es2<-e/abs(cos(s.min))
   w<-which(atan2(coord.y-es1-c.y,coord.x-c.x)<s.max &
@@ -49,15 +49,15 @@ add.t2c.slice<-function(member,bg) {
   return(bg)
 }
 
-for(member in seq(1,56,5)) {
+for(member in seq(1,10,1)) {
   print(sprintf("20CR2c %2d",member))
   bg<-add.t2c.slice(member,bg)
   g<-gc()
 }
 
 # Range for CERA20C
-cera20c.max<- -0.05*pi
-cera20c.min<- -0.70*pi
+cera20c.max<- -0.12*pi
+cera20c.min<- -0.77*pi
 
 # Add a CERA20C slice
 add.cera20c.slice<-function(member,bg) {
@@ -77,17 +77,17 @@ add.cera20c.slice<-function(member,bg) {
   return(bg)
 }
 
-for(member in seq(0,9,3)) {
+for(member in seq(0,9,1)) {
   print(sprintf("CERA20C %2d",member))
   bg<-add.cera20c.slice(member,bg)
   g<-gc()
 }
 
 # Add a ERA5 slice
-add.era5.slice<-function(member,bg) {
+add.era5.slice<-function(member,bg,n,o) {
   image<-readPNG(sprintf("%s/ERA5_%02d.png",Imagedir,member))
-  s.max<-era5.min+(era5.max-era5.min)*(member+1)/10
-  s.min<-era5.min+(era5.max-era5.min)*member/10
+  s.max<-era5.min+(era5.max-era5.min)*(member-o+1)/n
+  s.min<-era5.min+(era5.max-era5.min)*(member-o)/n
   es1<-e/abs(cos(s.max))
   es2<-e/abs(cos(s.min))
   w<-which(atan2(coord.y-es1-c.y,coord.x-c.x)<s.max &
@@ -101,19 +101,19 @@ add.era5.slice<-function(member,bg) {
   return(bg)
 }
 # Two ranges for ERA5
-era5.max<- -0.70*pi
+era5.max<- -0.77*pi
 era5.min<- -1.00*pi
-for(member in seq(0,3,3)) {
+for(member in seq(0,2,1)) {
   print(sprintf("ERA5 %2d",member))
-  bg<-add.era5.slice(member,bg)
+  bg<-add.era5.slice(member,bg,3,0)
   g<-gc()
 }
 
 era5.max<-  1.00*pi
 era5.min<-  0.53*pi
-for(member in seq(4,9,3)) {
+for(member in seq(3,9,1)) {
   print(sprintf("ERA5 %2d",member))
-  bg<-add.era5.slice(member,bg)
+  bg<-add.era5.slice(member,bg,7,3)
   g<-gc()
 }
 
