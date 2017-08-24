@@ -1,0 +1,10 @@
+./ERA5.render.R --member=0
+./ERA5.render.R --member=1
+./ERA5.render.R --member=2
+./ERA5.render.R --member=3
+./ERA5.render.R --member=4
+./ERA5.render.R --member=5
+./ERA5.render.R --member=6
+./ERA5.render.R --member=7
+./ERA5.render.R --member=8
+./ERA5.render.R --member=9

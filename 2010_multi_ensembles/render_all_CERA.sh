@@ -1,0 +1,10 @@
+./CERA20C.render.R --member=0
+./CERA20C.render.R --member=1
+./CERA20C.render.R --member=2
+./CERA20C.render.R --member=3
+./CERA20C.render.R --member=4
+./CERA20C.render.R --member=5
+./CERA20C.render.R --member=6
+./CERA20C.render.R --member=7
+./CERA20C.render.R --member=8
+./CERA20C.render.R --member=9
