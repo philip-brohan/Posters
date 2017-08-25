@@ -29,7 +29,7 @@ coord.x<-as.vector(coord.x)
 
 # Range for 20CR2c
 t2c.max<-  0.53*pi
-t2c.min<- -0.12*pi
+t2c.min<- -0.19*pi
 
 # Add a 20CR2c slice
 add.t2c.slice<-function(member,bg) {
@@ -56,8 +56,8 @@ for(member in seq(1,10,1)) {
 }
 
 # Range for CERA20C
-cera20c.max<- -0.12*pi
-cera20c.min<- -0.77*pi
+cera20c.max<- -0.19*pi
+cera20c.min<- -0.69*pi
 
 # Add a CERA20C slice
 add.cera20c.slice<-function(member,bg) {
@@ -101,9 +101,9 @@ add.era5.slice<-function(member,bg,n,o) {
   return(bg)
 }
 # Two ranges for ERA5
-era5.max<- -0.77*pi
+era5.max<- -0.69*pi
 era5.min<- -1.00*pi
-for(member in seq(1,3,1)) {
+for(member in seq(1,4,1)) {
   print(sprintf("ERA5 %2d",member))
   bg<-add.era5.slice(member,bg,3,1)
   g<-gc()
@@ -111,9 +111,9 @@ for(member in seq(1,3,1)) {
 
 era5.max<-  1.00*pi
 era5.min<-  0.53*pi
-for(member in seq(4,10,1)) {
+for(member in seq(5,10,1)) {
   print(sprintf("ERA5 %2d",member))
-  bg<-add.era5.slice(member,bg,7,4)
+  bg<-add.era5.slice(member,bg,6,5)
   g<-gc()
 }
 

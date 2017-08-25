@@ -32,15 +32,15 @@ c.y<-1.0-(0.45-0.065)
 
 # Delimiters for 20CR2c
 t2c.max<-  0.53*pi
-t2c.min<- -0.12*pi
+t2c.min<- -0.19*pi
 
-sc<-0.005+runif(1)*0.005
+sc<-0.000+runif(1)*0.005
 grid.lines(x=unit(c(c.x+cos(t2c.max)*sc,
                     c.x+cos(t2c.max)*10),'npc'),
            y=unit(c(c.y+sin(t2c.max)*sc,
                     c.y+sin(t2c.max)*10),'npc'),
              gp=lgpt)
-sc<-0.005+runif(1)*0.005
+sc<-0.000+runif(1)*0.005
 grid.lines(x=unit(c(c.x+cos(t2c.min)*sc,
                     c.x+cos(t2c.min)*10),'npc'),
            y=unit(c(c.y+sin(t2c.min)*sc,
@@ -72,17 +72,18 @@ for(member in seq(1,10,1)) {
   mark.t2c.slice(member)
 }
 
-# Range for CERA20C
-cera20c.max<- -0.12*pi
-cera20c.min<- -0.77*pi
 
-sc<-0.005+runif(1)*0.005
+# Range for CERA20C
+cera20c.max<- -0.19*pi
+cera20c.min<- -0.69*pi
+
+sc<-0.000+runif(1)*0.005
 grid.lines(x=unit(c(c.x+cos(cera20c.max)*sc,
                     c.x+cos(cera20c.max)*10),'npc'),
            y=unit(c(c.y+sin(cera20c.max)*sc,
                     c.y+sin(cera20c.max)*10),'npc'),
              gp=lgpt)
-sc<-0.005+runif(1)*0.005
+sc<-0.000+runif(1)*0.005
 grid.lines(x=unit(c(c.x+cos(cera20c.min)*sc,
                     c.x+cos(cera20c.min)*10),'npc'),
            y=unit(c(c.y+sin(cera20c.min)*sc,
@@ -110,7 +111,7 @@ mark.cera20c.slice<-function(member) {
 
 }
 
-for(member in seq(1,10,1)) {
+for(member in seq(0,9,1)) {
   mark.cera20c.slice(member)
 }
 
@@ -136,28 +137,28 @@ mark.era5.slice<-function(member,n,o) {
 }
 
 # Two ranges for ERA5
-era5.max<- -0.77*pi
+era5.max<- -0.69*pi
 era5.min<- -1.00*pi
-sc<-0.005+runif(1)*0.005
+sc<-0.000+runif(1)*0.005
 grid.lines(x=unit(c(c.x+cos(era5.max)*sc,
                     c.x+cos(era5.max)*10),'npc'),
            y=unit(c(c.y+sin(era5.max)*sc,
                     c.y+sin(era5.max)*10),'npc'),
              gp=lgpt)
 
-for(member in seq(1,3,1)) {
-  mark.era5.slice(member,3,1)
+for(member in seq(1,4,1)) {
+  mark.era5.slice(member,4,1)
 }
 era5.max<-  1.00*pi
 era5.min<-  0.53*pi
-sc<-0.005+runif(1)*0.005
+sc<-0.000+runif(1)*0.005
 grid.lines(x=unit(c(c.x+cos(era5.min)*sc,
                     c.x+cos(era5.min)*10),'npc'),
            y=unit(c(c.y+sin(era5.min)*sc,
                     c.y+sin(era5.min)*10),'npc'),
              gp=lgpt)
-for(member in seq(4,10,1)) {
-  mark.era5.slice(member,7,4)
+for(member in seq(5,10,1)) {
+  mark.era5.slice(member,7,5)
 }
 
 draw.label<-function(label,xp,yp,scale=1) {

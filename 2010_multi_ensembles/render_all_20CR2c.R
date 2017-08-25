@@ -2,7 +2,7 @@
 
 # Render each 20CR2c ensemble member as a seperate SPICE job
 
-for(member in seq(1,56)) {
+for(member in seq(1,10)) {
   sink('20CR2c.member.slm')
   cat('#!/bin/ksh -l\n')
   cat('#SBATCH --output=/scratch/hadpb/slurm_output/20CR2c.member-%j.out\n')

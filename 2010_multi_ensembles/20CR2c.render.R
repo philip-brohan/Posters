@@ -269,6 +269,15 @@ draw.pressure<-function(mslp,Options,colour=c(0,0,0)) {
 draw.streamlines<-function(s,Options) {
 
     gp<-set.streamline.GC(Options)
+    # Adjust the streamlines to this ensemble member
+    u<-TWCR.get.member.at.hour('uwnd.10m',opt$year,opt$month,opt$day,opt$hour,member=opt$member,version='3.5.1')
+    v<-TWCR.get.member.at.hour('vwnd.10m',opt$year,opt$month,opt$day,opt$hour,member=opt$member,version='3.5.1')
+    r.u.v<-GSDF.wind.to.pole(u,v,Options$pole.lat,Options$pole.lon)
+    u<-r.u.v$u
+    v<-r.u.v$v
+    s<-GSDF.WeatherMap:::WeatherMap.propagate.streamlines(s[['y']][,1],s[['x']][,1],
+                                                          s$status,s$id,
+                                                          u,v,u,u,Options)
     grid.xspline(x=unit(as.vector(t(s[['x']])),'native'),
                  y=unit(as.vector(t(s[['y']])),'native'),
                  id.lengths=rep(Options$wind.vector.points,length(s[['x']][,1])),
@@ -396,11 +405,6 @@ png(ifile.name,
   WeatherMap.draw.precipitation(prate,Options)
   draw.grid(prate,gt,set.precip.colour,Options,grid.lwd=2.0,grid.lty=1)
 
-  # Add the label
-   draw.label(Options,sprintf("%04d-%02d-%02d:%02d",opt$year,opt$month,
-                              opt$day,opt$hour))
-  # Add the name
-   draw.name(Options)
 
  dev.off()
 
