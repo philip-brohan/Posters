@@ -2,7 +2,7 @@
 
 # Render each ERA5 ensemble member as a seperate SPICE job
 
-for(member in seq(0,9)) {
+for(member in seq(1,10)) {
   sink('ERA5.member.slm')
   cat('#!/bin/ksh -l\n')
   cat('#SBATCH --output=/scratch/hadpb/slurm_output/ERA5.member-%j.out\n')

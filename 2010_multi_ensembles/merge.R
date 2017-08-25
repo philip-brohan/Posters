@@ -8,7 +8,7 @@ library(png)
 Imagedir<-sprintf("%s/Posters/2010_multi_e",Sys.getenv('SCRATCH'))
 
 # Background image - uniform yellow
-bg<-twcr2c<-readPNG(sprintf("%s/20CR2c_01.png",Imagedir))
+bg<-readPNG(sprintf("%s/20CR2c_01.png",Imagedir))
 bg[,,1]<-1 # Yellow
 bg[,,2]<-1
 bg[,,3]<-0.5
@@ -103,17 +103,17 @@ add.era5.slice<-function(member,bg,n,o) {
 # Two ranges for ERA5
 era5.max<- -0.77*pi
 era5.min<- -1.00*pi
-for(member in seq(0,2,1)) {
+for(member in seq(1,3,1)) {
   print(sprintf("ERA5 %2d",member))
-  bg<-add.era5.slice(member,bg,3,0)
+  bg<-add.era5.slice(member,bg,3,1)
   g<-gc()
 }
 
 era5.max<-  1.00*pi
 era5.min<-  0.53*pi
-for(member in seq(3,9,1)) {
+for(member in seq(4,10,1)) {
   print(sprintf("ERA5 %2d",member))
-  bg<-add.era5.slice(member,bg,7,3)
+  bg<-add.era5.slice(member,bg,7,4)
   g<-gc()
 }
 

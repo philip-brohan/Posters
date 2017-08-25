@@ -367,20 +367,20 @@ png(ifile.name,
 
   draw.land.flat(Options)
 
-  t2m<-ERA5.get.member.at.hour('air.2m',opt$year,opt$month,opt$day,opt$hour)
+  t2m<-ERA5.get.member.at.hour('air.2m',opt$year,opt$month,opt$day,opt$hour,opt$member)
   t2n<-ERA5.get.slice.at.hour('air.2m',opt$year,opt$month,opt$day,opt$hour,type='normal')
   t2n<-GSDF.regrid.2d(t2n,t2m)
   t2m$data[]<-t2m$data-t2n$data
   Draw.temperature(t2m,Options,Trange=10)
   draw.grid(t2m,g5,set.t2m.colour,Options,grid.lwd=2.0,grid.lty=1)
 
-  mslp<-ERA5.get.member.at.hour('prmsl',opt$year,opt$month,opt$day,opt$hour)
+  mslp<-ERA5.get.member.at.hour('prmsl',opt$year,opt$month,opt$day,opt$hour,opt$member)
   draw.pressure(mslp,Options)
 
   streamlines<-readRDS(sprintf("%s/ERA5.streamlines.rd",Imagedir))
   draw.streamlines(streamlines,Options)
  
-  prate<-ERA5.get.member.at.hour('prate',opt$year,opt$month,opt$day,opt$hour)
+  prate<-ERA5.get.member.at.hour('prate',opt$year,opt$month,opt$day,opt$hour,opt$member)
   prate$data[]<-prate$data/(3.6*3) # Convert to Kg/m/s
   WeatherMap.draw.precipitation(prate,Options)
   draw.grid(prate,g5,set.precip.colour,Options,grid.lwd=2.0,grid.lty=1)
