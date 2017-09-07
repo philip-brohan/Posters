@@ -1,7 +1,6 @@
 #!/usr/bin/Rscript --no-save
 
-# Poster comparing ERA5 with ERA Interim
-# Print quality - A0 format
+# Single time point for testing obs effect plots
 
 library(GSDF.TWCR)
 library(GSDF.WeatherMap)
@@ -34,8 +33,8 @@ Options$vp.lon.max<-  180
 Options<-WeatherMap.set.option(Options,'wrap.spherical',F)
 Options$precip.colour=c(0,0.2,0)
 Options$label.xp=0.995
-Options<-WeatherMap.set.option(Options,'obs.size',0.5)
-Options<-WeatherMap.set.option(Options,'obs.colour',rgb(255,215,0,255,
+Options<-WeatherMap.set.option(Options,'obs.size',2.5)
+Options<-WeatherMap.set.option(Options,'obs.colour',rgb(255,204,0,255,
                                                        maxColorValue=255))
 
 Options$ice.points<-1000000
@@ -58,7 +57,7 @@ orog<-GSDF.ncdf.load(sprintf("%s/orography/elev.0.25-deg.nc",Sys.getenv('SCRATCH
 orog$data[orog$data<0]<-0 # sea-surface, not sea-bottom
 is.na(orog$data[orog$data==0])<-TRUE
 
-get.member.at.hour<-function(variable,year,month,day,hour,member,version='3.5.1') {
+get.member.at.hour<-function(variable,year,month,day,hour,member,version='3.5.4') {
 
        t<-TWCR.get.members.slice.at.hour(variable,year,month,day,
                                   hour,version=version)
@@ -66,6 +65,17 @@ get.member.at.hour<-function(variable,year,month,day,hour,member,version='3.5.1'
        gc()
        return(t)
   }
+
+GSDF.ks<-function(d1,d2) {
+  result<-GSDF.select.from.1d(d1,'ensemble',1)
+  for(x in seq(1,180)) {
+    for(y in seq(1,91)) {
+      #result$data[x,y]<-ks.test(d1$data[x,y,,1],d2$data[x,y,,1])$p.value
+      result$data[x,y]<-sd(d1$data[x,y,,1])-sd(d2$data[x,y,,1])
+    }
+  }
+  return(result)
+}
 
 # Plot the orography - raster background, fast
 draw.land.flat<-function(Options,n.levels=20) {
@@ -245,10 +255,10 @@ plot.obs.coverage<-function(obs,Options) {
   w<-which(obs$Longitude>lon.m)
   if(length(w)>0) obs$Longitude[w]<-obs$Longitude[w]-360
   # Filter to .5/degree lat and lon
-  idx<-sprintf("%4d%4d",as.integer(obs$Latitude*1),as.integer(obs$Longitude*1))
+  idx<-sprintf("%4d%4d",as.integer(obs$Latitude*0.5),as.integer(obs$Longitude*0.5))
   w<-which(duplicated(idx))
   if(length(w)>0) obs<-obs[-w,]
-  gp<-gpar(col=Options$obs.colour,fill=Options$obs.colour)
+  gp<-gpar(col='black',fill=Options$obs.colour,lwd=0.2)
   grid.points(x=unit(obs$Longitude,'native'),
               y=unit(obs$Latitude,'native'),
               size=unit(Options$obs.size,'native'),
@@ -270,21 +280,18 @@ sub.plot<-function(year,month,day,hour,Options) {
   pushViewport(dataViewport(c(lon.min,lon.max),c(lat.min,lat.max),
                             extension=0,gp=base.gp))
 
-  #icec<-TWCR.get.slice.at.hour('icec',year,month,day,hour,version='3.5.1')
-  #ip<-WeatherMap.rectpoints(Options$ice.points,Options)
-  #WeatherMap.draw.ice(ip$lat,ip$lon,icec,Options)
   draw.land.flat(Options)
   
-  t2m<-get.member.at.hour('air.2m',year,month,day,hour,1,version='3.5.1')
+  t2m<-get.member.at.hour('air.2m',year,month,day,hour,1,version='3.2.1')
   t2n<-TWCR.get.slice.at.hour('air.2m',year,month,day,hour,type='normal',version='3.4.1')
   t2n<-GSDF.regrid.2d(t2n,t2m)
   t2m$data[]<-t2m$data-t2n$data
   draw.temperature(t2m,Options,Trange=7)
   
-  prmsl<-get.member.at.hour('prmsl',year,month,day,hour,1,version='3.5.1')
+  prmsl<-get.member.at.hour('prmsl',year,month,day,hour,1,version='3.2.1')
   draw.pressure(prmsl,Options)
   
-  prate<-get.member.at.hour('prate',year,month,day,hour,1,version='3.5.1')
+  prate<-get.member.at.hour('prate',year,month,day,hour,1,version='3.2.1')
   WeatherMap.draw.precipitation(prate,Options)
   
   # Mark regions where new obs have made things better
@@ -330,45 +337,28 @@ sub.plot<-function(year,month,day,hour,Options) {
 
 
 # Make the full plot
+date<-lubridate::ymd_hms("1916-03-12:06:00:00")
 
-image.name<-sprintf("data.rescue.pdf",year,month,day,hour)
+image.name<-sprintf("single.frame.pdf",year,month,day,hour)
 ifile.name<-sprintf("%s/%s",Imagedir,image.name)
 
  pdf(ifile.name,
-         width=46.8,
-         height=33.1,
+         width=46.8/4,
+         height=33.1/4,
          bg=rgb(255,255,255,255,maxColorValue=255),
          family='Helvetica',
          pointsize=12)
 
   base.gp<-gpar(fontfamily='Helvetica',fontface='bold',col='black')
 
- base.date<-lubridate::ymd_hms("1872-12-02:12:00:00")
- count<-0
- for(j in seq(1,5)) {
-    for(i in seq(1,4)) {
-      print(sprintf("%d %d",j,i))
-       date<-base.date+days((7*365+130)*count)+hours(6*count)
-       #Options<-set.pole(count,Options)
-       pushViewport(viewport(x=unit((i-0.5)/4,'npc'),
-                             y=unit((5.5-j)/5,'npc'),
-                             width=unit((1/5)*1.2,'npc'),
-                             height=unit((1/5)/sqrt(2)*1.31,'npc'),
-                             clip='on'))
           grid.polygon(x=unit(c(0,1,1,0),'npc'),
                        y=unit(c(0,0,1,1),'npc'),
                        gp=gpar(col=Options$sea.colour,fill=Options$sea.colour))
-        #if(count==0 || count==19) {
           sub.plot(lubridate::year(date),
                    lubridate::month(date),
                    lubridate::day(date),
                    lubridate::hour(date),
                    Options)
-      #}
-       popViewport()
-       count<-count+1
-       gc(verbose=FALSE)
-     }
-  }
+       g<-gc(verbose=FALSE)
   dev.off()
 
