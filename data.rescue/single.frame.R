@@ -1,4 +1,4 @@
-#!/usr/bin/Rscript --no-save
+#!/usr/bin/env Rscript --no-save
 
 # Single time point for testing obs effect plots
 
@@ -33,7 +33,7 @@ Options$vp.lon.max<-  180
 Options<-WeatherMap.set.option(Options,'wrap.spherical',F)
 Options$precip.colour=c(0,0.2,0)
 Options$label.xp=0.995
-Options<-WeatherMap.set.option(Options,'obs.size',2.5)
+Options<-WeatherMap.set.option(Options,'obs.size',5.0)
 Options<-WeatherMap.set.option(Options,'obs.colour',rgb(255,204,0,255,
                                                        maxColorValue=255))
 
@@ -57,7 +57,7 @@ orog<-GSDF.ncdf.load(sprintf("%s/orography/elev.0.25-deg.nc",Sys.getenv('SCRATCH
 orog$data[orog$data<0]<-0 # sea-surface, not sea-bottom
 is.na(orog$data[orog$data==0])<-TRUE
 
-get.member.at.hour<-function(variable,year,month,day,hour,member,version='3.5.4') {
+get.member.at.hour<-function(variable,year,month,day,hour,member,version='3.5.1') {
 
        t<-TWCR.get.members.slice.at.hour(variable,year,month,day,
                                   hour,version=version)
@@ -239,12 +239,13 @@ set.pole<-function(step,Options) {
 
 # Want to plot obs coverage rather than observations - make pseudo
 #  observations indicating coverage.
-plot.obs.coverage<-function(obs,Options) {
-    if(Options$pole.lon!=0 || Options$pole.lat!=90) {
-	   l2<-GSDF.ll.to.rg(obs$Latitude,obs$Longitude,Options$pole.lat,Options$pole.lon)
-	   obs$Longitude<-l2$lon
-	   obs$Latitude<-l2$lat
-  }
+plot.obs.coverage<-function(obs.new,obs.old,Options) {
+   # if(Options$pole.lon!=0 || Options$pole.lat!=90) {
+   #	   l2<-GSDF.ll.to.rg(obs$Latitude,obs$Longitude,Options$pole.lat,Options$pole.lon)
+   #	   obs$Longitude<-l2$lon
+   #	   obs$Latitude<-l2$lat
+   #    }
+  obs<-obs.old
   if(length(obs$Latitude)<1) return()
   lon.m<-Options$lon.min
   if(!is.null(Options$vp.lon.min)) lon.m<-Options$vp.lon.min
@@ -254,11 +255,24 @@ plot.obs.coverage<-function(obs,Options) {
   if(!is.null(Options$vp.lon.max)) lon.m<-Options$vp.lon.max
   w<-which(obs$Longitude>lon.m)
   if(length(w)>0) obs$Longitude[w]<-obs$Longitude[w]-360
-  # Filter to .5/degree lat and lon
-  idx<-sprintf("%4d%4d",as.integer(obs$Latitude*0.5),as.integer(obs$Longitude*0.5))
+  obs.old<-obs
+  obs<-obs.new
+  if(length(obs$Latitude)<1) return()
+  lon.m<-Options$lon.min
+  if(!is.null(Options$vp.lon.min)) lon.m<-Options$vp.lon.min
+  w<-which(obs$Longitude<lon.m)
+  if(length(w)>0) obs$Longitude[w]<-obs$Longitude[w]+360
+  lon.m<-Options$lon.max
+  if(!is.null(Options$vp.lon.max)) lon.m<-Options$vp.lon.max
+  w<-which(obs$Longitude>lon.m)
+  if(length(w)>0) obs$Longitude[w]<-obs$Longitude[w]-360
+  obs.new<-obs
+    
+  # 
+  idx<-sprintf("%4d%4d",as.integer(obs$Latitude*0.1),as.integer(obs$Longitude*0.1))
   w<-which(duplicated(idx))
   if(length(w)>0) obs<-obs[-w,]
-  gp<-gpar(col='black',fill=Options$obs.colour,lwd=0.2)
+  gp<-gpar(col='black',fill=Options$obs.colour,lwd=0.5)
   grid.points(x=unit(obs$Longitude,'native'),
               y=unit(obs$Latitude,'native'),
               size=unit(Options$obs.size,'native'),
@@ -295,13 +309,15 @@ sub.plot<-function(year,month,day,hour,Options) {
   WeatherMap.draw.precipitation(prate,Options)
   
   # Mark regions where new obs have made things better
-  m.o<-TWCR.get.slice.at.hour('prmsl',year,month,day,hour,version='3.2.1',type='spread')
+  m.o<-TWCR.get.members.slice.at.hour('prmsl',year,month,day,hour,version='3.2.1')
+  m.o<-GSDF.reduce.1d(m.o,'ensemble',sd)
   fg.o<-TWCR.get.slice.at.hour('prmsl',year,month,day,hour,version='3.2.1',
                                 type='first.guess.spread')
   fg.o<-GSDF.regrid.2d(fg.o,m.o)
   rat.o<-fg.o
   rat.o$data[]<-m.o$data/fg.o$data
-  m.n<-TWCR.get.slice.at.hour('prmsl',year,month,day,hour,version='3.5.1',type='spread')
+  m.n<-TWCR.get.members.slice.at.hour('prmsl',year,month,day,hour,version='3.5.1')
+  m.n<-GSDF.reduce.1d(m.n,'ensemble',sd)
   fg.n<-TWCR.get.slice.at.hour('prmsl',year,month,day,hour,version='3.5.1',
                                 type='first.guess.spread')
   fg.n<-GSDF.regrid.2d(fg.n,m.n)
@@ -320,13 +336,13 @@ sub.plot<-function(year,month,day,hour,Options) {
   WeatherMap.draw.fog(glow,Options)
   
   # Show new obs, since v2 in yellow, old ones in black
-  obs<-TWCR.get.obs(year,month,day,hour,version='3.5.1')
+  obs.new<-TWCR.get.obs(year,month,day,hour,version='3.5.1')
+  obs.old<-TWCR.get.obs(year,month,day,hour,version='3.2.1')
   Options<-WeatherMap.set.option(Options,'obs.colour',rgb(255,204,0,255,
                                                           maxColorValue=255))
-  plot.obs.coverage(obs,Options)
-  obs<-TWCR.get.obs(year,month,day,hour,version='3.2.1')
-  Options<-WeatherMap.set.option(Options,'obs.colour','black')
-  plot.obs.coverage(obs,Options)
+  plot.obs.coverage(obs.new,obs.old,Options)
+  Options<-WeatherMap.set.option(Options,'obs.colour',rgb(.5,.5,.5,1))
+  plot.obs.coverage(obs.old,obs.new,Options)
 
   Options$label=sprintf("%04d-%02d-%02d:%02d",year,month,day,as.integer(hour))
     Options<-WeatherMap.set.option(Options,'land.colour',Options$sea.colour)
@@ -337,7 +353,7 @@ sub.plot<-function(year,month,day,hour,Options) {
 
 
 # Make the full plot
-date<-lubridate::ymd_hms("1916-03-12:06:00:00")
+date<-lubridate::ymd_hms("1880-03-30:18:00:00")
 
 image.name<-sprintf("single.frame.pdf",year,month,day,hour)
 ifile.name<-sprintf("%s/%s",Imagedir,image.name)
