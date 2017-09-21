@@ -26,8 +26,8 @@ for i in range(1,5):
     for j in range(1,6):
         t_date=base_date+date_step*count
         print(t_date.year)
-        #try:
-           #retrieve_for_year(t_date.year,'3.5.1',source='scratch')
-        #except:
-           #print "Failed 3.5.1 retrieval for %d" % t_date.year
+        try:
+           retrieve_for_year(t_date.year,'3.5.1',source='scratch')
+        except:
+           print "Failed 3.5.1 retrieval for %d" % t_date.year
         count=count+1

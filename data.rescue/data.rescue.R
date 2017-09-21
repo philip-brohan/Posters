@@ -1,4 +1,4 @@
-#!/usr/bin/env Rscript --no-save
+#!/usr/bin/env Rscript
 
 # Poster comparing ERA5 with ERA Interim
 # Print quality - A0 format
@@ -227,14 +227,7 @@ set.pole<-function(step,Options) {
   return(Options)
 }
 
-# Want to plot obs coverage rather than observations - make pseudo
-#  observations indicating coverage.
-plot.obs.coverage<-function(obs,Options) {
-    if(Options$pole.lon!=0 || Options$pole.lat!=90) {
-	   l2<-GSDF.ll.to.rg(obs$Latitude,obs$Longitude,Options$pole.lat,Options$pole.lon)
-	   obs$Longitude<-l2$lon
-	   obs$Latitude<-l2$lat
-  }
+recentre.obs<-function(obs) {
   if(length(obs$Latitude)<1) return()
   lon.m<-Options$lon.min
   if(!is.null(Options$vp.lon.min)) lon.m<-Options$vp.lon.min
@@ -244,15 +237,77 @@ plot.obs.coverage<-function(obs,Options) {
   if(!is.null(Options$vp.lon.max)) lon.m<-Options$vp.lon.max
   w<-which(obs$Longitude>lon.m)
   if(length(w)>0) obs$Longitude[w]<-obs$Longitude[w]-360
-  # Filter to .5/degree lat and lon
-  idx<-sprintf("%4d%4d",as.integer(obs$Latitude*0.5),as.integer(obs$Longitude*0.5))
-  w<-which(duplicated(idx))
-  if(length(w)>0) obs<-obs[-w,]
-  gp<-gpar(col=Options$obs.colour,fill=Options$obs.colour,lwd=0.2)
-  grid.points(x=unit(obs$Longitude,'native'),
-              y=unit(obs$Latitude,'native'),
-              size=unit(Options$obs.size,'native'),
-              pch=21,gp=gp)
+  return(obs)
+}
+
+# Want to plot obs coverage rather than observations - make pseudo
+#  observations indicating coverage.
+plot.obs.coverage<-function(obs.new,obs.old,Options) {
+  obs.old<-recentre.obs(obs.old)
+  idx.old<-as.integer(obs.old$Latitude*0.5)*1000+
+                            as.integer(obs.old$Longitude*0.5)
+  obs.new<-recentre.obs(obs.new)
+  idx.new<-as.integer(obs.new$Latitude*0.5)*1000+
+                            as.integer(obs.new$Longitude*0.5)
+
+  idx.old<-idx.old-min(c(idx.old,idx.new))+1
+  idx.new<-idx.new-min(c(idx.old,idx.new))+1
+  
+  obs.old<-obs.old[order(idx.old),]
+  idx.old<-idx.old[order(idx.old)]
+  t.old<-tabulate(idx.old)
+  t.old<-t.old[t.old!=0]
+  d<-which(duplicated(idx.old))
+  idx.old<-idx.old[-d]
+  obs.old<-obs.old[-d,]
+
+  obs.new<-obs.new[order(idx.new),]
+  idx.new<-idx.new[order(idx.new)]
+  t.new<-tabulate(idx.new)
+  t.new<-t.new[t.new!=0]
+  d<-which(duplicated(idx.new))
+  idx.new<-idx.new[-d]
+  obs.new<-obs.new[-d,]
+  
+  # indices (regions) with no more obs in new than old
+  w.o<-sort(which(idx.old %in% intersect(idx.old,idx.new)))
+  w.n<-sort(which(idx.new %in% intersect(idx.old,idx.new)))
+  if(length(w.o)>0) {
+     w.old<-which(t.old[w.o]>=t.new[w.n])
+     if(length(w.old>0)) {
+        w.old<-w.o[w.old]
+        obs.plt<-obs.old[w.old,]
+        gp<-gpar(col='black',fill=rgb(0.4,0.4,0.4,1),lwd=0.5)
+        grid.points(x=unit(obs.plt$Longitude,'native'),
+                    y=unit(obs.plt$Latitude,'native'),
+                    size=unit(Options$obs.size,'native'),
+                    pch=21,gp=gp)
+      }
+   }
+
+  # indices in both but more in new than old
+  if(length(w.n)>0) {
+     w.new<-which(t.new[w.n]>t.old[w.o])
+     if(length(w.new>0)) {
+        w.new<-w.n[w.new]
+        obs.plt<-obs.new[w.new,]
+        gp<-gpar(col='black',fill=Options$obs.colour,lwd=0.5)
+        grid.points(x=unit(obs.plt$Longitude,'native'),
+                    y=unit(obs.plt$Latitude,'native'),
+                    size=unit(Options$obs.size,'native'),
+                    pch=21,gp=gp)
+      }
+   }
+     
+   # indices only in new
+   if(length(w.n)<length(idx.new)) {
+        obs.plt<-obs.new[-w.n,]
+        gp<-gpar(col='black',fill=Options$obs.colour,lwd=0.5)
+        grid.points(x=unit(obs.plt$Longitude,'native'),
+                    y=unit(obs.plt$Latitude,'native'),
+                    size=unit(Options$obs.size,'native'),
+                    pch=21,gp=gp)
+   }
 }  
   
 # Make a sub plot
@@ -315,13 +370,11 @@ sub.plot<-function(year,month,day,hour,Options) {
   WeatherMap.draw.fog(glow,Options)
   
   # Show new obs, since v2 in yellow, old ones in black
-  obs<-TWCR.get.obs(year,month,day,hour,version='3.5.1')
-  Options<-WeatherMap.set.option(Options,'obs.colour',rgb(255,121,0,255,
+  obs.new<-TWCR.get.obs(year,month,day,hour,version='3.5.1')
+  obs.old<-TWCR.get.obs(year,month,day,hour,version='3.2.1')
+  Options<-WeatherMap.set.option(Options,'obs.colour',rgb(255,204,0,255,
                                                           maxColorValue=255))
-  plot.obs.coverage(obs,Options)
-  obs<-TWCR.get.obs(year,month,day,hour,version='3.2.1')
-  Options<-WeatherMap.set.option(Options,'obs.colour','black')
-  plot.obs.coverage(obs,Options)
+  plot.obs.coverage(obs.new,obs.old,Options)
 
   Options$label=sprintf("%04d-%02d-%02d:%02d",year,month,day,as.integer(hour))
     Options<-WeatherMap.set.option(Options,'land.colour',Options$sea.colour)
