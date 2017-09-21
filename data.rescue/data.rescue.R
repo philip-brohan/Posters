@@ -250,8 +250,8 @@ plot.obs.coverage<-function(obs.new,obs.old,Options) {
   idx.new<-as.integer(obs.new$Latitude*0.5)*1000+
                             as.integer(obs.new$Longitude*0.5)
 
-  idx.old<-idx.old-min(c(idx.old,idx.new))+1
-  idx.new<-idx.new-min(c(idx.old,idx.new))+1
+  idx.old<-idx.old-min(c(idx.old,idx.new),na.rm=TRUE)+1
+  idx.new<-idx.new-min(c(idx.old,idx.new),na.rm=TRUE)+1
   
   obs.old<-obs.old[order(idx.old),]
   idx.old<-idx.old[order(idx.old)]

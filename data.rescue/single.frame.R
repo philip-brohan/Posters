@@ -260,8 +260,8 @@ plot.obs.coverage<-function(obs.new,obs.old,Options) {
   idx.new<-as.integer(obs.new$Latitude*0.5)*1000+
                             as.integer(obs.new$Longitude*0.5)
 
-  idx.old<-idx.old-min(c(idx.old,idx.new))+1
-  idx.new<-idx.new-min(c(idx.old,idx.new))+1
+  idx.old<-idx.old-min(c(idx.old,idx.new),na.rm=TRUE)+1
+  idx.new<-idx.new-min(c(idx.old,idx.new),na.rm=TRUE)+1
   
   obs.old<-obs.old[order(idx.old),]
   idx.old<-idx.old[order(idx.old)]
@@ -392,7 +392,7 @@ sub.plot<-function(year,month,day,hour,Options) {
 
 
 # Make the full plot
-date<-lubridate::ymd_hms("1990-03-30:18:00:00")
+date<-lubridate::ymd_hms("2012-07-31:06:00:00")
 
 image.name<-sprintf("single.frame.pdf",year,month,day,hour)
 ifile.name<-sprintf("%s/%s",Imagedir,image.name)
