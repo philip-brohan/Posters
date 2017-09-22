@@ -17,15 +17,9 @@ Options<-WeatherMap.set.option(Options,'sea.colour',rgb(255,255,255,255,
                                                        maxColorValue=255))
 Options<-WeatherMap.set.option(Options,'ice.colour',rgb(255,255,255,255,
                                                        maxColorValue=255))
-#Options<-WeatherMap.set.option(Options,'pole.lon',160)
-#Options<-WeatherMap.set.option(Options,'pole.lat',45)
 
 Options<-WeatherMap.set.option(Options,'lat.min',-90)
 Options<-WeatherMap.set.option(Options,'lat.max',90)
-#Options<-WeatherMap.set.option(Options,'lon.min',-190+50)
-#Options<-WeatherMap.set.option(Options,'lon.max',190+50)
-#Options$vp.lon.min<- -180+50
-#Options$vp.lon.max<-  180+50
 Options<-WeatherMap.set.option(Options,'lon.min',-190)
 Options<-WeatherMap.set.option(Options,'lon.max',190)
 Options$vp.lon.min<- -180
@@ -325,9 +319,6 @@ sub.plot<-function(year,month,day,hour,Options) {
   pushViewport(dataViewport(c(lon.min,lon.max),c(lat.min,lat.max),
                             extension=0,gp=base.gp))
 
-  #icec<-TWCR.get.slice.at.hour('icec',year,month,day,hour,version='3.5.1')
-  #ip<-WeatherMap.rectpoints(Options$ice.points,Options)
-  #WeatherMap.draw.ice(ip$lat,ip$lon,icec,Options)
   draw.land.flat(Options)
   
   t2m<-get.member.at.hour('air.2m',year,month,day,hour,1,version='3.5.1')
@@ -343,6 +334,8 @@ sub.plot<-function(year,month,day,hour,Options) {
   WeatherMap.draw.precipitation(prate,Options)
   
   # Mark regions where new obs have made things better
+  glow.ratio.scale<-5
+  glow.ratio.threshold<-0.2
   m.o<-TWCR.get.members.slice.at.hour('prmsl',year,month,day,hour,version='3.2.1')
   m.o<-GSDF.reduce.1d(m.o,'ensemble',sd)
   fg.o<-TWCR.get.slice.at.hour('prmsl',year,month,day,hour,version='3.2.1',
@@ -358,11 +351,11 @@ sub.plot<-function(year,month,day,hour,Options) {
   rat.n<-fg.n
   rat.n$data[]<-m.n$data/fg.n$data
   glow<-rat.n
-  glow$data[]<-1-pmin(1,rat.n$data/rat.o$data)
-  w<-which(glow$data>0.1)
+  glow$data[]<-pmax(0,pmin(1,rat.o$data-rat.n$data))
+  w<-which(glow$data>glow.ratio.threshold)
   if(length(w)>0) {
-    glow$data[w]<-pmin(glow$data[w]*5,1)
-    glow$data[-w]<-0
+    glow$data[w]<-pmin(glow$data[w]*glow.ratio.scale,1)
+    if(length(w)<length(glow$data)) glow$data[-w]<-0
   }
   Options$fog.colour<-c(1,0.8,0)
   Options$fog.resolution<-0.25
@@ -370,8 +363,8 @@ sub.plot<-function(year,month,day,hour,Options) {
   WeatherMap.draw.fog(glow,Options)
   
   # Show new obs, since v2 in yellow, old ones in black
-  obs.new<-TWCR.get.obs(year,month,day,hour,version='3.5.1')
-  obs.old<-TWCR.get.obs(year,month,day,hour,version='3.2.1')
+  obs.new<-TWCR.get.obs.1file(year,month,day,hour,version='3.5.1')
+  obs.old<-TWCR.get.obs.1file(year,month,day,hour,version='3.2.1')
   Options<-WeatherMap.set.option(Options,'obs.colour',rgb(255,204,0,255,
                                                           maxColorValue=255))
   plot.obs.coverage(obs.new,obs.old,Options)

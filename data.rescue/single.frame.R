@@ -16,15 +16,9 @@ Options<-WeatherMap.set.option(Options,'sea.colour',rgb(255,255,255,255,
                                                        maxColorValue=255))
 Options<-WeatherMap.set.option(Options,'ice.colour',rgb(255,255,255,255,
                                                        maxColorValue=255))
-#Options<-WeatherMap.set.option(Options,'pole.lon',160)
-#Options<-WeatherMap.set.option(Options,'pole.lat',45)
 
 Options<-WeatherMap.set.option(Options,'lat.min',-90)
 Options<-WeatherMap.set.option(Options,'lat.max',90)
-#Options<-WeatherMap.set.option(Options,'lon.min',-190+50)
-#Options<-WeatherMap.set.option(Options,'lon.max',190+50)
-#Options$vp.lon.min<- -180+50
-#Options$vp.lon.max<-  180+50
 Options<-WeatherMap.set.option(Options,'lon.min',-190)
 Options<-WeatherMap.set.option(Options,'lon.max',190)
 Options$vp.lon.min<- -180
@@ -350,6 +344,8 @@ sub.plot<-function(year,month,day,hour,Options) {
   WeatherMap.draw.precipitation(prate,Options)
   
   # Mark regions where new obs have made things better
+  glow.ratio.scale<-5
+  glow.ratio.threshold<-0.2
   m.o<-TWCR.get.members.slice.at.hour('prmsl',year,month,day,hour,version='3.2.1')
   m.o<-GSDF.reduce.1d(m.o,'ensemble',sd)
   fg.o<-TWCR.get.slice.at.hour('prmsl',year,month,day,hour,version='3.2.1',
@@ -357,28 +353,43 @@ sub.plot<-function(year,month,day,hour,Options) {
   fg.o<-GSDF.regrid.2d(fg.o,m.o)
   rat.o<-fg.o
   rat.o$data[]<-m.o$data/fg.o$data
-  m.n<-TWCR.get.members.slice.at.hour('prmsl',year,month,day,hour,version='3.5.1')
-  m.n<-GSDF.reduce.1d(m.n,'ensemble',sd)
+  m.e<-TWCR.get.members.slice.at.hour('prmsl',year,month,day,hour,version='3.5.1')
+  m.n<-GSDF.reduce.1d(m.e,'ensemble',sd)
+  mean.n<-GSDF.reduce.1d(m.e,'ensemble',mean)
   fg.n<-TWCR.get.slice.at.hour('prmsl',year,month,day,hour,version='3.5.1',
                                 type='first.guess.spread')
   fg.n<-GSDF.regrid.2d(fg.n,m.n)
   rat.n<-fg.n
   rat.n$data[]<-m.n$data/fg.n$data
   glow<-rat.n
-  glow$data[]<-1-pmin(1,rat.n$data/rat.o$data)
-  w<-which(glow$data>0.1)
+  glow$data[]<-pmax(0,pmin(1,rat.o$data-rat.n$data))
+  w<-which(glow$data>glow.ratio.threshold)
   if(length(w)>0) {
-    glow$data[w]<-pmin(glow$data[w]*5,1)
-    glow$data[-w]<-0
+    glow$data[w]<-pmin(glow$data[w]*glow.ratio.scale,1)
+    if(length(w)<length(glow$data)) glow$data[-w]<-0
   }
   Options$fog.colour<-c(1,0.8,0)
   Options$fog.resolution<-0.25
   Options$fog.min.transparency<-0.7
   WeatherMap.draw.fog(glow,Options)
-  
-  # Show new obs, since v2 in yellow, old ones in black
-  obs.new<-TWCR.get.obs(year,month,day,hour,version='3.5.1')
-  obs.old<-TWCR.get.obs(year,month,day,hour,version='3.2.1')
+
+  # Add the conventional fog
+  prmsl.sd<-TWCR.get.slice.at.hour('prmsl',year,month,day,hour,
+                                         version='3.4.1',type='standard.deviation')
+  prmsl.sd<-GSDF.regrid.2d(prmsl.sd,mean.n)
+  prmsl.m<-TWCR.get.slice.at.hour('prmsl',year,month,day,hour,
+                                         version='3.4.1',type='normal')
+  prmsl.m<-GSDF.regrid.2d(prmsl.m,mean.n)
+  fog<-TWCR.relative.entropy(prmsl.m,prmsl.sd,mean.n,m.n)
+  fog.threshold<-exp(1)
+  fog$data[]<-1-pmin(fog.threshold,pmax(0,fog$data))/fog.threshold
+  Options$fog.colour<-c(0.3,0.3,0.3)
+  Options$fog.min.transparency<-0.8
+  WeatherMap.draw.fog(fog,Options)
+    
+  # Show new obs, since v2 in yellow, old ones in grey
+  obs.new<-TWCR.get.obs.1file(year,month,day,hour,version='3.5.1')
+  obs.old<-TWCR.get.obs.1file(year,month,day,hour,version='3.2.1')
   Options<-WeatherMap.set.option(Options,'obs.colour',rgb(255,204,0,255,
                                                           maxColorValue=255))
   plot.obs.coverage(obs.new,obs.old,Options)
@@ -392,7 +403,7 @@ sub.plot<-function(year,month,day,hour,Options) {
 
 
 # Make the full plot
-date<-lubridate::ymd_hms("2012-07-31:06:00:00")
+date<-lubridate::ymd_hms("1894-07-31:00:00:00")
 
 image.name<-sprintf("single.frame.pdf",year,month,day,hour)
 ifile.name<-sprintf("%s/%s",Imagedir,image.name)
