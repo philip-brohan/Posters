@@ -8,6 +8,27 @@ library(GSDF.WeatherMap)
 library(grid)
 library(lubridate)
 
+dates<-c("1872-11-22:12:00:00",
+         "1880-11-22:12:00:00",
+         "1887-11-22:12:00:00",
+         "1894-11-22:12:00:00",
+         "1902-11-22:12:00:00",
+         "1909-11-22:12:00:00",
+         "1917-11-22:12:00:00",
+         "1924-11-22:12:00:00",
+         "1931-11-22:12:00:00",
+         "1939-11-22:12:00:00",
+         "1946-11-22:12:00:00",
+         "1953-11-22:12:00:00",
+         "1961-11-22:12:00:00",
+         "1968-11-22:12:00:00",
+         "1975-11-22:12:00:00",
+         "1983-11-22:12:00:00",
+         "1990-11-22:12:00:00",
+         "1997-11-22:12:00:00",
+         "2005-11-22:12:00:00",
+         "2012-11-22:12:00:00")
+
 Imagedir<-sprintf("%s/Posters/data.rescue",Sys.getenv('SCRATCH'))
 
 Options<-WeatherMap.set.option(NULL)
@@ -396,7 +417,7 @@ ifile.name<-sprintf("%s/%s",Imagedir,image.name)
  for(j in seq(1,5)) {
      for(i in seq(1,4)) {
       print(sprintf("%d %d",j,i))
-       date<-base.date+days((7*365+130)*count)+hours(6*count)
+       date<-lubridate::ymd_hms(dates[count+1])
        #Options<-set.pole(count,Options)
        pushViewport(viewport(x=unit((i-0.5)/4,'npc'),
                              y=unit((5.5-j)/5,'npc'),

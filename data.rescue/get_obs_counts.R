@@ -2,7 +2,7 @@
 
 # Find dates with large numbers of additional obs
 
-years<-c(1880,1887,1894,1900,1909,1917,1924,1931,1939,1946,
+years<-c(1872,1880,1887,1894,1902,1909,1917,1924,1931,1939,1946,
          1953,1961,1968,1975,1983,1990,1997,2005,2012)
 
 get_counts<-function(year,version) {
