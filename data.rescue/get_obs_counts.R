@@ -37,5 +37,5 @@ for(year in years) {
   c1<-get_counts(year,'3.2.1')
   c2<-get_counts(year,'3.5.1')
   m<-merge_counts(c2,c1)
-  print(head(m))
+  print(head(m,30))
 }
