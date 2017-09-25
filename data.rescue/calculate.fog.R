@@ -1,4 +1,4 @@
-#!/usr/bin/Rscript --no-save
+#!/usr/bin/env Rscript
 
 # Calculate the Fog of ignorance for each image
 #  This script should parallel the main plot script, except it
@@ -8,6 +8,27 @@ library(GSDF.TWCR)
 library(GSDF.WeatherMap)
 library(grid)
 library(lubridate)
+
+dates<-c("1872-11-01:12:00:00",
+         "1880-01-30:18:00:00",
+         "1887-02-16:12:00:00",
+         "1894-10-10:00:00:00",
+         "1902-12-28:06:00:00",
+         "1909-02-03:06:00:00",
+         "1917-10-05:18:00:00",
+         "1924-01-24:06:00:00",
+         "1931-09-23:06:00:00",
+         "1939-01-04:18:00:00",
+         "1946-07-04:18:00:00",
+         "1953-10-21:12:00:00",
+         "1961-08-06:06:00:00",
+         "1968-11-17:18:00:00",
+         "1975-05-31:12:00:00",
+         "1983-08-02:06:00:00",
+         "1990-12-23:18:00:00",
+         "1997-07-31:18:00:00",
+         "2005-02-03:00:00:00",
+         "2012-04-18:06:00:00")
 
 Imagedir<-sprintf("%s/Posters/data.rescue",Sys.getenv('SCRATCH'))
 
@@ -99,19 +120,18 @@ sub.plot<-function(year,month,day,hour,Options) {
                             extension=0,gp=base.gp))
 
   
-    prmsl<-TWCR.get.slice.at.hour('prmsl',year,month,day,hour,version='3.5.1')
-    prmsl.spread<-TWCR.get.slice.at.hour('prmsl',year,month,day,hour,version='3.5.1',
-                                              type='spread')
     prmsl.sd<-TWCR.get.slice.at.hour('prmsl',year,month,day,hour,
                                          version='3.4.1',type='standard.deviation')
-    prmsl.normal<-TWCR.get.slice.at.hour('prmsl',year,month,day,hour,version='3.4.1',
-                                             type='normal')
-    fog<-TWCR.relative.entropy(prmsl.normal,prmsl.sd,prmsl,prmsl.spread)
-    fog$data[]<-1-pmin(fog.threshold,pmax(0,fog$data))/fog.threshold
+    prmsl.e<-TWCR.get.members.slice.at.hour('prmsl',year,month,day,hour,version='3.5.1')
+    prmsl.spread<-GSDF.reduce.1d(prmsl.e,'ensemble',sd)
+    prmsl.sd<-GSDF.regrid.2d(prmsl.sd,prmsl.spread)
+    fog<-prmsl.sd
+    fog$data[]<-prmsl.spread$data/prmsl.sd$data
+    fog$data[]<-1-pmax(0,pmin(1,(1-fog$data)*2))
     ex.lon<-GSDF.roll.dimensions(fog,1,2)
     ex.lat<-GSDF.roll.dimensions(fog,2,1)
     w<-which(ex.lat< -85 & ex.lat> -90 & ex.lon>135 & ex.lon< 180)
-    fog$data[w]<-pmin(fog$data[w],0.5)
+    fog$data[w]<-pmin(fog$data[w],0.25)
     WeatherMap.draw.fog(fog,Options)
 
   popViewport()
@@ -137,15 +157,14 @@ background.plot<-function(year,month,day,hour,Options) {
                             extension=0,gp=base.gp))
 
   
-    prmsl<-TWCR.get.slice.at.hour('prmsl',year,month,day,hour,version='3.5.1')
-    prmsl.spread<-TWCR.get.slice.at.hour('prmsl',year,month,day,hour,version='3.5.1',
-                                              type='spread')
     prmsl.sd<-TWCR.get.slice.at.hour('prmsl',year,month,day,hour,
                                          version='3.4.1',type='standard.deviation')
-    prmsl.normal<-TWCR.get.slice.at.hour('prmsl',year,month,day,hour,version='3.4.1',
-                                             type='normal')
-    fog<-TWCR.relative.entropy(prmsl.normal,prmsl.sd,prmsl,prmsl.spread)
-    fog$data[]<-1-pmin(fog.threshold,pmax(0,fog$data))/fog.threshold
+    prmsl.e<-TWCR.get.members.slice.at.hour('prmsl',year,month,day,hour,version='3.5.1')
+    prmsl.spread<-GSDF.reduce.1d(prmsl.e,'ensemble',sd)
+    prmsl.sd<-GSDF.regrid.2d(prmsl.sd,prmsl.spread)
+    fog<-prmsl.sd
+    fog$data[]<-prmsl.spread$data/prmsl.sd$data
+    fog$data[]<-1-pmax(0,pmin(1,(1-fog$data)*2))
     fog$data[]<-fog$data/2
     WeatherMap.draw.fog(fog,Options)
 
@@ -174,7 +193,7 @@ ifile.name<-sprintf("%s/%s",Imagedir,image.name)
  for(j in seq(1,5)) {
     fogs[[j]]<-list()
     for(i in seq(1,4)) {
-       date<-base.date+years(8*count)+hours(400*count)
+       date<-lubridate::ymd_hms(dates[count+1])
        pushViewport(viewport(x=unit((i-0.5)/4,'npc'),
                              y=unit((5.5-j)/5,'npc'),
                              width=unit((1/5)*1.2,'npc'),

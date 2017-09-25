@@ -387,9 +387,9 @@ sub.plot<-function(year,month,day,hour,Options) {
                                          version='3.4.1',type='standard.deviation')
   prmsl.sd<-GSDF.regrid.2d(prmsl.sd,m.n)
   fog<-m.n
-  fog$data[]<-prmsl.sd$data-m.n$data
+  fog$data[]<-m.n$data/prmsl.sd$data
   see<-prmsl.sd$data/sqrt(110)
-  fog$data[]<-1-pmin(1,pmax(0,fog$data/(see*2)))
+  fog$data[]<-1-pmax(0,pmin(1,(1-fog$data)*2))
   Options$fog.colour<-c(0.3,0.3,0.3)
   Options$fog.min.transparency<-0.8
   WeatherMap.draw.fog(fog,Options)
