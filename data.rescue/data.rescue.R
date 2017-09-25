@@ -381,7 +381,16 @@ sub.plot<-function(year,month,day,hour,Options) {
   Options$fog.colour<-c(1,0.8,0)
   Options$fog.resolution<-0.25
   Options$fog.min.transparency<-0.7
-  WeatherMap.draw.fog(glow,Options)
+  #WeatherMap.draw.fog(glow,Options)
+
+  sf<-m.n
+  sf$data[]<-m.o$data/m.n$data-fg.o$data/fg.n$data
+  threshold<-quantile(sf$data[sf$data<0],0.05)*-1
+  w<-which(sf$data>threshold)
+  sf$data[]<-sf$data*0
+  sf$data[w]<-1
+  #Options$fog.colour<-c(1,0.4,0)
+  WeatherMap.draw.fog(sf,Options)
   
   # Show new obs, since v2 in yellow, old ones in black
   obs.new<-TWCR.get.obs.1file(year,month,day,hour,version='3.5.1')

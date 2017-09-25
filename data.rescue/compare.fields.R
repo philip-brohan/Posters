@@ -3,8 +3,8 @@
 library(GSDF.TWCR)
 
 year<-1894
-month<-7
-day<-31
+month<-10
+day<-10
 hour<-0
 
 get.data<-function(version) {
