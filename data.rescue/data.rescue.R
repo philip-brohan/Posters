@@ -409,15 +409,14 @@ sub.plot<-function(year,month,day,hour,Options) {
 
 # Make the full plot
 
-image.name<-sprintf("data.rescue.pdf",year,month,day,hour)
+image.name<-sprintf("data.rescue.png",year,month,day,hour)
 ifile.name<-sprintf("%s/%s",Imagedir,image.name)
 
- pdf(ifile.name,
-         width=46.8,
-         height=33.1,
-         bg=rgb(255,255,255,255,maxColorValue=255),
-         family='Helvetica',
-         pointsize=12)
+png(ifile.name,
+    width=14038,
+    height=9929,
+    type='cairo-png',
+    pointsize=96)
 
   base.gp<-gpar(fontfamily='Helvetica',fontface='bold',col='black')
 

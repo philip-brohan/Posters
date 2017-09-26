@@ -175,15 +175,14 @@ background.plot<-function(year,month,day,hour,Options) {
 
 # Make the full plot
 
-image.name<-sprintf("fog.overlay.pdf",year,month,day,hour)
+image.name<-sprintf("fog.overlay.png",year,month,day,hour)
 ifile.name<-sprintf("%s/%s",Imagedir,image.name)
 
- pdf(ifile.name,
-         width=46.8,
-         height=33.1,
-         bg='white',
-         family='Helvetica',
-         pointsize=12)
+png(ifile.name,
+    width=14038,
+    height=9929,
+    type='cairo-png',
+    pointsize=96)
 
   base.gp<-gpar(fontfamily='Helvetica',fontface='bold',col='black')
 
