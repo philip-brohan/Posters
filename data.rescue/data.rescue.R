@@ -420,17 +420,16 @@ png(ifile.name,
 
   base.gp<-gpar(fontfamily='Helvetica',fontface='bold',col='black')
 
- base.date<-lubridate::ymd_hms("1872-11-22:12:00:00")
  count<-0
  for(j in seq(1,5)) {
      for(i in seq(1,4)) {
       print(sprintf("%d %d",j,i))
        date<-lubridate::ymd_hms(dates[count+1])
        #Options<-set.pole(count,Options)
-       pushViewport(viewport(x=unit((i-0.5)/4,'npc'),
-                             y=unit((5.5-j)/5,'npc'),
-                             width=unit((1/5)*1.2,'npc'),
-                             height=unit((1/5)/sqrt(2)*1.31,'npc'),
+       pushViewport(viewport(x=unit((i-.5)/4,'npc'),
+                             y=unit(1-(j-.5)/5,'npc'),
+                             width=unit((1/4)*0.99,'npc'),
+                             height=unit((1/5)*0.99,'npc'),
                              clip='on'))
           grid.polygon(x=unit(c(0,1,1,0),'npc'),
                        y=unit(c(0,0,1,1),'npc'),
