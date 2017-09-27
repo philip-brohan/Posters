@@ -376,9 +376,10 @@ sub.plot<-function(year,month,day,hour,Options) {
   sf<-m.n
   sf$data[]<-m.o$data/m.n$data-fg.o$data/fg.n$data
   threshold<-quantile(sf$data[sf$data<0],0.05)*-1
-  w<-which(sf$data>threshold)
-  sf$data[]<-sf$data*0
-  sf$data[w]<-1
+  #w<-which(sf$data>threshold)
+  #sf$data[]<-sf$data*0
+  #sf$data[w]<-1
+  sf$data[]<-1/(1+exp((sf$data-threshold)*-20))
   #Options$fog.colour<-c(1,0.4,0)
   WeatherMap.draw.fog(sf,Options)
 

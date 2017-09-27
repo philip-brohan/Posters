@@ -1,12 +1,13 @@
 #!/usr/bin/env Rscript
 
-# Poster comparing ERA5 with ERA Interim
+# Poster comparing 20CRv2 with 20CRv2c.
 # Print quality - A0 format
 
 library(GSDF.TWCR)
 library(GSDF.WeatherMap)
 library(grid)
 library(lubridate)
+library(png)
 
 dates<-c("1872-11-01:12:00:00",
          "1880-01-30:18:00:00",
@@ -52,7 +53,6 @@ Options$label.xp=0.995
 Options<-WeatherMap.set.option(Options,'obs.size',1.5)
 Options<-WeatherMap.set.option(Options,'obs.colour',rgb(255,215,0,255,
                                                        maxColorValue=255))
-
 Options$ice.points<-1000000
 Options$fog.resolution<-0.25
 
@@ -60,7 +60,7 @@ Options$mslp.base=101325                    # Base value for anomalies
 Options$mslp.range=50000                    # Anomaly for max contour
 Options$mslp.step=500                       # Smaller -> more contours
 Options$mslp.tpscale=5                      # Smaller -> contours less transparent
-Options$mslp.lwd=1
+Options$mslp.lwd=3
 Options$precip.colour=c(0,0.2,0)
 # Overrides mslp options
 contour.levels<-seq(-300,300,30)
@@ -78,6 +78,14 @@ get.member.at.hour<-function(variable,year,month,day,hour,member,version='3.5.1'
        t<-TWCR.get.members.slice.at.hour(variable,year,month,day,
                                   hour,version=version)
        t<-GSDF.select.from.1d(t,'ensemble',member)
+       gc()
+       return(t)
+  }
+get.mean.at.hour<-function(variable,year,month,day,hour,member,version='3.5.1') {
+
+       t<-TWCR.get.members.slice.at.hour(variable,year,month,day,
+                                  hour,version=version)
+       t<-GSDF.reduce.1d(t,'ensemble',mean)
        gc()
        return(t)
   }
@@ -132,7 +140,6 @@ draw.temperature<-function(temperature,Options,Trange=1) {
   Options.local$fog.colour<-c(0,0,1)
   WeatherMap.draw.fog(tminus,Options.local)
 }
-
 
 draw.pressure<-function(mslp,Options,colour=c(0,0,0)) {
 
@@ -292,10 +299,10 @@ plot.obs.coverage<-function(obs.new,obs.old,Options) {
      if(length(w.old>0)) {
         w.old<-w.o[w.old]
         obs.plt<-obs.old[w.old,]
-        gp<-gpar(col='black',fill=rgb(0.4,0.4,0.4,1),lwd=0.5)
+        gp<-gpar(col='black',fill=rgb(0.4,0.4,0.4,1),lwd=2.5)
         grid.points(x=unit(obs.plt$Longitude,'native'),
                     y=unit(obs.plt$Latitude,'native'),
-                    size=unit(Options$obs.size,'native'),
+                    size=unit(Options$obs.size*1.2,'native'),
                     pch=21,gp=gp)
       }
    }
@@ -306,10 +313,10 @@ plot.obs.coverage<-function(obs.new,obs.old,Options) {
      if(length(w.new>0)) {
         w.new<-w.n[w.new]
         obs.plt<-obs.new[w.new,]
-        gp<-gpar(col='black',fill=Options$obs.colour,lwd=0.5)
+        gp<-gpar(col='black',fill=Options$obs.colour,lwd=2.5)
         grid.points(x=unit(obs.plt$Longitude,'native'),
                     y=unit(obs.plt$Latitude,'native'),
-                    size=unit(Options$obs.size,'native'),
+                    size=unit(Options$obs.size*1.5,'native'),
                     pch=21,gp=gp)
       }
    }
@@ -317,10 +324,10 @@ plot.obs.coverage<-function(obs.new,obs.old,Options) {
    # indices only in new
    if(length(w.n)<length(idx.new)) {
         obs.plt<-obs.new[-w.n,]
-        gp<-gpar(col='black',fill=Options$obs.colour,lwd=0.5)
+        gp<-gpar(col='black',fill=Options$obs.colour,lwd=2.5)
         grid.points(x=unit(obs.plt$Longitude,'native'),
                     y=unit(obs.plt$Latitude,'native'),
-                    size=unit(Options$obs.size,'native'),
+                    size=unit(Options$obs.size*1.5,'native'),
                     pch=21,gp=gp)
    }
 }  
@@ -342,54 +349,37 @@ sub.plot<-function(year,month,day,hour,Options) {
 
   draw.land.flat(Options)
   
-  t2m<-get.member.at.hour('air.2m',year,month,day,hour,1,version='3.5.1')
+  t2m<-get.mean.at.hour('air.2m',year,month,day,hour,1,version='3.5.1')
   t2n<-TWCR.get.slice.at.hour('air.2m',year,month,day,hour,type='normal',version='3.4.1')
   t2n<-GSDF.regrid.2d(t2n,t2m)
   t2m$data[]<-t2m$data-t2n$data
   draw.temperature(t2m,Options,Trange=7)
   
-  prmsl<-get.member.at.hour('prmsl',year,month,day,hour,1,version='3.5.1')
+  prmsl<-get.mean.at.hour('prmsl',year,month,day,hour,1,version='3.5.1')
   draw.pressure(prmsl,Options)
   
-  prate<-get.member.at.hour('prate',year,month,day,hour,1,version='3.5.1')
+  prate<-get.mean.at.hour('prate',year,month,day,hour,1,version='3.5.1')
   WeatherMap.draw.precipitation(prate,Options)
   
   # Mark regions where new obs have made things better
-  glow.ratio.scale<-10
-  glow.ratio.threshold<-0.2
   m.o<-TWCR.get.members.slice.at.hour('prmsl',year,month,day,hour,version='3.2.1')
   m.o<-GSDF.reduce.1d(m.o,'ensemble',sd)
   fg.o<-TWCR.get.slice.at.hour('prmsl',year,month,day,hour,version='3.2.1',
                                 type='first.guess.spread')
   fg.o<-GSDF.regrid.2d(fg.o,m.o)
-  rat.o<-fg.o
-  rat.o$data[]<-m.o$data/fg.o$data
   m.n<-TWCR.get.members.slice.at.hour('prmsl',year,month,day,hour,version='3.5.1')
   m.n<-GSDF.reduce.1d(m.n,'ensemble',sd)
   fg.n<-TWCR.get.slice.at.hour('prmsl',year,month,day,hour,version='3.5.1',
                                 type='first.guess.spread')
   fg.n<-GSDF.regrid.2d(fg.n,m.n)
-  rat.n<-fg.n
-  rat.n$data[]<-m.n$data/fg.n$data
-  glow<-rat.n
-  glow$data[]<-pmax(0,pmin(1,rat.o$data-rat.n$data))
-  w<-which(glow$data>glow.ratio.threshold)
-  if(length(w)>0) {
-    glow$data[w]<-pmin(glow$data[w]*glow.ratio.scale,1)
-    if(length(w)<length(glow$data)) glow$data[-w]<-0
-  }
-  Options$fog.colour<-c(1,0.8,0)
-  Options$fog.resolution<-0.25
-  Options$fog.min.transparency<-0.7
-  #WeatherMap.draw.fog(glow,Options)
 
   sf<-m.n
   sf$data[]<-m.o$data/m.n$data-fg.o$data/fg.n$data
   threshold<-quantile(sf$data[sf$data<0],0.05)*-1
-  w<-which(sf$data>threshold)
-  sf$data[]<-sf$data*0
-  sf$data[w]<-1
-  #Options$fog.colour<-c(1,0.4,0)
+  sf$data[]<-1/(1+exp((sf$data-threshold)*-20))
+  Options$fog.colour<-c(1,0.8,0)
+  Options$fog.resolution<-0.25
+  Options$fog.min.transparency<-0.7
   WeatherMap.draw.fog(sf,Options)
   
   # Show new obs, since v2 in yellow, old ones in black
@@ -398,12 +388,39 @@ sub.plot<-function(year,month,day,hour,Options) {
   Options<-WeatherMap.set.option(Options,'obs.colour',rgb(255,204,0,255,
                                                           maxColorValue=255))
   plot.obs.coverage(obs.new,obs.old,Options)
+  
+  # Add the conventional fog
+  prmsl.sd<-TWCR.get.slice.at.hour('prmsl',year,month,day,hour,
+                                         version='3.4.1',type='standard.deviation')
+  prmsl.sd<-GSDF.regrid.2d(prmsl.sd,m.n)
+  fog<-m.n
+  fog$data[]<-m.n$data/prmsl.sd$data
+  fog$data[]<-1/(1+exp((fog$data-0.6)*-20))
+  Options$fog.colour<-c(0.3,0.3,0.3)
+  Options$fog.min.transparency<-0.8
+  WeatherMap.draw.fog(fog,Options)
 
-  Options$label=sprintf("%04d-%02d-%02d:%02d",year,month,day,as.integer(hour))
-    Options<-WeatherMap.set.option(Options,'land.colour',Options$sea.colour)
-    WeatherMap.draw.label(Options)
-
+  draw.label(sprintf("%04d-%02d-%02d:%02d",year,month,day,as.integer(hour)),
+             0.925,0.05,scale=1,tp=0.65)
+  
   popViewport()
+}
+
+draw.label<-function(label,xp,yp,scale=1,tp=0.85) {
+    label.gp<-gpar(family='Helvetica',font=1,col='black',cex=scale)
+    xp<-unit(xp,'npc')
+    yp<-unit(yp,'npc')    
+    tg<-textGrob(label,x=xp,y=yp,
+                              just='center',
+                              gp=label.gp)
+   bg.gp<-gpar(col=rgb(1,1,1,0),fill=rgb(1,1,1,tp))
+   h<-heightDetails(tg)*(scale/2)
+   w<-widthDetails(tg)*(scale/2)
+   b<-unit(0.3,'char') # border
+   grid.polygon(x=unit.c(xp+w+b,xp-w-b,xp-w-b,xp+w+b),
+                y=unit.c(yp+h+b,yp+h+b,yp-h-b,yp-h-b),
+                gp=bg.gp)
+   grid.draw(tg)
 }
 
 
@@ -416,7 +433,7 @@ png(ifile.name,
     width=14038,
     height=9929,
     type='cairo-png',
-    pointsize=96)
+    pointsize=48)
 
   base.gp<-gpar(fontfamily='Helvetica',fontface='bold',col='black')
 
@@ -428,8 +445,8 @@ png(ifile.name,
        #Options<-set.pole(count,Options)
        pushViewport(viewport(x=unit((i-.5)/4,'npc'),
                              y=unit(1-(j-.5)/5,'npc'),
-                             width=unit((1/4)*0.99,'npc'),
-                             height=unit((1/5)*0.99,'npc'),
+                             width=unit((1/4),'npc'),
+                             height=unit((1/5),'npc'),
                              clip='on'))
           grid.polygon(x=unit(c(0,1,1,0),'npc'),
                        y=unit(c(0,0,1,1),'npc'),
@@ -448,5 +465,99 @@ png(ifile.name,
        gc(verbose=FALSE)
      }
   }
-  dev.off()
+
+# Key - White partially-transparent background rectangle
+ key.gp<-gpar(col=rgb(0,0,0,1),fill=rgb(1,1,1,0.75),
+              cex=1.5)
+ h<-0.15
+ w<-0.10
+ x.o<-0.007
+ y.o<-0.027
+ t.o<-0.003
+ grid.polygon(x=unit(c(x.o,x.o+w,x.o+w,x.o),'npc'),
+                y=unit(c(y.o,y.o,y.o+h,y.o+h),'npc'),
+                gp=key.gp)
+ 
+ g.w<-w/6
+ g.h<-g.w*sqrt(2)/2
+ grid.text('Weather from 20CRv2c\nensemble mean',x=unit(x.o+t.o,'npc'),
+                     y=unit(y.o+h*4.5/5,'npc'),
+                     just=c('left','centre'),
+                     gp=key.gp)
+ w.img<-readPNG('weather.sample.png')
+ grid.raster(w.img,x=unit(x.o+w-t.o,'npc'),
+                     y=unit(y.o+h*4.5/5,'npc'),
+                     width=unit(g.w,'npc'),
+                     height=unit(g.h,'npc'),
+                     just=c('right','centre'),
+                     gp=key.gp)
+ 
+ grid.text('Where 20CRv2c has\nlittle skill',x=unit(x.o+t.o,'npc'),
+                     y=unit(y.o+h*3.5/5,'npc'),
+                     just=c('left','centre'),
+                     gp=key.gp)
+ fog.gp<-gpar(col=rgb(0,0,0,0),fill=rgb(0.35,0.35,0.35,0.95))
+ grid.polygon(x=unit(c(x.o+w-t.o-g.w,x.o+w-t.o,
+                       x.o+w-t.o,x.o+w-t.o-g.w),'npc'),
+              y=unit(c(y.o-g.h/2+h*3.5/5,y.o-g.h/2+h*3.5/5,
+                       y.o+g.h/2+h*3.5/5,y.o+g.h/2+h*3.5/5),'npc'),
+              gp=fog.gp)
+ 
+ grid.text('Where v2c is markedly\nbetter than v2',x=unit(x.o+t.o,'npc'),
+                     y=unit(y.o+h*2.5/5,'npc'),
+                     just=c('left','centre'),
+                     gp=key.gp)
+ glow.gp<-gpar(col=rgb(0,0,0,0),fill=rgb(255,215,0,255,
+                                         maxColorValue=255))
+ grid.polygon(x=unit(c(x.o+w-t.o-g.w,x.o+w-t.o,
+                       x.o+w-t.o,x.o+w-t.o-g.w),'npc'),
+              y=unit(c(y.o-g.h/2+h*2.5/5,y.o-g.h/2+h*2.5/5,
+                       y.o+g.h/2+h*2.5/5,y.o+g.h/2+h*2.5/5),'npc'),
+              gp=glow.gp)
+ 
+ grid.text('Where there are observations\nin both v2 and v2c.',x=unit(x.o+t.o,'npc'),
+                     y=unit(y.o+h*1.5/5,'npc'),
+                     just=c('left','centre'),
+                     gp=key.gp)
+ p.x<-x.o+w-t.o-runif(5)*g.w
+ p.y<-y.o+h*1.5/5+g.h/2-(runif(5)*g.h)
+ old.gp<-gpar(col=rgb(0,0,0,1),fill=rgb(0.4,0.4,0.4,1),lwd=5)
+ grid.points(x=unit(p.x,'npc'),
+             y=unit(p.y,'npc'),
+             size=unit(0.004,'npc'),
+             pch=21,
+             gp=old.gp)
+ 
+ grid.text('Where there are additional\nobservations only in v2c',x=unit(x.o+t.o,'npc'),
+                     y=unit(y.o+h*0.5/5,'npc'),
+                     just=c('left','centre'),
+                     gp=key.gp)
+ p.x<-x.o+w-t.o-runif(5)*g.w
+ p.y<-y.o+h*0.5/5+g.h/2-(runif(5)*g.h)
+ new.gp<-gpar(col=rgb(0,0,0,1),fill=rgb(255,215,0,255,
+                                         maxColorValue=255),lwd=5)
+ grid.points(x=unit(p.x,'npc'),
+             y=unit(p.y,'npc'),
+             size=unit(0.004,'npc'),
+             pch=21,
+             gp=new.gp)
+
+# Dividing lines
+new.gp<-gpar(col=rgb(255,215,0,255,maxColorValue=255),lwd=10)
+
+for(i in seq(1,3)) {
+  grid.lines(x=unit(rep(0.25*i,2),'npc'),
+             y=unit(c(0,1),'npc'),
+             gp=new.gp)
+}
+for(i in seq(1,4)) {
+  grid.lines(x=unit(c(0,1),'npc'),
+             y=unit(rep(0.2*i,2),'npc'),
+             gp=new.gp)
+}
+
+# Signature
+draw.label("philip.brohan@metoffice.gov.uk",0.0375,0.0075,1.4,0.65)
+
+dev.off()
 
