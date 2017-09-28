@@ -6,6 +6,7 @@ library(GSDF.TWCR)
 library(GSDF.WeatherMap)
 library(grid)
 library(lubridate)
+library(png)
 
 Imagedir<-sprintf("%s/Posters/data.rescue",Sys.getenv('SCRATCH'))
 
@@ -50,6 +51,26 @@ orog<-GSDF.ncdf.load(sprintf("%s/orography/elev.0.25-deg.nc",Sys.getenv('SCRATCH
                              lat.range=c(-90,90),lon.range=c(-180,360))
 orog$data[orog$data<0]<-0 # sea-surface, not sea-bottom
 is.na(orog$data[orog$data==0])<-TRUE
+
+fog.sample<-readPNG('Fog_sample.png')
+fog.gsgrid<-GSDF()
+fog.gsgrid$dimensions[[1]]<-list(type='lat',values=seq(-90,90,180/(length(fog.sample[,1,1])-1)))
+fog.gsgrid$dimensions[[2]]<-list(type='lon',values=seq(-180,180,360/(length(fog.sample[1,,1])-1)))
+fog.gsgrid$data<-array(dim=c(length(fog.gsgrid$dimensions[[1]]$values),
+                             length(fog.gsgrid$dimensions[[2]]$values)))
+overlay.fog<-function(fog,Options) {
+    fog.gsgrid<-fog
+    fog.gsgrid$dimensions[[1]]<-list(type='lat',values=seq(-90,90,180/(length(fog.sample[,1,1])-1)))
+    fog.gsgrid$dimensions[[2]]<-list(type='lon',values=seq(0,360,360/(length(fog.sample[1,,])-1)))
+    fog.gsgrid$data<-array(dim=c(length(fog.gsgrid$dimensions[[1]]$values),
+                                 length(fog.gsgrid$dimensions[[2]]$values)))
+    
+    fog<-GSDF.regrid.2d(fog,fog.gsgrid)
+    f<-fog.sample
+    f[,,4]<-pmin(1,pmax(0,(1-fog$data),na.rm=TRUE))#*Options$fog.min.transparency
+    grid.raster(as.raster(f),height=unit(1,'npc'),width=unit(1,'npc'))
+}
+
 
 get.member.at.hour<-function(variable,year,month,day,hour,member,version='3.5.1') {
 
@@ -393,7 +414,7 @@ sub.plot<-function(year,month,day,hour,Options) {
   fog$data[]<-1-pmax(0,pmin(1,(1-fog$data)*2))
   Options$fog.colour<-c(0.3,0.3,0.3)
   Options$fog.min.transparency<-0.8
-  WeatherMap.draw.fog(fog,Options)
+  overlay.fog(fog,Options)
     
   # Show new obs, since v2 in yellow, old ones in grey
   obs.new<-TWCR.get.obs.1file(year,month,day,hour,version='3.5.1')

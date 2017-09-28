@@ -48,7 +48,7 @@ Options$vp.lon.min<- -180
 Options$vp.lon.max<-  180
 
 Options<-WeatherMap.set.option(Options,'wrap.spherical',F)
-Options$precip.colour=c(0,0.2,0)
+Options$precip.colour=c(0.0,0.2,0.0)
 Options$label.xp=0.995
 Options<-WeatherMap.set.option(Options,'obs.size',1.5)
 Options<-WeatherMap.set.option(Options,'obs.colour',rgb(255,215,0,255,
@@ -61,7 +61,6 @@ Options$mslp.range=50000                    # Anomaly for max contour
 Options$mslp.step=500                       # Smaller -> more contours
 Options$mslp.tpscale=5                      # Smaller -> contours less transparent
 Options$mslp.lwd=3
-Options$precip.colour=c(0,0.2,0)
 # Overrides mslp options
 contour.levels<-seq(-300,300,30)
 contour.levels<-abs(contour.levels)**1.5*sign(contour.levels)
@@ -330,7 +329,20 @@ plot.obs.coverage<-function(obs.new,obs.old,Options) {
                     size=unit(Options$obs.size*1.5,'native'),
                     pch=21,gp=gp)
    }
-}  
+}
+
+fog.sample<-readPNG('Fog_sample.png')
+fog.gsgrid<-GSDF()
+fog.gsgrid$dimensions[[1]]<-list(type='lat',values=seq(-90,90,180/(length(fog.sample[,1,1])-1)))
+fog.gsgrid$dimensions[[2]]<-list(type='lon',values=seq(0,360,360/(length(fog.sample[1,,1])-1)))
+fog.gsgrid$data<-array(dim=c(length(fog.gsgrid$dimensions[[1]]$values),
+                             length(fog.gsgrid$dimensions[[1]]$values)))
+overlay.fog<-function(fog,Options) {
+    fog<-GSDF.regrid.2d(fog,fog.gsgrid)
+    f<-fog.sample
+    #f[,,4]<-(1-fog$data)*Options$fog.min.transparency
+    grid.raster(as.raster(f))
+}
   
 # Make a sub plot
 sub.plot<-function(year,month,day,hour,Options) {
@@ -359,6 +371,7 @@ sub.plot<-function(year,month,day,hour,Options) {
   draw.pressure(prmsl,Options)
   
   prate<-get.mean.at.hour('prate',year,month,day,hour,1,version='3.5.1')
+  prate$data[]<-prate$data*2
   WeatherMap.draw.precipitation(prate,Options)
   
   # Mark regions where new obs have made things better
@@ -380,7 +393,7 @@ sub.plot<-function(year,month,day,hour,Options) {
   Options$fog.colour<-c(1,0.8,0)
   Options$fog.resolution<-0.25
   Options$fog.min.transparency<-0.7
-  WeatherMap.draw.fog(sf,Options)
+  overlay.fog(sf,Options)
   
   # Show new obs, since v2 in yellow, old ones in black
   obs.new<-TWCR.get.obs.1file(year,month,day,hour,version='3.5.1')
@@ -396,7 +409,7 @@ sub.plot<-function(year,month,day,hour,Options) {
   fog<-m.n
   fog$data[]<-m.n$data/prmsl.sd$data
   fog$data[]<-1/(1+exp((fog$data-0.6)*-20))
-  Options$fog.colour<-c(0.3,0.3,0.3)
+  Options$fog.colour<-c(0.66,0.68,0.70)
   Options$fog.min.transparency<-0.8
   WeatherMap.draw.fog(fog,Options)
 
@@ -433,7 +446,7 @@ png(ifile.name,
     width=14038,
     height=9929,
     type='cairo-png',
-    pointsize=48)
+    pointsize=72)
 
   base.gp<-gpar(fontfamily='Helvetica',fontface='bold',col='black')
 
@@ -451,7 +464,7 @@ png(ifile.name,
           grid.polygon(x=unit(c(0,1,1,0),'npc'),
                        y=unit(c(0,0,1,1),'npc'),
                        gp=gpar(col=Options$sea.colour,fill=Options$sea.colour))
-      #if(count==0 || count==19) {
+      if(count==0 || count==19) {
           tryCatch(sub.plot(lubridate::year(date),
                    lubridate::month(date),
                    lubridate::day(date),
@@ -459,7 +472,7 @@ png(ifile.name,
                             Options),
                     error = function(c) {popViewport()}
                    )
-      #}
+      }
        popViewport()
        count<-count+1
        gc(verbose=FALSE)
@@ -468,9 +481,9 @@ png(ifile.name,
 
 # Key - White partially-transparent background rectangle
  key.gp<-gpar(col=rgb(0,0,0,1),fill=rgb(1,1,1,0.75),
-              cex=1.5)
- h<-0.15
- w<-0.10
+              cex=1.5,lineheight=0.75)
+ h<-0.12
+ w<-0.11
  x.o<-0.007
  y.o<-0.027
  t.o<-0.003
@@ -557,7 +570,7 @@ for(i in seq(1,4)) {
 }
 
 # Signature
-draw.label("philip.brohan@metoffice.gov.uk",0.0375,0.0075,1.4,0.65)
+draw.label("philip.brohan@metoffice.gov.uk",0.0375,0.0075,1.2,0.65)
 
 dev.off()
 
