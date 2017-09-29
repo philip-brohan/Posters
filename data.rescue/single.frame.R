@@ -52,22 +52,18 @@ orog<-GSDF.ncdf.load(sprintf("%s/orography/elev.0.25-deg.nc",Sys.getenv('SCRATCH
 orog$data[orog$data<0]<-0 # sea-surface, not sea-bottom
 is.na(orog$data[orog$data==0])<-TRUE
 
-fog.sample<-readPNG('Fog_sample.png')
-fog.gsgrid<-GSDF()
-fog.gsgrid$dimensions[[1]]<-list(type='lat',values=seq(-90,90,180/(length(fog.sample[,1,1])-1)))
-fog.gsgrid$dimensions[[2]]<-list(type='lon',values=seq(-180,180,360/(length(fog.sample[1,,1])-1)))
-fog.gsgrid$data<-array(dim=c(length(fog.gsgrid$dimensions[[1]]$values),
-                             length(fog.gsgrid$dimensions[[2]]$values)))
+fog.sample<-readPNG('smoke.png')
 overlay.fog<-function(fog,Options) {
     fog.gsgrid<-fog
-    fog.gsgrid$dimensions[[1]]<-list(type='lat',values=seq(-90,90,180/(length(fog.sample[,1,1])-1)))
-    fog.gsgrid$dimensions[[2]]<-list(type='lon',values=seq(0,360,360/(length(fog.sample[1,,])-1)))
+    fog.gsgrid$dimensions[[2]]<-list(type='lat',values=seq(90,-90,-180/(length(fog.sample[,1,1])-1)))
+    fog.gsgrid$dimensions[[1]]<-list(type='lon',values=seq(-180,180,360/(length(fog.sample[1,,1])-1)))
     fog.gsgrid$data<-array(dim=c(length(fog.gsgrid$dimensions[[1]]$values),
                                  length(fog.gsgrid$dimensions[[2]]$values)))
     
     fog<-GSDF.regrid.2d(fog,fog.gsgrid)
     f<-fog.sample
-    f[,,4]<-pmin(1,pmax(0,(1-fog$data),na.rm=TRUE))#*Options$fog.min.transparency
+    tr<-t(as.matrix(fog$data))
+    f[,,4]<-pmin(1,pmax(0,tr,na.rm=TRUE))*Options$fog.min.transparency
     grid.raster(as.raster(f),height=unit(1,'npc'),width=unit(1,'npc'))
 }
 
@@ -410,10 +406,9 @@ sub.plot<-function(year,month,day,hour,Options) {
   prmsl.sd<-GSDF.regrid.2d(prmsl.sd,m.n)
   fog<-m.n
   fog$data[]<-m.n$data/prmsl.sd$data
-  see<-prmsl.sd$data/sqrt(110)
-  fog$data[]<-1-pmax(0,pmin(1,(1-fog$data)*2))
-  Options$fog.colour<-c(0.3,0.3,0.3)
-  Options$fog.min.transparency<-0.8
+  fog$data[]<-1/(1+exp((fog$data-0.6)*-20))
+  #fog$data[]<-1-pmax(0,pmin(1,(1-fog$data)*2))
+  Options$fog.min.transparency<-0.9
   overlay.fog(fog,Options)
     
   # Show new obs, since v2 in yellow, old ones in grey
@@ -432,7 +427,7 @@ sub.plot<-function(year,month,day,hour,Options) {
 
 
 # Make the full plot
-date<-lubridate::ymd_hms("1894-10-10:00:00:00")
+date<-lubridate::ymd_hms("1872-10-10:00:00:00")
 
 image.name<-sprintf("single.frame.pdf",year,month,day,hour)
 ifile.name<-sprintf("%s/%s",Imagedir,image.name)

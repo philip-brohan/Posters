@@ -332,16 +332,18 @@ plot.obs.coverage<-function(obs.new,obs.old,Options) {
 }
 
 fog.sample<-readPNG('Fog_sample.png')
-fog.gsgrid<-GSDF()
-fog.gsgrid$dimensions[[1]]<-list(type='lat',values=seq(-90,90,180/(length(fog.sample[,1,1])-1)))
-fog.gsgrid$dimensions[[2]]<-list(type='lon',values=seq(0,360,360/(length(fog.sample[1,,1])-1)))
-fog.gsgrid$data<-array(dim=c(length(fog.gsgrid$dimensions[[1]]$values),
-                             length(fog.gsgrid$dimensions[[1]]$values)))
 overlay.fog<-function(fog,Options) {
+    fog.gsgrid<-fog
+    fog.gsgrid$dimensions[[2]]<-list(type='lat',values=seq(90,-90,-180/(length(fog.sample[,1,1])-1)))
+    fog.gsgrid$dimensions[[1]]<-list(type='lon',values=seq(-180,180,360/(length(fog.sample[1,,1])-1)))
+    fog.gsgrid$data<-array(dim=c(length(fog.gsgrid$dimensions[[1]]$values),
+                                 length(fog.gsgrid$dimensions[[2]]$values)))
+    
     fog<-GSDF.regrid.2d(fog,fog.gsgrid)
     f<-fog.sample
-    #f[,,4]<-(1-fog$data)*Options$fog.min.transparency
-    grid.raster(as.raster(f))
+    tr<-t(as.matrix(fog$data))
+    f[,,4]<-pmin(1,pmax(0,tr,na.rm=TRUE))*Options$fog.min.transparency
+    grid.raster(as.raster(f),height=unit(1,'npc'),width=unit(1,'npc'))
 }
   
 # Make a sub plot
@@ -393,7 +395,7 @@ sub.plot<-function(year,month,day,hour,Options) {
   Options$fog.colour<-c(1,0.8,0)
   Options$fog.resolution<-0.25
   Options$fog.min.transparency<-0.7
-  overlay.fog(sf,Options)
+  WeatherMap.draw.fog(sf,Options)
   
   # Show new obs, since v2 in yellow, old ones in black
   obs.new<-TWCR.get.obs.1file(year,month,day,hour,version='3.5.1')
@@ -409,9 +411,8 @@ sub.plot<-function(year,month,day,hour,Options) {
   fog<-m.n
   fog$data[]<-m.n$data/prmsl.sd$data
   fog$data[]<-1/(1+exp((fog$data-0.6)*-20))
-  Options$fog.colour<-c(0.66,0.68,0.70)
-  Options$fog.min.transparency<-0.8
-  WeatherMap.draw.fog(fog,Options)
+  Options$fog.min.transparency<-0.9
+  overlay.fog(fog,Options)
 
   draw.label(sprintf("%04d-%02d-%02d:%02d",year,month,day,as.integer(hour)),
              0.925,0.05,scale=1,tp=0.65)
@@ -464,7 +465,7 @@ png(ifile.name,
           grid.polygon(x=unit(c(0,1,1,0),'npc'),
                        y=unit(c(0,0,1,1),'npc'),
                        gp=gpar(col=Options$sea.colour,fill=Options$sea.colour))
-      if(count==0 || count==19) {
+      #if(count==0 || count==19) {
           tryCatch(sub.plot(lubridate::year(date),
                    lubridate::month(date),
                    lubridate::day(date),
@@ -472,7 +473,7 @@ png(ifile.name,
                             Options),
                     error = function(c) {popViewport()}
                    )
-      }
+      #}
        popViewport()
        count<-count+1
        gc(verbose=FALSE)
@@ -509,7 +510,7 @@ png(ifile.name,
                      y=unit(y.o+h*3.5/5,'npc'),
                      just=c('left','centre'),
                      gp=key.gp)
- fog.gp<-gpar(col=rgb(0,0,0,0),fill=rgb(0.35,0.35,0.35,0.95))
+ fog.gp<-gpar(col=rgb(0,0,0,0),fill=rgb(0.65,0.65,0.65,0.95))
  grid.polygon(x=unit(c(x.o+w-t.o-g.w,x.o+w-t.o,
                        x.o+w-t.o,x.o+w-t.o-g.w),'npc'),
               y=unit(c(y.o-g.h/2+h*3.5/5,y.o-g.h/2+h*3.5/5,
