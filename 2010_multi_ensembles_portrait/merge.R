@@ -18,11 +18,13 @@ e<-0
 
 # Centre point
 c.x<-11.5/19.4
-c.y<-19/27.4
+c.y<-19/19.4
+#c.y<-19/27.4
+scale<-min(length(bg[1,,1]),length(bg[,1,1]))
 
 # Coordinates on 0-1 for each pixel
-coord.y<-rev(rep(seq(1,length(bg[,1,1]))/length(bg[,1,1]),length(bg[1,,1])))
-coord.x<-rep(seq(1,length(bg[1,,1]))/length(bg[1,,1]),length(bg[,1,1]))
+coord.y<-rev(rep(seq(1,length(bg[,1,1]))/scale,length(bg[1,,1])))
+coord.x<-rep(seq(1,length(bg[1,,1]))/scale,length(bg[,1,1]))
 coord.x<-array(dim=c(length(bg[1,,1]),length(bg[,1,1])),data=coord.x)
 coord.x<-aperm(coord.x)
 coord.x<-as.vector(coord.x)
@@ -57,7 +59,7 @@ for(member in seq(1,10,1)) {
 
 # Range for CERA20C
 cera20c.max<- -0.05*pi
-cera20c.min<- -0.59*pi
+cera20c.min<- -0.55*pi
 
 # Add a CERA20C slice
 add.cera20c.slice<-function(member,bg) {
@@ -101,7 +103,7 @@ add.20CR.slice<-function(member,bg,n,o) {
   return(bg)
 }
 # Two ranges for 20CR
-t2c.max<- -0.59*pi
+t2c.max<- -0.55*pi
 t2c.min<- -1.00*pi
 for(member in seq(1,9,1)) {
   print(sprintf("20CR %2d",member))
@@ -111,9 +113,9 @@ for(member in seq(1,9,1)) {
 
 t2c.max<-  1.00*pi
 t2c.min<-  0.95*pi
-for(member in seq(9,10,1)) {
+for(member in seq(10,10,1)) {
   print(sprintf("20CR %2d",member))
-  bg<-add.20CR.slice(member,bg,1,9)
+  bg<-add.20CR.slice(member,bg,1,10)
   g<-gc()
 }
 

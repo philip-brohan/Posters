@@ -28,23 +28,24 @@ lgpt<-gpar(col=rgb(1,1,0.5,1),fill=rgb(1,1,0.5,1),lwd=12)
 
 # Centre point
 c.x<-11.5/19.4
-c.y<-19/27.4
+c.y<-19/19.4
+#c.y<-19/27.4
 
 # Delimiters for ERA5
 t2c.max<-  0.95*pi
 t2c.min<- -0.05*pi
 
-sc<-0.000+runif(1)*0.005
+sc<-0#0.000+runif(1)*0.005
 grid.lines(x=unit(c(c.x+cos(t2c.max)*sc,
-                    c.x+cos(t2c.max)*10),'npc'),
+                    c.x+cos(t2c.max)*10),'snpc'),
            y=unit(c(c.y+sin(t2c.max)*sc,
-                    c.y+sin(t2c.max)*10),'npc'),
+                    c.y+sin(t2c.max)*10),'snpc'),
              gp=lgpt)
-sc<-0.000+runif(1)*0.005
+sc<-0#0.000+runif(1)*0.005
 grid.lines(x=unit(c(c.x+cos(t2c.min)*sc,
-                    c.x+cos(t2c.min)*10),'npc'),
+                    c.x+cos(t2c.min)*10),'snpc'),
            y=unit(c(c.y+sin(t2c.min)*sc,
-                    c.y+sin(t2c.min)*10),'npc'),
+                    c.y+sin(t2c.min)*10),'snpc'),
              gp=lgpt)
 
 # Add a 20CR2c slice
@@ -55,15 +56,15 @@ mark.t2c.slice<-function(member) {
 
   sc<-0.005+runif(1)*0.005
   grid.lines(x=unit(c(c.x+cos(s.max)*sc,
-                      c.x+cos(s.max)*10),'npc'),
+                      c.x+cos(s.max)*10),'snpc'),
              y=unit(c(c.y+sin(s.max)*sc,
-                      c.y+sin(s.max)*10),'npc'),
+                      c.y+sin(s.max)*10),'snpc'),
              gp=lgp)
   sc<-0.005+runif(1)*0.005
   grid.lines(x=unit(c(c.x+cos(s.min)*sc,
-                      c.x+cos(s.min)*10),'npc'),
+                      c.x+cos(s.min)*10),'snpc'),
              y=unit(c(c.y+sin(s.min)*sc,
-                      c.y+sin(s.min)*10),'npc'),
+                      c.y+sin(s.min)*10),'snpc'),
              gp=lgp)
 
 }
@@ -75,19 +76,19 @@ for(member in seq(1,10,1)) {
 
 # Range for CERA20C
 cera20c.max<- -0.05*pi
-cera20c.min<- -0.59*pi
+cera20c.min<- -0.55*pi
 
-sc<-0.000+runif(1)*0.005
+sc<-0#0.000+runif(1)*0.005
 grid.lines(x=unit(c(c.x+cos(cera20c.max)*sc,
-                    c.x+cos(cera20c.max)*10),'npc'),
+                    c.x+cos(cera20c.max)*10),'snpc'),
            y=unit(c(c.y+sin(cera20c.max)*sc,
-                    c.y+sin(cera20c.max)*10),'npc'),
+                    c.y+sin(cera20c.max)*10),'snpc'),
              gp=lgpt)
-sc<-0.000+runif(1)*0.005
+sc<-0#0.000+runif(1)*0.005
 grid.lines(x=unit(c(c.x+cos(cera20c.min)*sc,
-                    c.x+cos(cera20c.min)*10),'npc'),
+                    c.x+cos(cera20c.min)*10),'snpc'),
            y=unit(c(c.y+sin(cera20c.min)*sc,
-                    c.y+sin(cera20c.min)*10),'npc'),
+                    c.y+sin(cera20c.min)*10),'snpc'),
              gp=lgpt)
 
 # Add a CERA20C slice
@@ -98,15 +99,15 @@ mark.cera20c.slice<-function(member) {
 
   sc<-0.005+runif(1)*0.005
   grid.lines(x=unit(c(c.x+cos(s.max)*sc,
-                      c.x+cos(s.max)*10),'npc'),
+                      c.x+cos(s.max)*10),'snpc'),
              y=unit(c(c.y+sin(s.max)*sc,
-                      c.y+sin(s.max)*10),'npc'),
+                      c.y+sin(s.max)*10),'snpc'),
              gp=lgp)
   sc<-0.005+runif(1)*0.005
   grid.lines(x=unit(c(c.x+cos(s.min)*sc,
-                      c.x+cos(s.min)*10),'npc'),
+                      c.x+cos(s.min)*10),'snpc'),
              y=unit(c(c.y+sin(s.min)*sc,
-                      c.y+sin(s.min)*10),'npc'),
+                      c.y+sin(s.min)*10),'snpc'),
              gp=lgp)
 
 }
@@ -123,27 +124,27 @@ mark.era5.slice<-function(member,n,o) {
   
   sc<-0.005+runif(1)*0.005
   grid.lines(x=unit(c(c.x+cos(s.max)*sc,
-                      c.x+cos(s.max)*10),'npc'),
+                      c.x+cos(s.max)*10),'snpc'),
              y=unit(c(c.y+sin(s.max)*sc,
-                      c.y+sin(s.max)*10),'npc'),
+                      c.y+sin(s.max)*10),'snpc'),
              gp=lgp)
   sc<-0.005+runif(1)*0.005
   grid.lines(x=unit(c(c.x+cos(s.min)*sc,
-                      c.x+cos(s.min)*10),'npc'),
+                      c.x+cos(s.min)*10),'snpc'),
              y=unit(c(c.y+sin(s.min)*sc,
-                      c.y+sin(s.min)*10),'npc'),
+                      c.y+sin(s.min)*10),'snpc'),
              gp=lgp)
   
 }
 
 # Two ranges for ERA5
-era5.max<- -0.59*pi
+era5.max<- -0.55*pi
 era5.min<- -1.00*pi
 sc<-0.000+runif(1)*0.005
 grid.lines(x=unit(c(c.x+cos(era5.max)*sc,
-                    c.x+cos(era5.max)*10),'npc'),
+                    c.x+cos(era5.max)*10),'snpc'),
            y=unit(c(c.y+sin(era5.max)*sc,
-                    c.y+sin(era5.max)*10),'npc'),
+                    c.y+sin(era5.max)*10),'snpc'),
              gp=lgpt)
 
 for(member in seq(2,10,1)) {
@@ -151,11 +152,11 @@ for(member in seq(2,10,1)) {
 }
 era5.max<-  1.00*pi
 era5.min<-  0.95*pi
-sc<-0.000+runif(1)*0.005
+sc<-0#0.000+runif(1)*0.005
 grid.lines(x=unit(c(c.x+cos(era5.min)*sc,
-                    c.x+cos(era5.min)*10),'npc'),
+                    c.x+cos(era5.min)*10),'snpc'),
            y=unit(c(c.y+sin(era5.min)*sc,
-                    c.y+sin(era5.min)*10),'npc'),
+                    c.y+sin(era5.min)*10),'snpc'),
              gp=lgpt)
 for(member in seq(1,1,1)) {
   mark.era5.slice(member,1,1)
@@ -180,12 +181,12 @@ draw.label<-function(label,xp,yp,scale=1) {
   # Add the date
 draw.label(sprintf("%04d-%02d-%02d:%02d",opt$year,opt$month,
                    opt$day,opt$hour),
-                   0.96,0.01*16/9,1.3)
+                   0.09,0.96,1.5)
 
 # Label the reanalyes
-draw.label("ERA5 ENDA",0.025,0.95,1.0)
-draw.label("CERA20C",0.68,0.01*16/9,1.0)
-draw.label("20CR2c\n(members 1-10)",0.925,0.97,1.0)
+draw.label("ERA5 ENDA",0.85,0.97,1.0)
+draw.label("CERA20C",0.93,0.04,1.0)
+draw.label("20CR2c\n(members 1-10)",0.05,0.06,1.0)
 
 # Signature
-draw.label("philip.brohan@metoffice.gov.uk",0.04,0.01,0.7)
+draw.label("philip.brohan@metoffice.gov.uk",0.18,0.01,0.7)
