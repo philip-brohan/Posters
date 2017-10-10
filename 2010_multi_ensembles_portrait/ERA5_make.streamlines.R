@@ -31,14 +31,21 @@ Options<-WeatherMap.set.option(Options,'wind.vector.move.scale',1)
 Options<-WeatherMap.set.option(Options,'wind.vector.density',0.5)
 Options$ice.points<-100000
 
+ERA5.get.member.at.hour<-function(variable,year,month,day,hour,member=1) {
+
+       t<-ERA5.get.members.slice.at.hour(variable,year,month,day,hour)
+       t<-GSDF.select.from.1d(t,'ensemble',member)
+       gc()
+       return(t)
+}
 
     s<-NULL
     sf.name<-sprintf("%s/ERA5.streamlines.rd",
                            Imagedir,year,month,day,hour)
 
-    uwnd<-ERA5.get.slice.at.hour('uwnd.10m',year,month,day,hour)
-    vwnd<-ERA5.get.slice.at.hour('vwnd.10m',year,month,day,hour)
-    t.actual<-ERA5.get.slice.at.hour('air.2m',year,month,day,hour)
+    uwnd<-ERA5.get.member.at.hour('uwnd.10m',year,month,day,hour,member=1)
+    vwnd<-ERA5.get.member.at.hour('vwnd.10m',year,month,day,hour,member=1)
+    t.actual<-ERA5.get.member.at.hour('air.2m',year,month,day,hour,member=1)
     t.normal<-ERA5.get.slice.at.hour('air.2m',year,month,day,hour,type='normal')
     #t.normal<-t.actual
     #t.normal$data[]<-rep(286,length(t.normal$data))

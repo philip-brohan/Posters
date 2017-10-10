@@ -27,12 +27,12 @@ lgp<-gpar(col=rgb(1,1,0.5,1),fill=rgb(1,1,0.5,1),lwd=2)
 lgpt<-gpar(col=rgb(1,1,0.5,1),fill=rgb(1,1,0.5,1),lwd=12)
 
 # Centre point
-c.x<-0.4-0.006
-c.y<-1.0-(0.45-0.065)
+c.x<-11.5/19.4
+c.y<-19/27.4
 
-# Delimiters for 20CR2c
-t2c.max<-  0.53*pi
-t2c.min<- -0.19*pi
+# Delimiters for ERA5
+t2c.max<-  0.95*pi
+t2c.min<- -0.05*pi
 
 sc<-0.000+runif(1)*0.005
 grid.lines(x=unit(c(c.x+cos(t2c.max)*sc,
@@ -74,8 +74,8 @@ for(member in seq(1,10,1)) {
 
 
 # Range for CERA20C
-cera20c.max<- -0.19*pi
-cera20c.min<- -0.69*pi
+cera20c.max<- -0.05*pi
+cera20c.min<- -0.59*pi
 
 sc<-0.000+runif(1)*0.005
 grid.lines(x=unit(c(c.x+cos(cera20c.max)*sc,
@@ -137,7 +137,7 @@ mark.era5.slice<-function(member,n,o) {
 }
 
 # Two ranges for ERA5
-era5.max<- -0.69*pi
+era5.max<- -0.59*pi
 era5.min<- -1.00*pi
 sc<-0.000+runif(1)*0.005
 grid.lines(x=unit(c(c.x+cos(era5.max)*sc,
@@ -146,19 +146,19 @@ grid.lines(x=unit(c(c.x+cos(era5.max)*sc,
                     c.y+sin(era5.max)*10),'npc'),
              gp=lgpt)
 
-for(member in seq(1,4,1)) {
-  mark.era5.slice(member,4,1)
+for(member in seq(2,10,1)) {
+  mark.era5.slice(member,9,2)
 }
 era5.max<-  1.00*pi
-era5.min<-  0.53*pi
+era5.min<-  0.95*pi
 sc<-0.000+runif(1)*0.005
 grid.lines(x=unit(c(c.x+cos(era5.min)*sc,
                     c.x+cos(era5.min)*10),'npc'),
            y=unit(c(c.y+sin(era5.min)*sc,
                     c.y+sin(era5.min)*10),'npc'),
              gp=lgpt)
-for(member in seq(5,10,1)) {
-  mark.era5.slice(member,7,5)
+for(member in seq(1,1,1)) {
+  mark.era5.slice(member,1,1)
 }
 
 draw.label<-function(label,xp,yp,scale=1) {

@@ -17,8 +17,8 @@ bg[,,3]<-0.5
 e<-0
 
 # Centre point
-c.x<-0.4-0.006
-c.y<-1.0-(0.45-0.065)
+c.x<-11.5/19.4
+c.y<-19/27.4
 
 # Coordinates on 0-1 for each pixel
 coord.y<-rev(rep(seq(1,length(bg[,1,1]))/length(bg[,1,1]),length(bg[1,,1])))
@@ -27,15 +27,15 @@ coord.x<-array(dim=c(length(bg[1,,1]),length(bg[,1,1])),data=coord.x)
 coord.x<-aperm(coord.x)
 coord.x<-as.vector(coord.x)
 
-# Range for 20CR2c
-t2c.max<-  0.53*pi
-t2c.min<- -0.19*pi
+# Range for ERA5
+era5.max<-  0.95*pi
+era5.min<- -0.05*pi
 
-# Add a 20CR2c slice
-add.t2c.slice<-function(member,bg) {
-  image<-readPNG(sprintf("%s/20CR2c_%02d.png",Imagedir,member))
-  s.max<-t2c.min+(t2c.max-t2c.min)*member/10
-  s.min<-t2c.min+(t2c.max-t2c.min)*(member-1)/10
+# Add a ERA5 slice
+add.era5.slice<-function(member,bg) {
+  image<-readPNG(sprintf("%s/ERA5_%02d.png",Imagedir,member))
+  s.max<-era5.min+(era5.max-era5.min)*member/10
+  s.min<-era5.min+(era5.max-era5.min)*(member-1)/10
   es1<-e/abs(cos(s.max))
   es2<-e/abs(cos(s.min))
   w<-which(atan2(coord.y-es1-c.y,coord.x-c.x)<s.max &
@@ -50,14 +50,14 @@ add.t2c.slice<-function(member,bg) {
 }
 
 for(member in seq(1,10,1)) {
-  print(sprintf("20CR2c %2d",member))
-  bg<-add.t2c.slice(member,bg)
+  print(sprintf("ERA5 %2d",member))
+  bg<-add.era5.slice(member,bg)
   g<-gc()
 }
 
 # Range for CERA20C
-cera20c.max<- -0.19*pi
-cera20c.min<- -0.69*pi
+cera20c.max<- -0.05*pi
+cera20c.min<- -0.59*pi
 
 # Add a CERA20C slice
 add.cera20c.slice<-function(member,bg) {
@@ -83,11 +83,11 @@ for(member in seq(0,9,1)) {
   g<-gc()
 }
 
-# Add a ERA5 slice
-add.era5.slice<-function(member,bg,n,o) {
-  image<-readPNG(sprintf("%s/ERA5_%02d.png",Imagedir,member))
-  s.max<-era5.min+(era5.max-era5.min)*(member-o+1)/n
-  s.min<-era5.min+(era5.max-era5.min)*(member-o)/n
+# Add a 20CR slice
+add.20CR.slice<-function(member,bg,n,o) {
+  image<-readPNG(sprintf("%s/20CR2c_%02d.png",Imagedir,member))
+  s.max<-t2c.min+(t2c.max-t2c.min)*(member-o+1)/n
+  s.min<-t2c.min+(t2c.max-t2c.min)*(member-o)/n
   es1<-e/abs(cos(s.max))
   es2<-e/abs(cos(s.min))
   w<-which(atan2(coord.y-es1-c.y,coord.x-c.x)<s.max &
@@ -100,20 +100,20 @@ add.era5.slice<-function(member,bg,n,o) {
   }
   return(bg)
 }
-# Two ranges for ERA5
-era5.max<- -0.69*pi
-era5.min<- -1.00*pi
-for(member in seq(1,4,1)) {
-  print(sprintf("ERA5 %2d",member))
-  bg<-add.era5.slice(member,bg,3,1)
+# Two ranges for 20CR
+t2c.max<- -0.59*pi
+t2c.min<- -1.00*pi
+for(member in seq(1,9,1)) {
+  print(sprintf("20CR %2d",member))
+  bg<-add.20CR.slice(member,bg,9,1)
   g<-gc()
 }
 
-era5.max<-  1.00*pi
-era5.min<-  0.53*pi
-for(member in seq(5,10,1)) {
-  print(sprintf("ERA5 %2d",member))
-  bg<-add.era5.slice(member,bg,6,5)
+t2c.max<-  1.00*pi
+t2c.min<-  0.95*pi
+for(member in seq(9,10,1)) {
+  print(sprintf("20CR %2d",member))
+  bg<-add.20CR.slice(member,bg,1,9)
   g<-gc()
 }
 
