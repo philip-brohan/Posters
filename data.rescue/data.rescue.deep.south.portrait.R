@@ -11,6 +11,7 @@ library(png)
 
 dates<-c("1872-01-01:00:00:00",
          "1880-01-12:00:00:00",
+         "1883-09-22:00:00:00",
          "1887-10-01:00:00:00",
          "1894-03-28:00:00:00",
          "1902-12-28:06:00:00",
@@ -452,27 +453,26 @@ draw.label<-function(label,xp,yp,scale=1,tp=0.85) {
 
 # Make the full plot
 
-image.name<-sprintf("deep.south.png",year,month,day,hour)
+image.name<-sprintf("deep.south.portrait.png",year,month,day,hour)
 ifile.name<-sprintf("%s/%s",Imagedir,image.name)
 
 png(ifile.name,
-    width=14038,
-    height=9929,
+    height=14038,
+    width=9929,
     type='cairo-png',
     pointsize=72)
 
   base.gp<-gpar(fontfamily='Helvetica',fontface='bold',col='black')
 
  count<-0
- for(j in seq(1,5)) {
-     for(i in seq(1,4)) {
+ for(j in seq(1,7)) {
+     for(i in seq(1,3)) {
       print(sprintf("%d %d",j,i))
        date<-lubridate::ymd_hms(dates[count+1])
-       #Options<-set.pole(count,Options)
-       pushViewport(viewport(x=unit((i-.5)/4,'npc'),
-                             y=unit(1-(j-.5)/5,'npc'),
-                             width=unit((1/4),'npc'),
-                             height=unit((1/5),'npc'),
+       pushViewport(viewport(x=unit((i-.5)/3,'npc'),
+                             y=unit(1-(j-.5)/7,'npc'),
+                             width=unit((1/3),'npc'),
+                             height=unit((1/7),'npc'),
                              clip='on'))
           grid.polygon(x=unit(c(0,1,1,0),'npc'),
                        y=unit(c(0,0,1,1),'npc'),
@@ -495,17 +495,17 @@ png(ifile.name,
 # Key - White partially-transparent background rectangle
  key.gp<-gpar(col=rgb(0,0,0,1),fill=rgb(1,1,1,0.75),
               cex=1.5,lineheight=0.75)
- h<-0.12
- w<-0.11
+ h<-0.10
+ w<-0.20
  x.o<-0.007
- y.o<-0.027
+ y.o<-0.03
  t.o<-0.003
  grid.polygon(x=unit(c(x.o,x.o+w,x.o+w,x.o),'npc'),
                 y=unit(c(y.o,y.o,y.o+h,y.o+h),'npc'),
                 gp=key.gp)
  
  g.w<-w/6
- g.h<-g.w*sqrt(2)/2
+ g.h<-g.w/2
  grid.text('Weather from 20CRv2c\nensemble mean',x=unit(x.o+t.o,'npc'),
                      y=unit(y.o+h*4.5/5,'npc'),
                      just=c('left','centre'),
@@ -571,19 +571,20 @@ png(ifile.name,
 # Dividing lines
 new.gp<-gpar(col=rgb(255,215,0,255,maxColorValue=255),lwd=10)
 
-for(i in seq(1,3)) {
-  grid.lines(x=unit(rep(0.25*i,2),'npc'),
+for(i in seq(0,3)) {
+  grid.lines(x=unit(rep((1/3)*i,2),'npc'),
              y=unit(c(0,1),'npc'),
              gp=new.gp)
 }
-for(i in seq(1,4)) {
+for(i in seq(0,7)) {
   grid.lines(x=unit(c(0,1),'npc'),
-             y=unit(rep(0.2*i,2),'npc'),
+             y=unit(rep((1/7)*i,2),'npc'),
              gp=new.gp)
 }
 
 # Signature
-draw.label("philip.brohan@metoffice.gov.uk",0.0375,0.0075,1.2,0.65)
+draw.label("philip.brohan@metoffice.gov.uk",0.12,0.0075,1.2,0.65)
 
 dev.off()
+
 
