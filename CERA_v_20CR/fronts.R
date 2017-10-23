@@ -1,4 +1,4 @@
-#!/usr/bin/Rscript --no-save
+#!/usr/bin/env Rscript
 
 # Compare the CERA20C and 20CR2c ensembles
 # Print quality - A0 format

@@ -52,8 +52,17 @@ get.new.data<-function(day,hour){
   }
   return(new.data[day,hour+3]*100)
 }
-source('./assimilate.R')
+source('./assimilate_multi.R')
 source('validation_data.R')
+
+# Filter and order the obs
+included<-which(!is.na(mslp$X1903020718))
+stations<-stations[included,]
+mslp<-data.frame(X1903020718=mslp$X1903020718[included])
+
+order<-order(mslp$X1903020718)
+mslp<-data.frame(X1903020718=mslp$X1903020718[order]*3386.39) # Inches -> Pa
+stations<-stations[order,]
 
 Draw.pressure<-function(mslp,Options,colour=c(0,0,0,1)) {
   
@@ -203,25 +212,30 @@ plot.hour<-function(year,month,day,hour) {
 
     # Mark the validation obs
     vs.col<-rgb(255,215,0,255,maxColorValue=255)
-    included<-c(1,2,3,4,5,6,7,8,9,
-            10,11,12,13,14,15,16,17,18,19,
-            20,21,22,24,25,26,27)
-    included<-c(23,25,27)
+    included<-c(2,3,5,7,12,15,16,17,18,19,20,22,23)
+    included<-c(2,5,7,15,18,23)
     for(s in seq_along(stations$name)) {
-       if(!s %in% included) next 
-           rll<-GSDF.ll.to.rg(stations$latitude[s],
-                               stations$longitude[s],
-                               Options$pole.lat,Options$pole.lon)
+       rll<-GSDF.ll.to.rg(stations$latitude[s],
+                          stations$longitude[s],
+                          Options$pole.lat,Options$pole.lon)
+       if(s %in% included) {
         grid.points(x=unit(rll$lon,'native'),
                     y=unit(rll$lat,'native'),
                     size=unit(Options$obs.size*0.5,'native'),
                     pch=21,
                     gp=gpar(col='black',fill='black'))
+       } else {
+               grid.points(x=unit(rll$lon,'native'),
+                    y=unit(rll$lat,'native'),
+                    size=unit(Options$obs.size*0.5,'native'),
+                    pch=21,
+                    gp=gpar(col='yellow',fill='yellow'))
+       }    
     }
      # Assimilate al the validation obs
-       asm<-EnKF.field.assimilate(asm,asm,list(Latitude=stations$latitude[included],
+       asm<-EnKF.field.assimilate(e,e,list(Latitude=stations$latitude[included],
                                               Longitude=stations$longitude[included],
-                                              value=mslp$X1903020718[included]*3386.39))
+                                              value=mslp$X1903020718[included]))
       for(vn in seq_along(members)) {
             m<-GSDF.select.from.1d(asm,'ensemble',vn)
   	    #m$data[]<-as.vector(m$data)-as.vector(prmsl.normal$data)

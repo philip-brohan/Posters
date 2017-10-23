@@ -29,6 +29,15 @@ get.new.data<-function(day,hour){
 source('./assimilate_multi.R')
 source('validation_data.R')
 
+# Filter and order the obs
+included<-which(!is.na(mslp$X1903020718))
+stations<-stations[included,]
+mslp<-data.frame(X1903020718=mslp$X1903020718[included])
+
+order<-order(mslp$X1903020718)
+mslp<-data.frame(X1903020718=mslp$X1903020718[order]*3386.39) # Inches -> Pa
+stations<-stations[order,]
+
 # Get the reanalysis data
 e<-TWCR.get.members.slice.at.hour('prmsl',opt$year,opt$month,
                                           opt$day,opt$hour,
@@ -36,18 +45,14 @@ e<-TWCR.get.members.slice.at.hour('prmsl',opt$year,opt$month,
 
 # Assimilate the Fort William ob.
 #asm<-EnKF.field.assimilate(e,e,list(Latitude=station.lat,
-#                                          Longitude=station.lon,
-#                                          value=get.new.data(opt$day,opt$hour)))
-included<-c(26)
-asm<-EnKF.field.assimilate(e,e,list(Latitude=stations$latitude[included],
-                                        Longitude=stations$longitude[included],
-                                        value=mslp$X1903020718[included]*3386.39))
+#                                    Longitude=station.lon,
+#                                    value=get.new.data(opt$day,opt$hour)))
 
-# List of assimilation stations to compare
-included<-c(1,2,3,4,5,6,7,8,9,
-            10,11,12,13,14,15,16,17,18,19,
-            20,21,22,24,25,26,27)
-order<-order(mslp$X1903020718[included])
+# Assimilate some of the validation obs
+assimilated<-c(2,3,5,7,12,15,16,17,18,19,20,22,23)
+asm<-EnKF.field.assimilate(e,e,list(Latitude=stations$latitude[assimilated],
+                                        Longitude=stations$longitude[assimilated],
+                                        value=mslp$X1903020718[assimilated]))
 
 # Make the plot
 pdf(file=sprintf("%s/validation.pdf",Imagedir),
@@ -58,11 +63,11 @@ pdf(file=sprintf("%s/validation.pdf",Imagedir),
                           just=c("left","bottom"),name="Page",clip='off'))
        pushViewport(plotViewport(margins=c(0,0,3,10)))
           pushViewport(dataViewport(c(97500,102700),c(1,27),clip='off'))
-             grid.xaxis(main=F)
+             grid.xaxis(main=F,at=seq(98000,102500,500))
              grid.text('MSLP',y=unit(-3,'lines'))
-             grid.yaxis(at=seq(1,length(included)),
-                        label=stations$name[included][order]
-                        ,main=F)
+             grid.yaxis(at=seq(1,length(stations$latitude)),
+                        label=stations$name,
+                        main=F)
 
  
             # Add the 20CR Pressures
@@ -72,8 +77,8 @@ pdf(file=sprintf("%s/validation.pdf",Imagedir),
                at.stations<-GSDF.interpolate.ll(ens.m,
                                                 stations$latitude,
                                                 stations$longitude)
-               grid.points(x=unit(at.stations[included][order],'native'),
-                           y=unit(jitter(seq(1,length(included)),
+               grid.points(x=unit(at.stations,'native'),
+                           y=unit(jitter(seq(1,length(at.stations)),
                                          amount=0.1)+0.15,'native'),
                            pch=21,gp=gp,size=unit(0.003,'snpc'))
             }
@@ -85,8 +90,8 @@ pdf(file=sprintf("%s/validation.pdf",Imagedir),
                at.stations<-GSDF.interpolate.ll(ens.m,
                                                 stations$latitude,
                                                 stations$longitude)
-               grid.points(x=unit(at.stations[included][order],'native'),
-                           y=unit(jitter(seq(1,length(included)),
+               grid.points(x=unit(at.stations,'native'),
+                           y=unit(jitter(seq(1,length(at.stations)),
                                          amount=0.1)-0.15,'native'),
                            pch=21,gp=gp,size=unit(0.003,'snpc'))
                
@@ -94,9 +99,8 @@ pdf(file=sprintf("%s/validation.pdf",Imagedir),
 
            # Plot the observed pressures
             gp<-gpar(col='black',fill='black',lwd=2)
-            for(s in seq(1,length(included))) {
-              grid.lines(x=unit(mslp$X1903020718[included][order][s]*3386.39,
-                                                                'native'),
+            for(s in seq(1,length(mslp$X1903020718))) {
+              grid.lines(x=unit(mslp$X1903020718[s],'native'),
                         y=unit(c(s-0.3,s+0.3),'native'),
                         gp=gp)
             }

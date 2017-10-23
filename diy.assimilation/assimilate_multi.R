@@ -23,7 +23,6 @@ EnKF.field.assimilate<-function(target,constraint,observation) {
                                       dim=c(1,
                                       length(observation$Latitude))))
   names(observation.frame)<-names(constraint.frame)
-  
  # do the assimilation at each grid cell in target
   result<-target
   dim.lat<-GSDF.find.dimension(target,'lat')
@@ -51,6 +50,6 @@ EnKF.field.assimilate<-function(target,constraint,observation) {
 # result is target post-assimilation
 EnKF.assimilate<-function(target,constraint,observation) {
   m<-lm(cbind(target,constraint))
-  result<-fitted(m,observation)
+  result<-predict(m,observation)+residuals(m)
   return(result)
 }
