@@ -50,6 +50,5 @@ EnKF.field.assimilate<-function(target,constraint,observation) {
 # result is target post-assimilation
 EnKF.assimilate<-function(target,constraint,observation) {
   m<-lm(cbind(target,constraint))
-  result<-predict(m,observation)+residuals(m)
-  return(result)
+  predict(m,observation)+residuals(m)
 }

@@ -81,9 +81,7 @@ Draw.pressure<-function(mslp,Options,colour=c(0,0,0,1)) {
       M<-GSDF.regrid.2d(M,M2)
     }
     z<-matrix(data=M$data,nrow=length(longs),ncol=length(lats))
-    contour.levels<-seq(Options$mslp.base-Options$mslp.range,
-                        Options$mslp.base+Options$mslp.range,
-                        Options$mslp.step)
+    contour.levels<-seq(95000,105000,500)
     lines<-contourLines(longs,lats,z,
                          levels=contour.levels)
     if(!is.na(lines) && length(lines)>0) {
@@ -101,7 +99,10 @@ Draw.pressure<-function(mslp,Options,colour=c(0,0,0,1)) {
              }, warning = function(w) {
                  print(w)
              }, error = function(e) {
-                print(e)
+                # Hit MAXNUMPTS error - use straight lines instead
+                grid.lines(x=unit(lines[[i]]$x,'native'),
+                           y=unit(lines[[i]]$y,'native'),
+                           gp=gp)
              }, finally = {
                 # Do nothing
              })
@@ -212,8 +213,7 @@ plot.hour<-function(year,month,day,hour) {
 
     # Mark the validation obs
     vs.col<-rgb(255,215,0,255,maxColorValue=255)
-    included<-c(2,3,5,7,12,15,16,17,18,19,20,22,23)
-    included<-c(2,5,7,15,18,23)
+    included<-c(2,3,5,9,12,15,16,18,20,22)
     for(s in seq_along(stations$name)) {
        rll<-GSDF.ll.to.rg(stations$latitude[s],
                           stations$longitude[s],
