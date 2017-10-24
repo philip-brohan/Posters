@@ -24,10 +24,10 @@ Options<-WeatherMap.set.option(Options,'sea.colour',rgb(200,200,200,255,
 
 range<-8
 aspect<-1/sqrt(2)
-Options<-WeatherMap.set.option(Options,'lat.min',range*-1+3)
-Options<-WeatherMap.set.option(Options,'lat.max',range+3)
-Options<-WeatherMap.set.option(Options,'lon.min',range*aspect*-1-1)
-Options<-WeatherMap.set.option(Options,'lon.max',range*aspect-1)
+Options<-WeatherMap.set.option(Options,'lat.min',range*-1+2)
+Options<-WeatherMap.set.option(Options,'lat.max',range+2)
+Options<-WeatherMap.set.option(Options,'lon.min',range*aspect*-1-1.5)
+Options<-WeatherMap.set.option(Options,'lon.max',range*aspect-1.5)
 Options<-WeatherMap.set.option(Options,'pole.lon',177.5)
 Options<-WeatherMap.set.option(Options,'pole.lat',37.5)
 
@@ -35,7 +35,7 @@ Options$obs.size<- 0.15
 
 land<-WeatherMap.get.land(Options)
 
-Options$mslp.lwd<-2
+Options$mslp.lwd<-1
 Options$mslp.base=101325                    # Base value for anomalies
 Options$mslp.range=50000                    # Anomaly for max contour
 Options$mslp.step=750                       # Smaller -more contours
@@ -150,6 +150,23 @@ draw.grid<-function(Options) {
     }
 }
 
+draw.label<-function(label,xp,yp,scale=1,tp=0.85) {
+    label.gp<-gpar(family='Helvetica',font=1,col='black',cex=scale)
+    xp<-unit(xp,'npc')
+    yp<-unit(yp,'npc')    
+    tg<-textGrob(label,x=xp,y=yp,
+                              just='center',
+                              gp=label.gp)
+   bg.gp<-gpar(col=rgb(1,1,1,0),fill=rgb(1,1,1,tp))
+   h<-heightDetails(tg)*(scale/2)
+   w<-widthDetails(tg)*(scale/2)
+   b<-unit(0.3,'char') # border
+   grid.polygon(x=unit.c(xp+w+b,xp-w-b,xp-w-b,xp+w+b),
+                y=unit.c(yp+h+b,yp+h+b,yp-h-b,yp-h-b),
+                gp=bg.gp)
+   grid.draw(tg)
+}
+
 plot.hour<-function(year,month,day,hour) {    
 
     version<-'3.5.1'
@@ -189,12 +206,12 @@ plot.hour<-function(year,month,day,hour) {
                                           value=get.new.data(day,hour)))
       for(vn in seq_along(members)) {
             m<-GSDF.select.from.1d(asm,'ensemble',vn)
-  	    Draw.pressure(m,Options,colour=c(1,0,0,0.5))
+  	    Draw.pressure(m,Options,colour=c(1,0,0,1.0))
        }
     
       for(vn in seq_along(members)) {
             m<-GSDF.select.from.1d(e,'ensemble',vn)
-  	    Draw.pressure(m,Options,colour=c(0,0,1,0.5))
+  	    Draw.pressure(m,Options,colour=c(0,0,1,1.0))
       }
 
      # Assimilate the validation obs
@@ -204,11 +221,9 @@ plot.hour<-function(year,month,day,hour) {
                                               value=mslp$X1903020718[included]))
       for(vn in seq_along(members)) {
             m<-GSDF.select.from.1d(asm,'ensemble',vn)
-  	    Draw.pressure(m,Options,colour=c(0,0,0,0.5))
+  	    Draw.pressure(m,Options,colour=c(0,0,0,1.0))
        }
     
-      Options$label<-sprintf("%04d-%02d-%02d:%02d",year,month,day,as.integer(hour))
-      WeatherMap.draw.label(Options)
       obs<-TWCR.get.obs(year,month,day,hour,version=version)
       w<-which(obs$Longitude>180)
       obs$Longitude[w]<-obs$Longitude[w]-360
@@ -249,9 +264,22 @@ plot.hour<-function(year,month,day,hour) {
 }
 plot.hour(opt$year,opt$month,opt$day,opt$hour)
 
-# Add an overlay to be filled by the key
+# Add overlays to be filled by the key
 grid.polygon(x=unit(c(0.025,0.38,0.38,0.025),'npc'),
-             y=unit(c(0.525,0.525,0.975,0.975),'npc'),
-             gp=gpar(col=rgb(1,1,1,0),fill=rgb(1,1,1,0.6)))
+             y=unit(c(0.795,0.795,0.975,0.975),'npc'),
+             gp=gpar(col=rgb(1,1,1,0),fill=rgb(1,1,1,0.7)))
+
+grid.polygon(x=unit(c(0.025,0.38,0.38,0.025),'npc'),
+             y=unit(c(0.025,0.025,0.255,0.255),'npc'),
+             gp=gpar(col=rgb(1,1,1,0),fill=rgb(1,1,1,0.7)))
+
+
+draw.label(sprintf("%04d-%02d-%02d:%02d",opt$year,opt$month,opt$day,as.integer(opt$hour)),
+                   0.85,0.975,1.25,0.7)
+
+
+# Signature
+draw.label("philip.brohan@metoffice.gov.uk",0.8,0.01,0.5,0.3)
+
 
 dev.off()
