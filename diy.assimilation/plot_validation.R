@@ -30,7 +30,8 @@ source('./assimilate_multi.R')
 source('validation_data.R')
 
 # Filter and order the obs
-included<-which(!is.na(mslp$X1903020718))
+included<-c(1,2,3,4,6,7,8,9,10,11,12,14,15,16,17,19,20,
+            21,22,24,25,26,27)
 stations<-stations[included,]
 mslp<-data.frame(X1903020718=mslp$X1903020718[included])
 
@@ -49,7 +50,7 @@ e<-TWCR.get.members.slice.at.hour('prmsl',opt$year,opt$month,
 #                                    value=get.new.data(opt$day,opt$hour)))
 
 # Assimilate some of the validation obs
-assimilated<-c(2,3,5,7,12,15,16,17,18,19,20,22,23)
+assimilated<-c(2,3,4,8,11,14,16,18,20,21)
 asm<-EnKF.field.assimilate(e,e,list(Latitude=stations$latitude[assimilated],
                                         Longitude=stations$longitude[assimilated],
                                         value=mslp$X1903020718[assimilated]))

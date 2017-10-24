@@ -31,7 +31,7 @@ Options<-WeatherMap.set.option(Options,'lon.max',range*aspect-1)
 Options<-WeatherMap.set.option(Options,'pole.lon',177.5)
 Options<-WeatherMap.set.option(Options,'pole.lat',37.5)
 
-Options$obs.size<- 0.2
+Options$obs.size<- 0.15
 
 land<-WeatherMap.get.land(Options)
 
@@ -55,7 +55,8 @@ source('./assimilate_multi.R')
 source('validation_data.R')
 
 # Filter and order the obs
-included<-which(!is.na(mslp$X1903020718))
+included<-c(1,2,3,4,6,7,8,9,10,11,12,14,15,16,17,19,20,
+            21,22,24,25,26,27)
 stations<-stations[included,]
 mslp<-data.frame(X1903020718=mslp$X1903020718[included])
 
@@ -180,18 +181,7 @@ plot.hour<-function(year,month,day,hour) {
   				      extension=0))
       draw.grid(Options)
       WeatherMap.draw.land(land,Options)
-      obs<-TWCR.get.obs(year,month,day,hour,version=version)
-      w<-which(obs$Longitude>180)
-      obs$Longitude[w]<-obs$Longitude[w]-360
-      Options$obs.colour<-rgb(0,0,1,1)
-      WeatherMap.draw.obs(obs,Options)
-
-      for(vn in seq_along(members)) {
-            m<-GSDF.select.from.1d(e,'ensemble',vn)
-  	    #m$data[]<-as.vector(m$data)-as.vector(prmsl.normal$data)
-  	    Draw.pressure(m,Options,colour=c(0,0,1,0.5))
-      }
-
+    
     # Assimilate the Fort William ob.
       rll<-GSDF.ll.to.rg(station.lat,station.lon,Options$pole.lat,Options$pole.lon)
       asm<-EnKF.field.assimilate(e,e,list(Latitude=station.lat,
@@ -199,9 +189,32 @@ plot.hour<-function(year,month,day,hour) {
                                           value=get.new.data(day,hour)))
       for(vn in seq_along(members)) {
             m<-GSDF.select.from.1d(asm,'ensemble',vn)
-  	    #m$data[]<-as.vector(m$data)-as.vector(prmsl.normal$data)
   	    Draw.pressure(m,Options,colour=c(1,0,0,0.5))
        }
+    
+      for(vn in seq_along(members)) {
+            m<-GSDF.select.from.1d(e,'ensemble',vn)
+  	    Draw.pressure(m,Options,colour=c(0,0,1,0.5))
+      }
+
+     # Assimilate the validation obs
+       included<-c(2,3,4,8,9,11,14,16,18,20,21)
+       asm<-EnKF.field.assimilate(e,e,list(Latitude=stations$latitude[included],
+                                              Longitude=stations$longitude[included],
+                                              value=mslp$X1903020718[included]))
+      for(vn in seq_along(members)) {
+            m<-GSDF.select.from.1d(asm,'ensemble',vn)
+  	    Draw.pressure(m,Options,colour=c(0,0,0,0.5))
+       }
+    
+      Options$label<-sprintf("%04d-%02d-%02d:%02d",year,month,day,as.integer(hour))
+      WeatherMap.draw.label(Options)
+      obs<-TWCR.get.obs(year,month,day,hour,version=version)
+      w<-which(obs$Longitude>180)
+      obs$Longitude[w]<-obs$Longitude[w]-360
+      Options$obs.colour<-rgb(0,0,1,1)
+      WeatherMap.draw.obs(obs,Options)
+
 
     # Mark the Fort William ob
     grid.points(x=unit(rll$lon,'native'),
@@ -212,7 +225,6 @@ plot.hour<-function(year,month,day,hour) {
 
     # Mark the validation obs
     vs.col<-rgb(255,215,0,255,maxColorValue=255)
-    included<-c(2,3,5,9,12,15,16,18,20,22)
     for(s in seq_along(stations$name)) {
        rll<-GSDF.ll.to.rg(stations$latitude[s],
                           stations$longitude[s],
@@ -220,29 +232,17 @@ plot.hour<-function(year,month,day,hour) {
        if(s %in% included) {
         grid.points(x=unit(rll$lon,'native'),
                     y=unit(rll$lat,'native'),
-                    size=unit(Options$obs.size*0.5,'native'),
+                    size=unit(Options$obs.size,'native'),
                     pch=21,
                     gp=gpar(col='black',fill='black'))
        } else {
                grid.points(x=unit(rll$lon,'native'),
                     y=unit(rll$lat,'native'),
-                    size=unit(Options$obs.size*0.5,'native'),
+                    size=unit(Options$obs.size,'native'),
                     pch=21,
                     gp=gpar(col='yellow',fill='yellow'))
        }    
     }
-     # Assimilate the validation obs
-       asm<-EnKF.field.assimilate(e,e,list(Latitude=stations$latitude[included],
-                                              Longitude=stations$longitude[included],
-                                              value=mslp$X1903020718[included]))
-      for(vn in seq_along(members)) {
-            m<-GSDF.select.from.1d(asm,'ensemble',vn)
-  	    #m$data[]<-as.vector(m$data)-as.vector(prmsl.normal$data)
-  	    Draw.pressure(m,Options,colour=c(0,0,0,0.5))
-       }
-    
-      Options$label<-sprintf("%04d-%02d-%02d:%02d",year,month,day,as.integer(hour))
-      WeatherMap.draw.label(Options)
     
     upViewport()
     
