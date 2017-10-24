@@ -1,7 +1,6 @@
 #!/usr/bin/env Rscript
 
 # Show the effect of assimilating additional observations
-#  from Fort William
 
 library(GSDF.TWCR)
 library(GSDF.WeatherMap)
@@ -232,7 +231,7 @@ plot.hour<-function(year,month,day,hour) {
                     gp=gpar(col='yellow',fill='yellow'))
        }    
     }
-     # Assimilate al the validation obs
+     # Assimilate the validation obs
        asm<-EnKF.field.assimilate(e,e,list(Latitude=stations$latitude[included],
                                               Longitude=stations$longitude[included],
                                               value=mslp$X1903020718[included]))
@@ -247,7 +246,12 @@ plot.hour<-function(year,month,day,hour) {
     
     upViewport()
     
-    dev.off()
 }
-
 plot.hour(opt$year,opt$month,opt$day,opt$hour)
+
+# Add an overlay to be filled by the key
+grid.polygon(x=unit(c(0.025,0.38,0.38,0.025),'npc'),
+             y=unit(c(0.525,0.525,0.975,0.975),'npc'),
+             gp=gpar(col=rgb(1,1,1,0),fill=rgb(1,1,1,0.6)))
+
+dev.off()
