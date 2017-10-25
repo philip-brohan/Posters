@@ -45,15 +45,15 @@ e<-TWCR.get.members.slice.at.hour('prmsl',opt$year,opt$month,
                                           version='3.5.1')
 
 # Assimilate the Fort William ob.
-#asm<-EnKF.field.assimilate(e,e,list(Latitude=station.lat,
-#                                    Longitude=station.lon,
-#                                    value=get.new.data(opt$day,opt$hour)))
+asm<-EnKF.field.assimilate(e,e,list(Latitude=station.lat,
+                                    Longitude=station.lon,
+                                    value=get.new.data(opt$day,opt$hour)))
 
 # Assimilate some of the validation obs
-assimilated<-c(2,3,4,8,11,14,16,18,20,21)
-asm<-EnKF.field.assimilate(e,e,list(Latitude=stations$latitude[assimilated],
-                                        Longitude=stations$longitude[assimilated],
-                                        value=mslp$X1903020718[assimilated]))
+#assimilated<-c(2,3,4,8,11,14,16,18,20,21)
+#asm<-EnKF.field.assimilate(e,e,list(Latitude=stations$latitude[assimilated],
+#                                        Longitude=stations$longitude[assimilated],
+#                                        value=mslp$X1903020718[assimilated]))
 
 # Make the plot
 pdf(file=sprintf("%s/validation.pdf",Imagedir),

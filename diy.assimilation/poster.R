@@ -4,7 +4,7 @@
 
 library(GSDF.TWCR)
 library(GSDF.WeatherMap)
-library(parallel)
+#library(extrafont)
 
 opt<-list(year=1903,
           month=2,
@@ -150,6 +150,68 @@ draw.grid<-function(Options) {
     }
 }
 
+
+draw.obs<-function(obs,Options) {
+
+  if(Options$pole.lon!=0 || Options$pole.lat!=90) {
+	   l2<-GSDF.ll.to.rg(obs$Latitude,obs$Longitude,Options$pole.lat,Options$pole.lon)
+	   obs$Longitude<-l2$lon
+	   obs$Latitude<-l2$lat
+  }
+  if(length(obs$Latitude)<1) return()
+  lon.m<-Options$lon.min
+  if(!is.null(Options$vp.lon.min)) lon.m<-Options$vp.lon.min
+  w<-which(obs$Longitude<lon.m)
+  if(length(w)>0) obs$Longitude[w]<-obs$Longitude[w]+360
+  lon.m<-Options$lon.max
+  if(!is.null(Options$vp.lon.max)) lon.m<-Options$vp.lon.max
+  w<-which(obs$Longitude>lon.m)
+  if(length(w)>0) obs$Longitude[w]<-obs$Longitude[w]-360
+  gp<-gpar(col=Options$obs.colour,fill=Options$obs.colour)
+  grid.points(x=unit(obs$Longitude,'native'),
+              y=unit(obs$Latitude,'native'),
+              size=unit(Options$obs.size,'native'),
+              pch=21,gp=gp)
+  if(!is.null(obs$Label)){
+    scale<-0.2
+    offset=0.05
+    label.gp<-gpar(family='Helvetica',font=1,col='black',cex=scale)
+    for(o in seq_along(obs$Longitude)) {
+      if(nchar(obs$Label[o])>0) {
+          xp<-unit(obs$Longitude[o]+offset,'native')
+          yp<-unit(obs$Latitude[o]+offset,'native')    
+          tg<-textGrob(obs$Label[o],x=xp,y=yp,
+                                  just=c('left','bottom'),
+                                  gp=label.gp)
+          bg.gp<-gpar(col=rgb(1,1,1,0),fill=rgb(1,1,1,0.4))
+          h<-heightDetails(tg)*scale
+          w<-widthDetails(tg)*scale
+          b<-unit(1,'mm') # border
+          grid.polygon(x=unit.c(xp-b,xp+w+b,xp+w+b,xp-b),
+                       y=unit.c(yp-b,yp-b,yp+h+b,yp+h+b),
+                       gp=bg.gp)
+          grid.draw(tg)
+      }
+      if(nchar(obs$Value[o])>0) {
+          xp<-unit(obs$Longitude[o]+offset,'native')
+          yp<-unit(obs$Latitude[o]-offset,'native')    
+          tg<-textGrob(obs$Value[o],x=xp,y=yp,
+                                  just=c('left','top'),
+                                  gp=label.gp)
+          bg.gp<-gpar(col=rgb(1,1,1,0),fill=rgb(1,1,1,0.4))
+          h<-heightDetails(tg)*scale
+          w<-widthDetails(tg)*scale
+          b<-unit(1,'mm') # border
+          grid.polygon(x=unit.c(xp-b,xp+w+b,xp+w+b,xp-b),
+                       y=unit.c(yp+b,yp+b,yp-h-b,yp-h-b),
+                       gp=bg.gp)
+          grid.draw(tg)
+      }
+    }
+  }
+  
+}
+
 draw.label<-function(label,xp,yp,scale=1,tp=0.85) {
     label.gp<-gpar(family='Helvetica',font=1,col='black',cex=scale)
     xp<-unit(xp,'npc')
@@ -170,15 +232,9 @@ draw.label<-function(label,xp,yp,scale=1,tp=0.85) {
 plot.hour<-function(year,month,day,hour) {    
 
     version<-'3.5.1'
-       prmsl.normal<-TWCR.get.slice.at.hour('prmsl',year,month,day,hour,version='3.4.1',
-                                               type='normal')
        e<-TWCR.get.members.slice.at.hour('prmsl',year,month,day,
                                   hour,version=version)
       m<-GSDF.select.from.1d(e,'ensemble',1)
-      #prmsl.normal<-GSDF.regrid.2d(prmsl.normal,m)
-      obs<-TWCR.get.obs(year,month,day,hour,version=version)
-      w<-which(obs$Longitude>180)
-      obs$Longitude[w]<-obs$Longitude[w]-360
     image.name<-sprintf("%04d-%02d-%02d:%02d:%02d.png",year,month,day,as.integer(hour),
                                                          as.integer(hour%%1*60))
     ifile.name<-sprintf("%s/%s",Imagedir,image.name)
@@ -224,38 +280,45 @@ plot.hour<-function(year,month,day,hour) {
   	    Draw.pressure(m,Options,colour=c(0,0,0,1.0))
        }
     
-      obs<-TWCR.get.obs(year,month,day,hour,version=version)
+      obs<-TWCR.get.obs.1file(year,month,day,hour,version=version)
       w<-which(obs$Longitude>180)
       obs$Longitude[w]<-obs$Longitude[w]-360
+      l2<-GSDF.ll.to.rg(obs$Latitude,obs$Longitude,Options$pole.lat,Options$pole.lon)
+      w<-which(l2$lon> Options$lon.min & l2$lon< Options$lon.max &
+               l2$lat>Options$lat.min & l2$lat< Options$lat.max)
+      obs<-obs[w,]
+      w<-which(!(duplicated(obs$Longitude) & duplicated(obs$Latitude)))
+      obs<-obs[w,]
+      obs$Label=trimws(obs$Name)
+      obs$Value=obs$SLP
       Options$obs.colour<-rgb(0,0,1,1)
-      WeatherMap.draw.obs(obs,Options)
-
+      draw.obs(obs,Options)
 
     # Mark the Fort William ob
-    grid.points(x=unit(rll$lon,'native'),
-                y=unit(rll$lat,'native'),
-                size=unit(Options$obs.size,'native'),
-                pch=21,
-                gp=gpar(col='red',fill='red'))
+         obs<-list(Latitude=station.lat,
+                   Longitude=station.lon,
+                   Label="Fort William",
+                   Value=sprintf("%d",round(get.new.data(day,hour)/100)))
+         Options$obs.colour<-'red'
+         draw.obs(obs,Options) 
 
     # Mark the validation obs
     vs.col<-rgb(255,215,0,255,maxColorValue=255)
     for(s in seq_along(stations$name)) {
-       rll<-GSDF.ll.to.rg(stations$latitude[s],
-                          stations$longitude[s],
-                          Options$pole.lat,Options$pole.lon)
        if(s %in% included) {
-        grid.points(x=unit(rll$lon,'native'),
-                    y=unit(rll$lat,'native'),
-                    size=unit(Options$obs.size,'native'),
-                    pch=21,
-                    gp=gpar(col='black',fill='black'))
+         obs<-list(Latitude=stations$latitude[s],
+                   Longitude=stations$longitude[s],
+                   Label=as.character(stations$name[s]),
+                   Value=sprintf("%d",round(mslp$X1903020718[s]/100)))
+         Options$obs.colour<-'black'
+         draw.obs(obs,Options) 
        } else {
-               grid.points(x=unit(rll$lon,'native'),
-                    y=unit(rll$lat,'native'),
-                    size=unit(Options$obs.size,'native'),
-                    pch=21,
-                    gp=gpar(col='yellow',fill='yellow'))
+         obs<-list(Latitude=stations$latitude[s],
+                   Longitude=stations$longitude[s],
+                   Label=as.character(stations$name[s]),
+                   Value=sprintf("%d",round(mslp$X1903020718[s]/100)))
+         Options$obs.colour<-'yellow'
+         draw.obs(obs,Options) 
        }    
     }
     
