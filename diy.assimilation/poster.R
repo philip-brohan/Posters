@@ -151,7 +151,7 @@ draw.grid<-function(Options) {
 }
 
 
-draw.obs<-function(obs,Options) {
+draw.obs<-function(obs,Options,pch=21) {
 
   if(Options$pole.lon!=0 || Options$pole.lat!=90) {
 	   l2<-GSDF.ll.to.rg(obs$Latitude,obs$Longitude,Options$pole.lat,Options$pole.lon)
@@ -167,11 +167,11 @@ draw.obs<-function(obs,Options) {
   if(!is.null(Options$vp.lon.max)) lon.m<-Options$vp.lon.max
   w<-which(obs$Longitude>lon.m)
   if(length(w)>0) obs$Longitude[w]<-obs$Longitude[w]-360
-  gp<-gpar(col=Options$obs.colour,fill=Options$obs.colour)
+  gp<-gpar(col=Options$obs.colour,fill=Options$obs.colour,lwd=10)
   grid.points(x=unit(obs$Longitude,'native'),
               y=unit(obs$Latitude,'native'),
               size=unit(Options$obs.size,'native'),
-              pch=21,gp=gp)
+              pch=pch,gp=gp)
   if(!is.null(obs$Label)){
     scale<-0.2
     offset=0.05
@@ -212,22 +212,36 @@ draw.obs<-function(obs,Options) {
   
 }
 
-draw.label<-function(label,xp,yp,scale=1,tp=0.85) {
+draw.label<-function(label,xp,yp,scale=1,tp=0.85,unit='npc') {
     label.gp<-gpar(family='Helvetica',font=1,col='black',cex=scale)
-    xp<-unit(xp,'npc')
-    yp<-unit(yp,'npc')    
+    xp<-unit(xp,unit)
+    yp<-unit(yp,unit)    
     tg<-textGrob(label,x=xp,y=yp,
                               just='center',
                               gp=label.gp)
    bg.gp<-gpar(col=rgb(1,1,1,0),fill=rgb(1,1,1,tp))
    h<-heightDetails(tg)*(scale/2)
    w<-widthDetails(tg)*(scale/2)
-   b<-unit(0.3,'char') # border
+   b<-unit(5*scale,'mm') # border
    grid.polygon(x=unit.c(xp+w+b,xp-w-b,xp-w-b,xp+w+b),
                 y=unit.c(yp+h+b,yp+h+b,yp-h-b,yp-h-b),
                 gp=bg.gp)
    grid.draw(tg)
 }
+
+label.contours<-function(e,Options) {
+    e<-GSDF.reduce.1d(e,'ensemble',mean)
+    lat<-seq(40,70,0.01)
+    lon<-rep(2.5,length(lat))
+    f<-GSDF.interpolate.ll(e,lat,lon)
+    for(p in seq(95000,105000,500)) {
+        i<-which.min(abs(f-p))
+    	l2<-GSDF.ll.to.rg(lat[i],lon[i],Options$pole.lat,Options$pole.lon)
+        draw.label(sprintf("%d",p/100),l2$lon,l2$lat,0.75,0.5,unit='native')
+    }
+}
+               
+
 
 plot.hour<-function(year,month,day,hour) {    
 
@@ -278,7 +292,10 @@ plot.hour<-function(year,month,day,hour) {
       for(vn in seq_along(members)) {
             m<-GSDF.select.from.1d(asm,'ensemble',vn)
   	    Draw.pressure(m,Options,colour=c(0,0,0,1.0))
-       }
+        }
+
+    # Put on the contour labels
+      label.contours(asm,Options)
     
       obs<-TWCR.get.obs.1file(year,month,day,hour,version=version)
       w<-which(obs$Longitude>180)
@@ -317,8 +334,8 @@ plot.hour<-function(year,month,day,hour) {
                    Longitude=stations$longitude[s],
                    Label=as.character(stations$name[s]),
                    Value=sprintf("%d",round(mslp$X1903020718[s]/100)))
-         Options$obs.colour<-'yellow'
-         draw.obs(obs,Options) 
+         Options$obs.colour<-'black'
+         draw.obs(obs,Options,pch=1) 
        }    
     }
     
@@ -329,11 +346,11 @@ plot.hour(opt$year,opt$month,opt$day,opt$hour)
 
 # Add overlays to be filled by the key
 grid.polygon(x=unit(c(0.025,0.38,0.38,0.025),'npc'),
-             y=unit(c(0.795,0.795,0.975,0.975),'npc'),
+             y=unit(c(0.798,0.798,0.975,0.975),'npc'),
              gp=gpar(col=rgb(1,1,1,0),fill=rgb(1,1,1,0.7)))
 
 grid.polygon(x=unit(c(0.025,0.38,0.38,0.025),'npc'),
-             y=unit(c(0.025,0.025,0.255,0.255),'npc'),
+             y=unit(c(0.028,0.028,0.258,0.258),'npc'),
              gp=gpar(col=rgb(1,1,1,0),fill=rgb(1,1,1,0.7)))
 
 
