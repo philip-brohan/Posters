@@ -35,7 +35,7 @@ Options$obs.size<- 0.15
 
 land<-WeatherMap.get.land(Options)
 
-Options$mslp.lwd<-1
+Options$mslp.lwd<-1.5
 Options$mslp.base=101325                    # Base value for anomalies
 Options$mslp.range=50000                    # Anomaly for max contour
 Options$mslp.step=750                       # Smaller -more contours
@@ -226,12 +226,12 @@ draw.label<-function(label,xp,yp,scale=1,tp=0.85,unit='npc') {
 
 label.contours<-function(e,Options) {
     e<-GSDF.reduce.1d(e,'ensemble',mean)
-    lat<-seq(45,60,0.01)
-    lon<-rep(2.5,length(lat))
+    lat<-seq(50,58,0.01)
+    lon<-rep(seq(-12,0,0.015))
     f<-GSDF.interpolate.ll(e,lat,lon)
-    for(p in seq(9700,99400,800)) {
+    for(p in seq(97000,100900,800)) {
         i<-which.min(abs(f-p))
-    	l2<-GSDF.ll.to.rg(lat[i],lon[i],Options$pole.lat,Options$pole.lon)
+    	l2<-GSDF.ll.to.rg(lat[i],lon[i]+0.3,Options$pole.lat,Options$pole.lon)
         draw.label(sprintf("%d",p/100),l2$lon,l2$lat,0.75,0.5,unit='native')
     }
 }
@@ -337,18 +337,19 @@ plot.hour<-function(year,month,day,hour) {
     
     upViewport()
     
-   # Add the point-comparison plot
-    pushViewport(viewport(width=0.2,height=0.2,x=0.78,y=0.0141,
-                          just=c("left","bottom"),name="Page",clip='off',
-                          gp=gpar(fontsize=16)))
+    # Add the point-comparison plot
+    h<-0.258-0.028
+    pushViewport(viewport(width=h*sqrt(2),height=h,x=1-0.025,y=0.018,
+                          just=c("right","bottom"),name="Page",clip='off',
+                          gp=gpar(fontsize=48)))
        grid.polygon(x=unit(c(0,1,1,0),'npc'),
                     y=unit(c(0,0,1,1),'npc'),
                     gp=gpar(col=rgb(1,1,1,0),fill=rgb(1,1,1,0.8)))
-       pushViewport(plotViewport(margins=c(0,0,3,11)))
+       pushViewport(plotViewport(margins=c(2,0,3,8)))
           pushViewport(dataViewport(c(96500,101000),c(1,length(stations$name)),clip='off'))
              grid.xaxis(main=F,at=seq(96500,101000,500),
                                label=sprintf("%d",seq(96500,101000,500)/100))
-             grid.text('Observation and ensemble spreads at each DWR station',y=unit(1,'lines'))
+             grid.text('Observation (vertical bar) and ensemble spreads at each DWR station',y=unit(-1,'lines'))
              grid.yaxis(at=seq(length(stations$latitude),1,-1),
                         label=stations$name,
                         main=F)
@@ -363,7 +364,7 @@ plot.hour<-function(year,month,day,hour) {
                grid.points(x=unit(at.stations,'native'),
                            y=unit(jitter(seq(length(at.stations),1,-1),
                                          amount=0.1)+0.25,'native'),
-                           pch=21,gp=gp,size=unit(0.003,'snpc'))
+                           pch=21,gp=gp,size=unit(0.005,'snpc'))
             }
                
             # Add the post-FW Pressures
@@ -376,7 +377,7 @@ plot.hour<-function(year,month,day,hour) {
                grid.points(x=unit(at.stations,'native'),
                            y=unit(jitter(seq(length(at.stations),1,-1),
                                          amount=0.1)-0.00,'native'),
-                           pch=21,gp=gp,size=unit(0.003,'snpc'))
+                           pch=21,gp=gp,size=unit(0.005,'snpc'))
                
             }
 
@@ -390,13 +391,13 @@ plot.hour<-function(year,month,day,hour) {
                grid.points(x=unit(at.stations,'native'),
                            y=unit(jitter(seq(length(at.stations),1,-1),
                                          amount=0.1)-0.25,'native'),
-                           pch=21,gp=gp,size=unit(0.003,'snpc'))
+                           pch=21,gp=gp,size=unit(0.005,'snpc'))
                
             }
 
 
            # Plot the observed pressures
-            gp<-gpar(col='black',fill='black',lwd=2)
+            gp<-gpar(col='black',fill='black',lwd=5)
             ms<-length(stations$X1897112818)+1
             for(s in seq(length(stations$X1897112818),1,-1)) {
               grid.lines(x=unit(stations$X1897112818[s],'native'),
@@ -427,9 +428,6 @@ draw.label(sprintf("%04d-%02d-%02d:%02d",opt$year,opt$month,opt$day,as.integer(o
 
 # Signature
 draw.label("philip.brohan@metoffice.gov.uk",0.1,0.01,0.5,0.6)
-
-
-# Add 
 
 
 dev.off()
