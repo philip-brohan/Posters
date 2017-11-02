@@ -5,7 +5,7 @@ import os
 import numpy
 import matplotlib.pyplot
 import matplotlib.colors
-import mopd
+import Meteorographica.data.mopd as mopd
 
 # Remove incomprehensible error message
 iris.FUTURE.netcdf_promote=True
