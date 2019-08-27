@@ -1,6 +1,11 @@
 # Find times where there are new observations in the China region
 
 import datetime
+import virtualtime
+import os
+import os.path
+import pandas
+
 
 # List of years to look in
 years=(1872,1880,1883,1887,1894,1902,1909,1917,1924,1931,1939,1946,
@@ -46,6 +51,8 @@ def get_obs_1file(year,month,day,hour,version):
     base_dir=get_data_dir(version)
     of_name=get_data_file_name('observations',year,month,day,hour,version)
     if not os.path.isfile(of_name):
+        print version
+        print "%04d-%02d-%02d:%02d" % (year,month,day,hour)
         raise IOError("No obs file for given version and date")
 
     o=pandas.read_fwf(of_name,
@@ -97,10 +104,31 @@ def get_obs_1file(year,month,day,hour,version):
     return(o)
 
 def compare_year(year):
-    comp={}
+    comp=[]
     cdate=datetime.datetime(year,1,1,0)
     while cdate<datetime.datetime(year+1,1,1,0):
-        new_obs=get_obs_1file(cdate.year,cdate.month,cdate.day,cdate.hour,
-                              version='3.5.1')
-        old_obs=get_obs_1file(cdate.year,cdate.month,cdate.day,cdate.hour,
-                              version='3.2.1')
+        try:
+            new_obs=get_obs_1file(cdate.year,cdate.month,cdate.day,cdate.hour,
+                                  version='3.5.1')
+            in_region=(new_obs['Longitude']>60) & (new_obs['Longitude']<160) &\
+                      (new_obs['Latitude']>0)   & (new_obs['Latitude']<70)
+            new_obs=new_obs[in_region]
+            old_obs=get_obs_1file(cdate.year,cdate.month,cdate.day,cdate.hour,
+                                  version='3.2.1')
+            in_region=(old_obs['Longitude']>60) & (old_obs['Longitude']<160) &\
+                      (old_obs['Latitude']>0)   & (old_obs['Latitude']<70)
+            old_obs=old_obs[in_region]
+            comp.append("%04d %04d %04d %s" % (len(new_obs['UID'])-len(old_obs['UID']),
+                                               len(new_obs['UID']),len(old_obs['UID']),
+                                               cdate.strftime("%Y-%m-%d:%H")))
+        except IOError:
+            print "Obs file missing"
+            
+        cdate=cdate+datetime.timedelta(hours=6)
+    return sorted(comp,reverse=True)
+
+for year in years:
+    cy=compare_year(year)
+    for idx in range(20):
+        print cy[idx]
+    print " "
