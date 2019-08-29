@@ -25,28 +25,53 @@ fig=Figure(figsize=(22,22/aspect),              # Width, Height (inches)
            frameon=False,                # Don't draw a frame
            subplotpars=None,
            tight_layout=None)
+fig.set_frameon(False) 
 # Attach a canvas
 canvas=FigureCanvas(fig)
 
-# All mg plots use Rotated Pole: choose a rotation that shows the global
-#  circulation nicely.
-projection=ccrs.RotatedPole(pole_longitude=114.0,
-                                pole_latitude=35.0,
-                                central_rotated_longitude=0.0)
+# Lat:Lon aspect does not match the plot aspect, ignore this and
+#  fill the figure with the plot.
+matplotlib.rc('image',aspect='auto')
+
+# All mg plots use Rotated Pole: choose a rotation that approximates the
+# Spilhaus projection - bordered by land, ocean in the middle.
+projection=ccrs.RotatedPole(pole_longitude=113.0,
+                                pole_latitude=32.0,
+                                central_rotated_longitude=194.0)
 
 # Define an axes to contain the plot. In this case our axes covers
 #  the whole figure
-ax = fig.add_axes([0,0,1,1],projection=projection)
+ax = fig.add_axes([0.1,0,0.9,1],projection=projection)
 ax.set_axis_off() # Don't want surrounding x and y axis
 # Set the axes background colour
 ax.background_patch.set_facecolor((0.88,0.88,0.88,1))
 
 # Lat and lon range (in rotated-pole coordinates) for plot
-extent=[-180.0,180.0,-90.0,90.0]
+extent=[0.0,180.0,-90.0,90.0]
 ax.set_extent(extent, crs=projection)
-# Lat:Lon aspect does not match the plot aspect, ignore this and
-#  fill the figure with the plot.
-matplotlib.rc('image',aspect='auto')
+ax.set_xlim([-180, 180])
+
+# Draw a lat:lon grid
+mg.background.add_grid(ax,
+                       sep_major=5,
+                       sep_minor=2.5,
+                       color=(0,0.3,0,0.2))
+
+
+# Add the land
+land_img=ax.background_img(name='GreyT', resolution='low')
+
+
+# Subsidiary axes to allow more than -180:180 as range
+ax = fig.add_axes([0.0,0,0.1,1],projection=projection)
+ax.set_axis_off() # Don't want surrounding x and y axis
+# Set the axes background colour
+ax.background_patch.set_facecolor((0.88,0.88,0.88,1))
+
+# Lat and lon range (in rotated-pole coordinates) for plot
+extent=[144,180.0,-90.0,90.0]
+ax.set_extent(extent, crs=projection)
+ax.set_xlim([144, 180])
 
 # Draw a lat:lon grid
 mg.background.add_grid(ax,
