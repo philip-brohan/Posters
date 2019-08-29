@@ -37,11 +37,11 @@ matplotlib.rc('image',aspect='auto')
 # Spilhaus projection - bordered by land, ocean in the middle.
 projection=ccrs.RotatedPole(pole_longitude=113.0,
                                 pole_latitude=32.0,
-                                central_rotated_longitude=194.0)
+                                central_rotated_longitude=193.0)
 
 # Define an axes to contain the plot. In this case our axes covers
 #  the whole figure
-ax = fig.add_axes([0.1,0,0.9,1],projection=projection)
+ax = fig.add_axes([22/(360+22),0,360/(360+22),1],projection=projection)
 ax.set_axis_off() # Don't want surrounding x and y axis
 # Set the axes background colour
 ax.background_patch.set_facecolor((0.88,0.88,0.88,1))
@@ -63,15 +63,15 @@ land_img=ax.background_img(name='GreyT', resolution='low')
 
 
 # Subsidiary axes to allow more than -180:180 as range
-ax = fig.add_axes([0.0,0,0.1,1],projection=projection)
+ax = fig.add_axes([0,0,22/(360+22),1],projection=projection)
 ax.set_axis_off() # Don't want surrounding x and y axis
 # Set the axes background colour
 ax.background_patch.set_facecolor((0.88,0.88,0.88,1))
 
 # Lat and lon range (in rotated-pole coordinates) for plot
-extent=[144,180.0,-90.0,90.0]
+extent=[158,180.0,-90.0,90.0]
 ax.set_extent(extent, crs=projection)
-ax.set_xlim([144, 180])
+ax.set_xlim([158, 180])
 
 # Draw a lat:lon grid
 mg.background.add_grid(ax,
