@@ -85,7 +85,11 @@ icec = icec.regrid(plot_cube,iris.analysis.Linear())
 icec_img = ax.pcolorfast(lons, lats, icec.data,
                          cmap=matplotlib.colors.ListedColormap(
                                 ((0.9,0.9,0.9,0),
-                                 (0.9,0.9,0.9,1))),
+                                 (0.88,0.88,0.88,1),
+                                 (0.86,0.86,0.86,1),
+                                 (0.84,0.84,0.84,1),
+                                 (0.82,0.82,0.82,1),
+                                 (0.8,0.8,0.8,1))),
                          vmin=0,
                          vmax=1,
                          alpha=1,
