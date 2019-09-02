@@ -9,6 +9,8 @@ import numpy
 import matplotlib
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
+from matplotlib.patches import CirclePolygon
+from matplotlib.lines import Line2D
 import cartopy
 import cartopy.crs as ccrs
 
@@ -43,15 +45,13 @@ mask=mask.collapsed('time', iris.analysis.MEAN)
 mask.coord('latitude').coord_system=coord_s
 mask.coord('longitude').coord_system=coord_s
 
-
 # Define the figure (page size, background color, resolution, ...
-aspect=16/9.0
-fig=Figure(figsize=(22,22/aspect),              # Width, Height (inches)
-           dpi=100,
+fig=Figure(figsize=(48.8,33.1),              # Width, Height (inches)
+           dpi=300,
            facecolor=(0.5,0.5,0.5,1),
            edgecolor=None,
            linewidth=0.0,
-           frameon=False,                # Don't draw a frame
+           frameon=False,
            subplotpars=None,
            tight_layout=None)
 fig.set_frameon(False) 
@@ -112,7 +112,7 @@ t2m.data=numpy.ma.array(qcut(t2m.data.flatten(),100,labels=False,
 lats = t2m.coord('latitude').points
 lons = t2m.coord('longitude').points
 sst_img = ax.pcolorfast(lons, lats, t2m.data,
-                        cmap='RdYlBu_r',
+                        cmap='coolwarm',
                         alpha=1.0,
                         vmin=0,
                         vmax=102,
@@ -131,28 +131,35 @@ mask_img = ax.pcolorfast(lons, lats, mask.data,
                          zorder=200)
 
 # Plot the precipitation
-#precip = precip.regrid(pc,iris.analysis.Linear())
-#precip.data = numpy.maximum(0,precip.data)
-#precip.data = numpy.sqrt(precip.data)
-# Re-map to highlight small differences
-#s=precip.data.shape
-#precip.data=qcut(precip.data.flatten(),5000,labels=False,
-#                            duplicates='drop').reshape(s)
-#pmin = numpy.min(precip.data)
-#pmax = numpy.max(precip.data)
-# Plot as a colour map
-#p_colors=[]
-#for h in range(100):
-#    shade=h/100
-#    p_colors.append((0.0,0.3,0.0,shade))
-#precip_img = ax.pcolorfast(lons, lats, precip.data,
-#                           cmap=matplotlib.colors.ListedColormap(p_colors),
-#                        vmin = pmin,
-#                        vmax = pmax,
-#                        alpha=0.3,
-#                        zorder=300)
+precip = precip.regrid(pc,iris.analysis.Linear())
+s=precip.data.shape
+precip.data=qcut(precip.data.flatten(),100,labels=False,
+                             duplicates='drop').reshape(s)
+pmin = numpy.min(precip.data)
+pmax = numpy.max(precip.data)
+p_interpolator = iris.analysis.Linear().interpolator(precip, 
+                                    ['latitude', 'longitude'])
+
+# Generate a set of points to plot at
+p_points=mg.wind.allocate_vector_points(scale=0.25,max_points=1000000,
+                                        lat_range=(-45,45),lon_range=(-165,-75))
+p_lats = p_points['Latitude']
+p_lons = p_points['Longitude']
+
+# Plot them on the map
+for p_i in range(len(p_points['Longitude'])):
+    p_at=p_interpolator([p_lats[p_i],p_lons[p_i]]).data
+    shade=max(0,min(1,p_at/pmax))
+    width=max(0,2.0*min(1,p_at/pmax))
+    length=max(0,1.0*min(1,p_at/pmax))
+    ys=(p_points['Latitude'][p_i]-length/5,
+        p_points['Latitude'][p_i]+length/5)
+    xs=(p_points['Longitude'][p_i]+length/3,
+        p_points['Longitude'][p_i]-length/3)
+    ax.add_line(Line2D(xs, ys, linewidth=width, color=(0,0.3,0,shade),
+                       zorder=500))
 
 
 
 # Render the figure as a png
-fig.savefig('cassini.png')
+fig.savefig('precip_lines.png')

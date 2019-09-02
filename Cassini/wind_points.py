@@ -165,7 +165,7 @@ for i in range(w_lons.size):
 qv=ax.quiver(w_lons,w_lats,u_i,v_i,
                         headwidth=1,
                         minlength=0.1,
-                        color=(0,0,0,0.5),
+                        color=(0,0,0,1.0),
                         scale=4000,
                         zorder=400)
  
