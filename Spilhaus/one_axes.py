@@ -10,6 +10,7 @@ import numpy
 import matplotlib
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
+from matplotlib.lines import Line2D
 import cartopy
 import cartopy.crs as ccrs
 
@@ -50,9 +51,8 @@ mask.coord('longitude').coord_system=coord_s
 
 
 # Define the figure (page size, background color, resolution, ...
-aspect=16/9.0
-fig=Figure(figsize=(22,22/aspect),              # Width, Height (inches)
-           dpi=100,
+fig=Figure(figsize=(48.8,33.1),              # Width, Height (inches)
+           dpi=300,
            facecolor=(0.5,0.5,0.5,1),
            edgecolor=None,
            linewidth=0.0,
@@ -144,6 +144,57 @@ sst_img = ax.pcolorfast(lons, lats, sst.data,
                         cmap='RdYlBu_r',
                         alpha=1.0,
                         zorder=100)
+
+# Draw lines of latitude and longitude
+for offset in (-360,0):
+    for lat in range(-90,95,5):
+        lwd=0.1
+        if lat%10==0: lwd=0.2
+        if lat==0: lwd=1
+        x=[]
+        y=[]
+        for lon in range(-180,181,1):
+            rp=iris.analysis.cartography.rotate_pole(numpy.array(lon),
+                                                     numpy.array(lat), 113, 32)
+            nx=rp[0]+193+offset
+            if nx>180: nx -= 360
+            ny=rp[1]
+            if(len(x)==0 or (abs(nx-x[-1])<10 and abs(ny-y[-1])<10)):
+                x.append(nx)
+                y.append(ny)
+            else:
+                ax.add_line(Line2D(x, y, linewidth=lwd, color=(0,0,0,1),
+                                   zorder=150))
+                x=[]
+                y=[]
+        if(len(x)>1):        
+            ax.add_line(Line2D(x, y, linewidth=lwd, color=(0,0,0,1),
+                               zorder=150))
+
+    for lon in range(-180,185,5):
+        lwd=0.1
+        if lon%10==0: lwd=0.2
+        x=[]
+        y=[]
+        for lat in range(-90,90,1):
+            rp=iris.analysis.cartography.rotate_pole(numpy.array(lon),
+                                                     numpy.array(lat), 113, 32)
+            nx=rp[0]+193+offset
+            if nx>180: nx -= 360
+            ny=rp[1]
+            if(len(x)==0 or (abs(nx-x[-1])<10 and abs(ny-y[-1])<10)):
+                x.append(nx)
+                y.append(ny)
+            else:
+                ax.add_line(Line2D(x, y, linewidth=lwd, color=(0,0,0,1),
+                                   zorder=150))
+                x=[]
+                y=[]
+        if(len(x)>1):        
+            ax.add_line(Line2D(x, y, linewidth=lwd, color=(0,0,0,1),
+                               zorder=150))
+
+
 
 # Plot the sea ice
 icec = icec.regrid(pc,iris.analysis.Nearest())
