@@ -51,7 +51,7 @@ mask.coord('longitude').coord_system=coord_s
 
 
 # Define the figure (page size, background color, resolution, ...
-fig=Figure(figsize=(48.8,33.1),              # Width, Height (inches)
+fig=Figure(figsize=(46.8,33.1),              # Width, Height (inches)
            dpi=300,
            facecolor=(0.5,0.5,0.5,1),
            edgecolor=None,

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # Ocean-centred projection. Equirectangular, but inspired by Spilhaus.
-# Meto global data.
+# ERA5 data only
 
 import Meteorographica as mg
 import iris
@@ -26,41 +26,32 @@ def damp_lat(sst,factor=0.5):
             sst.data[lat_i,:] -= (lmt-mt)*factor
     return(sst)
 
-# Load the Meto SST
-sst=iris.load_cube('/scratch/hadpb/Posters/Spilhaus/tsurf.nc')
+# Load the ERA5 SST
+sst=iris.load_cube('ERA5_sst_2019031206.nc')
 # Get rid of the (1-member) time dimension
-sst=sst.collapsed('t', iris.analysis.MEAN)
-sst=sst.collapsed('Surface', iris.analysis.MEAN)
+sst=sst.collapsed('time', iris.analysis.MEAN)
 coord_s=iris.coord_systems.GeogCS(iris.fileformats.pp.EARTH_RADIUS)
 sst.coord('latitude').coord_system=coord_s
 sst.coord('longitude').coord_system=coord_s
+sst=damp_lat(sst,factor=0.25)
 # And the sea-ice
-icec=iris.load_cube('/scratch/hadpb/Posters/Spilhaus/icec.nc')
-icec=icec.collapsed('t', iris.analysis.MEAN)
-icec=icec.collapsed('Surface', iris.analysis.MEAN)
+icec=iris.load_cube('ERA5_icec_2019031206.nc')
+icec=icec.collapsed('time', iris.analysis.MEAN)
 icec.coord('latitude').coord_system=coord_s
 icec.coord('longitude').coord_system=coord_s
 # And the orography
-orog=iris.load_cube('/scratch/hadpb/Posters/Spilhaus/orography.nc')
-orog=orog.collapsed('t', iris.analysis.MEAN)
-orog=orog.collapsed('Surface', iris.analysis.MEAN)
+orog=iris.load_cube('ERA5_orography.nc')
+orog=orog.collapsed('time', iris.analysis.MEAN)
 orog.coord('latitude').coord_system=coord_s
 orog.coord('longitude').coord_system=coord_s
 # And the land-sea mask
-mask=iris.load_cube('/scratch/hadpb/Posters/Spilhaus/land_mask.nc')
-mask=mask.collapsed('t', iris.analysis.MEAN)
-mask=mask.collapsed('Surface', iris.analysis.MEAN)
+mask=iris.load_cube('ERA5_ls_mask.nc')
 mask.coord('latitude').coord_system=coord_s
 mask.coord('longitude').coord_system=coord_s
 
-# Apply the LS mask to turn tsurf into SST
-sst.data[mask.data>=0.5]=numpy.nan
-sst.data=numpy.ma.array(sst.data,
-                        mask=mask.data>0.5)
-sst=damp_lat(sst,factor=0.25)
 
 # Define the figure (page size, background color, resolution, ...
-fig=Figure(figsize=(46.8,33.1),              # Width, Height (inches)
+fig=Figure(figsize=(48.8,33.1),              # Width, Height (inches)
            dpi=300,
            facecolor=(0.5,0.5,0.5,1),
            edgecolor=None,
@@ -107,23 +98,23 @@ def plot_cube(resolution):
                                                     (longitude, 1)])
     return plot_cube
 
-pc=plot_cube(0.05)   
+pc=plot_cube(0.25)   
 
 # Mask out the duplicated SST data
-def strip_dups(sst,resolution=0.25):
-    scale=0.25/resolution
+#  Resolution specific (for 0.25 degree rotated cube).
+def strip_dups(sst):
     s=sst.shape
-    sst.data.mask[0:(int(150*scale)),0:(int(100*scale))]=True
-    sst.data.mask[(int(150*scale)):(int(171*scale)),0:(int(75*scale))]=True
-    sst.data.mask[(int(170*scale)):(int(190*scale)),0:(int(48*scale))]=True
-    sst.data.mask[(int(190*scale)):(int(200*scale)),0:(int(40*scale))]=True
-    sst.data.mask[(int(200*scale)):(int(210*scale)),0:(int(30*scale))]=True
-    sst.data.mask[(int(210*scale)):(int(225*scale)),0:(int(15*scale))]=True
-    sst.data.mask[(int(350*scale)):(int(475*scale)),0:(int(30*scale))]=True
-    sst.data.mask[(int(540*scale)):,0:(int(50*scale))]=True
-    for lat_in in range(0,int(300*scale)):
-        for lon_in in range(s[1]-22*int(1/resolution),s[1]):
-            if sst.data.mask[lat_in,lon_in-(360*int(1/resolution))]==False:
+    sst.data.mask[0:150,0:100]=True
+    sst.data.mask[150:171,0:75]=True
+    sst.data.mask[170:190,0:48]=True
+    sst.data.mask[190:200,0:40]=True
+    sst.data.mask[200:210,0:30]=True
+    sst.data.mask[210:225,0:15]=True
+    sst.data.mask[350:475,0:30]=True
+    sst.data.mask[540:,0:50]=True
+    for lat_in in range(0,300):
+        for lon_in in range(s[1]-22*4,s[1]):
+            if sst.data.mask[lat_in,lon_in-(360*4)]==False:
                 sst.data.mask[lat_in,lon_in]=True
     return(sst)
 
@@ -140,7 +131,7 @@ ax.set_aspect('auto')
 # Plot the SST
 sst = sst.regrid(pc,iris.analysis.Linear())
 # Strip out the duplicated data
-sst=strip_dups(sst,resolution=0.05)
+sst=strip_dups(sst)
 # Re-map to highlight small differences
 s=sst.data.shape
 sst.data=numpy.ma.array(qcut(sst.data.flatten(),100,labels=False,
@@ -232,4 +223,4 @@ orog_img = ax.pcolorfast(lons, lats, orog.data,
 
 
 # Render the figure as a png
-fig.savefig('poster_meto.png')
+fig.savefig('poster.png')
