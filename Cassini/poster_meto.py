@@ -105,7 +105,10 @@ def plot_cube(resolution):
                                                     (longitude, 1)])
     return plot_cube
 
-pc=plot_cube(0.05)   
+# High res temperature and orography
+pch=plot_cube(0.05)
+# Lowe res wind and precip (much faster)   
+pcl=plot_cube(0.25)   
 
 
 # Define an axes to contain the plot. In this case our axes covers
@@ -119,7 +122,7 @@ ax.set_ylim(-90,90)
 ax.set_aspect('auto')
 
 # Plot the T2M
-t2m = t2m.regrid(pc,iris.analysis.Linear())
+t2m = t2m.regrid(pch,iris.analysis.Linear())
 # Re-map to highlight small differences
 s=t2m.data.shape
 t2m.data=numpy.ma.array(qcut(t2m.data.flatten(),100,labels=False,
@@ -137,7 +140,7 @@ sst_img = ax.pcolorfast(lons, lats, t2m.data,
 
 
 # Plot the land mask
-mask = mask.regrid(pc,iris.analysis.Linear())
+mask = mask.regrid(pch,iris.analysis.Linear())
 mask_img = ax.pcolorfast(lons, lats, mask.data,
                          cmap=matplotlib.colors.ListedColormap(
                                 ((0.6,0.6,0.6,0),
@@ -148,7 +151,7 @@ mask_img = ax.pcolorfast(lons, lats, mask.data,
                          zorder=200)
 
 # Plot the precipitation
-precip = precip.regrid(pc,iris.analysis.Linear())
+precip = precip.regrid(pcl,iris.analysis.Linear())
 s=precip.data.shape
 precip.data=qcut(precip.data.flatten(),100,labels=False,
                              duplicates='drop').reshape(s)
@@ -165,7 +168,7 @@ p_lons = p_points['Longitude']
 for p_i in range(len(p_points['Longitude'])):
     p_at=p_interpolator([p_lats[p_i],p_lons[p_i]]).data
     shade=max(0,min(1,p_at/pmax))
-    width=max(0,2.0*min(1,p_at/pmax))
+    width=max(0,4.0*min(1,p_at/pmax))
     length=max(0,1.0*min(1,p_at/pmax))
     ys=(p_points['Latitude'][p_i]-length/5,
         p_points['Latitude'][p_i]+length/5)
@@ -176,8 +179,9 @@ for p_i in range(len(p_points['Longitude'])):
 
 # Plot the wind
 rw=iris.analysis.cartography.rotate_winds(u10m,v10m,cs)
-u10m = rw[0].regrid(pc,iris.analysis.Linear())
-v10m = rw[1].regrid(pc,iris.analysis.Linear())
+u10m = rw[0].regrid(pcl,iris.analysis.Linear())
+v10m = rw[1].regrid(pcl,iris.analysis.Linear())
+
 
 u_interpolator = iris.analysis.Linear().interpolator(u10m,
                                     ['latitude', 'longitude'])
@@ -185,8 +189,7 @@ v_interpolator = iris.analysis.Linear().interpolator(v10m,
                                     ['latitude', 'longitude'])
 
 # Generate a set of points to plot at
-w_points=mg.wind.allocate_vector_points(scale=0.5,max_points=1000000)#,
-#                                        lat_range=(-45,45),lon_range=(75,165))
+w_points=mg.wind.allocate_vector_points(scale=0.5,max_points=1000000)
 w_lats = w_points['Latitude']
 w_lons = w_points['Longitude']
 u_i=numpy.zeros(w_lons.size)
