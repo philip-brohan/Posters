@@ -60,9 +60,11 @@ orog=opfc.load('orog',dte1,model='global')
 mask=opfc.load('lsmask',dte1,model='global')
 dte2=datetime.datetime(args.year,args.month,args.day)+datetime.timedelta(days=1)
 tmp=opfc.load('tsurf',dte2,model='global')
+tmp.attributes=sst.attributes
 sst=iris.cube.CubeList((sst,tmp)).merge_cube()
 sst=sst.interpolate([('time',dte)],iris.analysis.Linear())
 tmp=opfc.load('icec',dte2,model='global')
+tmp.attributes=icec.attributes
 icec=iris.cube.CubeList((icec,tmp)).merge_cube()
 icec=icec.interpolate([('time',dte)],iris.analysis.Linear())
 
