@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Atmospheric state with the equator as a border.
+# Atmospheric state - temperature, wind and precip.
 
 import Meteorographica as mg
 import iris
@@ -9,6 +9,7 @@ import numpy
 import matplotlib
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
+from matplotlib.lines import Line2D
 import cartopy
 import cartopy.crs as ccrs
 
@@ -31,12 +32,23 @@ t2m=t2m.collapsed('time', iris.analysis.MEAN)
 coord_s=iris.coord_systems.GeogCS(iris.fileformats.pp.EARTH_RADIUS)
 t2m.coord('latitude').coord_system=coord_s
 t2m.coord('longitude').coord_system=coord_s
-t2m=damp_lat(t2m,factor=0.01)
+t2m=damp_lat(t2m,factor=0.25)
+# Re-map to highlight small differences
+s=t2m.data.shape
+t2m.data=numpy.ma.array(qcut(t2m.data.flatten(),1000,labels=False,
+                             duplicates='drop').reshape(s),
+                        mask=t2m.data.mask)
 # And the precipitation
 precip=iris.load_cube('ERA5_precip_2019031206.nc')
 precip=precip.collapsed('time', iris.analysis.MEAN)
 precip.coord('latitude').coord_system=coord_s
 precip.coord('longitude').coord_system=coord_s
+# Re-map to standardise the distribution 
+s=precip.data.shape
+precip.data += numpy.random.rand(s[0],s[1])*0.00001
+precip.data=numpy.ma.array(qcut(precip.data.flatten(),10000,
+                                labels=False).reshape(s),
+                           mask=precip.data.mask)
 # And the 10m wind
 u10m=iris.load_cube('ERA5_u10m_2019031206.nc')
 u10m=u10m.collapsed('time', iris.analysis.MEAN)
@@ -51,11 +63,15 @@ mask=iris.load_cube('ERA5_ls_mask.nc')
 mask=mask.collapsed('time', iris.analysis.MEAN)
 mask.coord('latitude').coord_system=coord_s
 mask.coord('longitude').coord_system=coord_s
+# And the sea-ice
+icec=iris.load_cube('ERA5_icec_2019031206.nc')
+icec=icec.collapsed('time', iris.analysis.MEAN)
+icec.coord('latitude').coord_system=coord_s
+icec.coord('longitude').coord_system=coord_s
 
 
 # Define the figure (page size, background color, resolution, ...
-aspect=16/9.0
-fig=Figure(figsize=(22,22/aspect),              # Width, Height (inches)
+fig=Figure(figsize=(19.2,10.8),              # Width, Height (inches)
            dpi=100,
            facecolor=(0.5,0.5,0.5,1),
            edgecolor=None,
@@ -165,44 +181,143 @@ ax.set_xlim(-180,180)
 ax.set_ylim(-90,90)
 ax.set_aspect('auto')
 
-# Plot the T2M
-t2m = t2m.regrid(pc,iris.analysis.Linear())
-# Re-map to highlight small differences
-s=t2m.data.shape
-t2m.data=numpy.ma.array(qcut(t2m.data.flatten(),1000,labels=False,
-                             duplicates='drop').reshape(s),
-                        mask=t2m.data.mask)
-# Adjust to show the wind
-wscale=200
-wind_noise_field.data=qcut(wind_noise_field.data.flatten(),wscale,labels=False,
-                             duplicates='drop').reshape(s)-(wscale-1)/2
+# Draw the lines of lat and lon
+# Draw lines of latitude and longitude
+for lat in range(-90,95,5):
+    lwd=0.5
+    x=[]
+    y=[]
+    for lon in range(-180,181,1):
+        rp=iris.analysis.cartography.rotate_pole(numpy.array(lon),
+                                                 numpy.array(lat),
+                                                 pole_longitude,pole_latitude)
+        nx=rp[0]
+        if nx>180: nx -= 360
+        ny=rp[1]
+        if(len(x)==0 or (abs(nx-x[-1])<10 and abs(ny-y[-1])<10)):
+            x.append(nx)
+            y.append(ny)
+        else:
+            ax.add_line(Line2D(x, y, linewidth=lwd, color=(0.4,0.4,0.4,1),
+                               zorder=10))
+            x=[]
+            y=[]
+    if(len(x)>1):        
+        ax.add_line(Line2D(x, y, linewidth=lwd, color=(0.4,0.4,0.4,1),
+                           zorder=10))
 
-# Plot as a colour map
-lats = t2m.coord('latitude').points
-lons = t2m.coord('longitude').points
-sst_img = ax.pcolorfast(lons, lats, t2m.data+wind_noise_field.data,
-                        cmap='RdYlBu_r',
-                        alpha=1.0,
-                        zorder=100)
-
+for lon in range(-180,185,5):
+    lwd=0.5
+    x=[]
+    y=[]
+    for lat in range(-90,90,1):
+        rp=iris.analysis.cartography.rotate_pole(numpy.array(lon),
+                                                 numpy.array(lat),
+                                                 pole_longitude,pole_latitude)
+        nx=rp[0]
+        if nx>180: nx -= 360
+        ny=rp[1]
+        if(len(x)==0 or (abs(nx-x[-1])<10 and abs(ny-y[-1])<10)):
+            x.append(nx)
+            y.append(ny)
+        else:
+            ax.add_line(Line2D(x, y, linewidth=lwd, color=(0.4,0.4,0.4,1),
+                               zorder=10))
+            x=[]
+            y=[]
+    if(len(x)>1):        
+        ax.add_line(Line2D(x, y, linewidth=lwd, color=(0.4,0.4,0.4,1),
+                           zorder=10))
 
 # Plot the land mask
 mask = mask.regrid(pc,iris.analysis.Linear())
+lats = mask.coord('latitude').points
+lons = mask.coord('longitude').points
 mask_img = ax.pcolorfast(lons, lats, mask.data,
                          cmap=matplotlib.colors.ListedColormap(
-                                ((0.6,0.6,0.6,0),
-                                 (0.6,0.6,0.6,1))),
+                                ((0.4,0.4,0.4,0),
+                                 (0.4,0.4,0.4,1))),
                          vmin=0,
                          vmax=1,
-                         alpha=0.5,
-                         zorder=200)
+                         alpha=1.0,
+                         zorder=20)
 
-#i=u10m.coord('longitude').points
-#j=u10m.coord('latitude').points
-#img = ax.pcolorfast(i, j, wind_noise_field.data,
-#                        cmap='Greys',
-#                        alpha=0.5,
-#                        zorder=300)
+# Plot the sea-ice
+icec = icec.regrid(pc,iris.analysis.Linear())
+icec_img = ax.pcolorfast(lons, lats, icec.data,
+                         cmap=matplotlib.colors.ListedColormap(
+                                ((0.5,0.5,0.5,0),
+                                 (0.5,0.5,0.5,1))),
+                         vmin=0,
+                         vmax=1,
+                         alpha=1.0,
+                         zorder=10)
+
+# Plot the T2M
+t2m = t2m.regrid(pc,iris.analysis.Linear())
+# Adjust to show the wind
+wscale=250
+s=wind_noise_field.data.shape
+wind_noise_field.data=qcut(wind_noise_field.data.flatten(),wscale,labels=False,
+                             duplicates='drop').reshape(s)-(wscale-1)/2
+
+# Hack the 'RdYlBu_r' colour map to get rid of the pale yellow and pale blue shades
+clrs={'red': [(0.0, 0.19215686274509805, 0.19215686274509805),
+              (0.125, 0.27058823529411763, 0.27058823529411763),
+              (0.2, 0.4549019607843137, 0.4549019607843137),
+              (0.375, 0.6705882352941176, 0.6705882352941176),
+              (0.5, 0.996078431372549, 0.996078431372549),
+              (0.625, 0.9921568627450981, 0.9921568627450981),
+              (0.75, 0.9568627450980393, 0.9568627450980393),
+              (0.875, 0.8431372549019608, 0.8431372549019608),
+              (1.0, 0.6470588235294118, 0.6470588235294118)],
+      'green': [(0.0, 0.21176470588235294, 0.21176470588235294),
+                (0.125, 0.4588235294117647, 0.4588235294117647),
+                (0.25, 0.6784313725490196, 0.6784313725490196),
+                (0.375, 0.8509803921568627, 0.8509803921568627),
+                (0.5, 0.8784313725490196, 0.8784313725490196),
+                (0.625, 0.6823529411764706, 0.6823529411764706),
+                (0.75, 0.42745098039215684, 0.42745098039215684),
+                (0.875, 0.18823529411764706, 0.18823529411764706),
+                (1.0, 0.0, 0.0)],
+      'blue': [(0.0, 0.5843137254901961, 0.5843137254901961),
+               (0.125, 0.7058823529411765, 0.7058823529411765),
+               (0.25, 0.8196078431372549, 0.8196078431372549),
+               (0.375, 0.9137254901960784, 0.9137254901960784),
+               (0.5, 0.5647058823529412, 0.5647058823529412),
+               (0.625, 0.3803921568627451, 0.3803921568627451),
+               (0.75, 0.2627450980392157, 0.2627450980392157),
+               (0.875, 0.15294117647058825, 0.15294117647058825),
+               (1.0, 0.14901960784313725, 0.14901960784313725)],
+      'alpha': [(0.0, 1, 1),
+                (0.1, 1, 1),
+                (0.2, 1, 1),
+                (0.3, 1, 1),
+                (0.4, 1, 1),
+                (0.5, 1, 1),
+                (0.6, 1, 1),
+                (0.7, 1, 1),
+                (0.8, 1, 1),
+                (0.9, 1, 1),
+                (1.0, 1, 1)]}
+tst_cmap=matplotlib.colors.LinearSegmentedColormap('tst_cmap',clrs)
+# Plot as a colour map
+sst_img = ax.pcolorfast(lons, lats, t2m.data+wind_noise_field.data,
+                        cmap=tst_cmap,
+                        alpha=0.8,
+                        zorder=100)
+
+# Plot the precip
+precip = precip.regrid(pc,iris.analysis.Linear())
+s=precip.data.shape
+precip.data[precip.data<7500]=7500
+cols=[]
+for ci in range(1000):
+    cols.append([0.0,0.3,0.0,ci/1000])
+precip_img = ax.pcolorfast(lons, lats, precip.data,
+                           cmap=matplotlib.colors.ListedColormap(cols),
+                           alpha=0.7,
+                           zorder=200)
 
 
 
