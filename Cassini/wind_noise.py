@@ -9,6 +9,7 @@ import numpy
 import matplotlib
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
+from matplotlib.patches import Rectangle
 from matplotlib.lines import Line2D
 import cartopy
 import cartopy.crs as ccrs
@@ -181,6 +182,10 @@ ax.set_xlim(-180,180)
 ax.set_ylim(-90,90)
 ax.set_aspect('auto')
 
+# Background
+ax.add_patch(Rectangle((0,0),1,1,facecolor=(0.6,0.6,0.6,1),fill=True,zorder=1))
+
+
 # Draw the lines of lat and lon
 # Draw lines of latitude and longitude
 for lat in range(-90,95,5):
@@ -256,7 +261,7 @@ icec_img = ax.pcolorfast(lons, lats, icec.data,
 # Plot the T2M
 t2m = t2m.regrid(pc,iris.analysis.Linear())
 # Adjust to show the wind
-wscale=250
+wscale=200
 s=wind_noise_field.data.shape
 wind_noise_field.data=qcut(wind_noise_field.data.flatten(),wscale,labels=False,
                              duplicates='drop').reshape(s)-(wscale-1)/2
@@ -303,13 +308,14 @@ clrs={'red': [(0.0, 0.19215686274509805, 0.19215686274509805),
 tst_cmap=matplotlib.colors.LinearSegmentedColormap('tst_cmap',clrs)
 # Plot as a colour map
 sst_img = ax.pcolorfast(lons, lats, t2m.data+wind_noise_field.data,
-                        cmap=tst_cmap,
+                        cmap='RdYlBu_r',
                         alpha=0.8,
                         zorder=100)
 
 # Plot the precip
 precip = precip.regrid(pc,iris.analysis.Linear())
 s=precip.data.shape
+precip.data+=wind_noise_field.data*10
 precip.data[precip.data<7500]=7500
 cols=[]
 for ci in range(1000):
