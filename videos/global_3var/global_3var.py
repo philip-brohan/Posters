@@ -308,12 +308,12 @@ sst_img = ax.pcolorfast(lons, lats, t2m.data+wind_noise_field.data,
                         zorder=100)
 
 # Plot the precip
-#precip = precip.regrid(pc,iris.analysis.Linear())
-#precip.data[precip.data>0.8] += wind_noise_field.data[precip.data>0.8]/3000
-#precip.data[precip.data<0.8] = 0.8
-#cols=[]
-#for ci in range(100):
-#    cols.append([0.0,0.3,0.0,ci/100])
+precip = precip.regrid(pc,iris.analysis.Linear())
+precip.data[precip.data>0.8] += wind_noise_field.data[precip.data>0.8]/3000
+precip.data[precip.data<0.8] = 0.8
+cols=[]
+for ci in range(100):
+    cols.append([0.0,0.3,0.0,ci/100])
 #precip_img = ax.pcolorfast(lons, lats, precip.data,
 #                           cmap=matplotlib.colors.ListedColormap(cols),
 #                           alpha=0.9,

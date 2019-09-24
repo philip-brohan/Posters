@@ -33,8 +33,12 @@ while current_day<=end_day:
                    current_day.day,current_day.hour):
         current_day=current_day+datetime.timedelta(hours=1)
         continue
-    cmd=("./global_3var.py --year=%d --month=%d" +
-        " --day=%d --hour=%f \n") % (
+    cmd=("./global_3var.py --year=%d --month=%d " +
+         "--day=%d --hour=%f "+
+         "--pole_latitude=90 --pole_longitude=180 "+
+         "--npg_longitude=0 "+
+         "--zoom=1 "+
+         "\n") % (
            current_day.year,current_day.month,
            current_day.day,current_day.hour)
     f.write(cmd)
