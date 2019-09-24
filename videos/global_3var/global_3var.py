@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Atmospheric state - near-surface temperature, wind and precip.
+# Atmospheric state - near-surface temperature, wind, and precip.
 
 import os
 import IRData.opfc as opfc
@@ -54,7 +54,6 @@ if not os.path.isdir(args.opdir):
 
 dte=datetime.datetime(args.year,args.month,args.day,
                       int(args.hour),int(args.hour%1*60))
-
 
 # Scale down the latitudinal variation in temperature
 def damp_lat(sst,factor=0.25):
@@ -140,10 +139,10 @@ def plot_cube(resolution,xmin,xmax,ymin,ymax):
                                      standard_name='longitude',
                                      units='degrees_east',
                                      coord_system=cs)
-    dummy_data = numpy.zeros((len(lon_values), len(lat_values)))
+    dummy_data = numpy.zeros((len(lat_values), len(lon_values)))
     plot_cube = iris.cube.Cube(dummy_data,
-                               dim_coords_and_dims=[(longitude, 0),
-                                                    (latitude, 1)])
+                               dim_coords_and_dims=[(latitude, 0),
+                                                    (longitude, 1)])
     return plot_cube
 
 pc=plot_cube(args.resolution,-180/args.zoom,180/args.zoom,
@@ -151,7 +150,7 @@ pc=plot_cube(args.resolution,-180/args.zoom,180/args.zoom,
 
 
 # Make the wind noise
-def wind_field(uw,vw,zf,hour=None,iterations=50,epsilon=0.003,sscale=1):
+def wind_field(uw,vw,zf,sequence=None,iterations=50,epsilon=0.003,sscale=1):
     # Random field as the source of the distortions
     z=pickle.load(open( zf, "rb" ) )
     (width,height)=z.data.shape
@@ -181,35 +180,32 @@ def wind_field(uw,vw,zf,hour=None,iterations=50,epsilon=0.003,sscale=1):
     #  and update result with the random field at their locations
     ss=uw.copy()
     ss.data=numpy.sqrt(uw.data**2+vw.data**2)
-    if hour is not None:
-        groups=11
-        increment=int(hour*4)
-        startsi=numpy.arange(19,iterations,3)
+    if sequence is not None:
+        startsi=numpy.arange(0,iterations,3)
         endpoints=numpy.tile(startsi,1+(width*height)//len(startsi))
-        endpoints += increment
-        endpoints[endpoints>=iterations]=19+endpoints[endpoints>=iterations]-iterations
-        endpoints=endpoints[0:(width*height)].reshape(z.data.shape)
+        endpoints += sequence%iterations
+        endpoints[endpoints>=iterations] -= iterations
+        endpoints=endpoints[0:(width*height)].reshape(width,height)
     else:
         endpoints=iterations+1        
     for k in range(iterations):
-        x[k<=endpoints] += epsilon*uw.data[i,j][k<=endpoints]
+        x += epsilon*vw.data[i,j]
         x[x>xmax]=x[x>xmax]-xmax+xmin
         x[x<xmin]=x[x<xmin]-xmin+xmax
-        y[k<=endpoints] += epsilon*vw.data[i,j][k<=endpoints]
+        y += epsilon*uw.data[i,j]
         y[y>ymax]=y[y>ymax]-ymax+ymin
         y[y<ymin]=y[y<ymin]-ymin+ymax
         i=x_to_i(x)
         j=y_to_j(y)
-        result.data[k<=endpoints] += (z.data[i,j]*ss.data[i,j]/sscale)[k<=endpoints]
+        update=z.data*ss.data/sscale
+        update[k>endpoints]=0
+        result.data[i,j] += update
     return result
 
 rw=iris.analysis.cartography.rotate_winds(u10m,v10m,cs)
 u10m = rw[0].regrid(pc,iris.analysis.Linear())
-u10m.transpose()
 v10m = rw[1].regrid(pc,iris.analysis.Linear())
-v10m.transpose()
-wind_noise_field=wind_field(u10m,v10m,args.zfile,epsilon=0.005)
-wind_noise_field.transpose()
+wind_noise_field=wind_field(u10m,v10m,args.zfile,sequence=int(args.hour*5),epsilon=0.005)
 
 # Define an axes to contain the plot. In this case our axes covers
 #  the whole figure

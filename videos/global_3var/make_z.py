@@ -37,10 +37,10 @@ def plot_cube(resolution,xmin,xmax,ymin,ymax):
                                      standard_name='longitude',
                                      units='degrees_east',
                                      coord_system=cs)
-    dummy_data = numpy.zeros((len(lon_values), len(lat_values)))
+    dummy_data = numpy.zeros((len(lat_values), len(lon_values)))
     plot_cube = iris.cube.Cube(dummy_data,
-                               dim_coords_and_dims=[(longitude, 0),
-                                                    (latitude, 1)])
+                               dim_coords_and_dims=[(latitude, 0),
+                                                    (longitude, 1)])
     return plot_cube
 
 z=plot_cube(args.resolution,-180/args.zoom,180/args.zoom,
