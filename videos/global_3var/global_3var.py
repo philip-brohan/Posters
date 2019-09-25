@@ -18,6 +18,10 @@ from matplotlib.lines import Line2D
 
 from pandas import qcut
 
+# Fix dask SPICE bug
+import dask
+dask.config.set(scheduler='single-threaded')
+
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("--year", help="Year",
@@ -185,9 +189,13 @@ def wind_field(uw,vw,zf,sequence=None,iterations=50,epsilon=0.003,sscale=1):
         endpoints=numpy.tile(startsi,1+(width*height)//len(startsi))
         endpoints += sequence%iterations
         endpoints[endpoints>=iterations] -= iterations
+        startpoints=endpoints-25
+        startpoints[startpoints<0] += iterations
         endpoints=endpoints[0:(width*height)].reshape(width,height)
+        startpoints=startpoints[0:(width*height)].reshape(width,height)
     else:
-        endpoints=iterations+1        
+        endpoints=iterations+1 
+        startpoints=-1       
     for k in range(iterations):
         x += epsilon*vw.data[i,j]
         x[x>xmax]=x[x>xmax]-xmax+xmin
@@ -198,7 +206,8 @@ def wind_field(uw,vw,zf,sequence=None,iterations=50,epsilon=0.003,sscale=1):
         i=x_to_i(x)
         j=y_to_j(y)
         update=z.data*ss.data/sscale
-        update[k>endpoints]=0
+        update[(endpoints>startpoints) & ((k>endpoints) | (k<startpoints))]=0
+        update[(startpoints>endpoints) & ((k>endpoints) & (k<startpoints))]=0
         result.data[i,j] += update
     return result
 
