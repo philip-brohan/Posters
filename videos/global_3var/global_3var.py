@@ -69,21 +69,30 @@ def damp_lat(sst,factor=0.25):
             sst.data[lat_i,:] -= (lmt-mt)*factor
     return(sst)
 
-# Load the model data
+# Load the model data - dealing sensibly with missing fields
 t2m=opfc.load('air.2m',dte,model='global')
 u10m=opfc.load('uwnd.10m',dte,model='global')
 v10m=opfc.load('vwnd.10m',dte,model='global')
 precip=opfc.load('prate',dte,model='global')
-orog=opfc.load('orog',dte,model='global')
-mask=opfc.load('lsmask',dte,model='global')
+try:
+    orog=opfc.load('orog',dte,model='global')
+except:
+    orog=opfc.load('orog',dte-datetime.timedelta(days=1),model='global')
+try:
+    mask=opfc.load('lsmask',dte,model='global')
+except:
+    mask=opfc.load('lsmask',dte-datetime.timedelta(days=1),model='global')
 # Icec is only daily, so interpolate manually
 dte1=datetime.datetime(args.year,args.month,args.day)
 dte2=datetime.datetime(args.year,args.month,args.day)+datetime.timedelta(days=1)
-icec=opfc.load('icec',dte1,model='global')
-tmp =opfc.load('icec',dte2,model='global')
-tmp.attributes=icec.attributes
-icec=iris.cube.CubeList((icec,tmp)).merge_cube()
-icec=icec.interpolate([('time',dte)],iris.analysis.Linear())
+try:
+    icec=opfc.load('icec',dte1,model='global')
+    tmp =opfc.load('icec',dte2,model='global')
+    tmp.attributes=icec.attributes
+    icec=iris.cube.CubeList((icec,tmp)).merge_cube()
+    icec=icec.interpolate([('time',dte)],iris.analysis.Linear())
+except:
+    icec=opfc.load('icec',dte1-datetime.timedelta(days=1),model='global')
 
 # Remap the t2m to highlight small differences
 t2m=damp_lat(t2m,factor=0.4)
@@ -157,6 +166,7 @@ pc=plot_cube(args.resolution,-180/args.zoom,180/args.zoom,
 def wind_field(uw,vw,zf,sequence=None,iterations=50,epsilon=0.003,sscale=1):
     # Random field as the source of the distortions
     z=pickle.load(open( zf, "rb" ) )
+    z=z.regrid(uw,iris.analysis.Linear())
     (width,height)=z.data.shape
     # Each point in this field has an index location (i,j)
     #  and a real (x,y) position
@@ -211,10 +221,13 @@ def wind_field(uw,vw,zf,sequence=None,iterations=50,epsilon=0.003,sscale=1):
         result.data[i,j] += update
     return result
 
+wind_pc=plot_cube(0.2,-180/args.zoom,180/args.zoom,
+                      -90/args.zoom,90/args.zoom)   
 rw=iris.analysis.cartography.rotate_winds(u10m,v10m,cs)
-u10m = rw[0].regrid(pc,iris.analysis.Linear())
-v10m = rw[1].regrid(pc,iris.analysis.Linear())
-wind_noise_field=wind_field(u10m,v10m,args.zfile,sequence=int(args.hour*5),epsilon=0.005)
+u10m = rw[0].regrid(wind_pc,iris.analysis.Linear())
+v10m = rw[1].regrid(wind_pc,iris.analysis.Linear())
+seq=(dte-datetime.datetime(2000,1,1)).total_seconds()/3600
+wind_noise_field=wind_field(u10m,v10m,args.zfile,sequence=int(seq*5),epsilon=0.005)
 
 # Define an axes to contain the plot. In this case our axes covers
 #  the whole figure
@@ -279,7 +292,9 @@ for lon in range(-180,185,5):
                            zorder=10))
 
 # Plot the land mask
-mask = mask.regrid(pc,iris.analysis.Linear())
+mask_pc=plot_cube(0.05,-180/args.zoom,180/args.zoom,
+                                  -90/args.zoom,90/args.zoom)   
+mask = mask.regrid(mask_pc,iris.analysis.Linear())
 lats = mask.coord('latitude').points
 lons = mask.coord('longitude').points
 mask_img = ax.pcolorfast(lons, lats, mask.data,
@@ -292,7 +307,9 @@ mask_img = ax.pcolorfast(lons, lats, mask.data,
                          zorder=20)
 
 # Plot the sea-ice
-icec = icec.regrid(pc,iris.analysis.Linear())
+ice_pc=plot_cube(0.05,-180/args.zoom,180/args.zoom,
+                      -90/args.zoom,90/args.zoom)   
+icec = icec.regrid(ice_pc,iris.analysis.Linear())
 icec_img = ax.pcolorfast(lons, lats, icec.data,
                          cmap=matplotlib.colors.ListedColormap(
                                 ((0.5,0.5,0.5,0),
@@ -303,7 +320,9 @@ icec_img = ax.pcolorfast(lons, lats, icec.data,
                          zorder=10)
 
 # Plot the T2M
-t2m = t2m.regrid(pc,iris.analysis.Linear())
+t2m_pc=plot_cube(0.05,-180/args.zoom,180/args.zoom,
+                      -90/args.zoom,90/args.zoom)   
+t2m = t2m.regrid(t2m_pc,iris.analysis.Linear())
 # Adjust to show the wind
 wscale=200
 s=wind_noise_field.data.shape
@@ -311,22 +330,26 @@ wind_noise_field.data=qcut(wind_noise_field.data.flatten(),wscale,labels=False,
                              duplicates='drop').reshape(s)-(wscale-1)/2
 
 # Plot as a colour map
-sst_img = ax.pcolorfast(lons, lats, t2m.data+wind_noise_field.data,
+wnf=wind_noise_field.regrid(t2m,iris.analysis.Linear())
+t2m_img = ax.pcolorfast(lons, lats, t2m.data+wnf.data,
                         cmap='RdYlBu_r',
                         alpha=0.8,
                         zorder=100)
 
 # Plot the precip
-precip = precip.regrid(pc,iris.analysis.Linear())
-precip.data[precip.data>0.8] += wind_noise_field.data[precip.data>0.8]/3000
+precip_pc=plot_cube(0.25,-180/args.zoom,180/args.zoom,
+                         -90/args.zoom,90/args.zoom)   
+precip = precip.regrid(precip_pc,iris.analysis.Linear())
+wnf=wind_noise_field.regrid(precip,iris.analysis.Linear())
+precip.data[precip.data>0.8] += wnf.data[precip.data>0.8]/3000
 precip.data[precip.data<0.8] = 0.8
 cols=[]
 for ci in range(100):
     cols.append([0.0,0.3,0.0,ci/100])
-#precip_img = ax.pcolorfast(lons, lats, precip.data,
-#                           cmap=matplotlib.colors.ListedColormap(cols),
-#                           alpha=0.9,
-#                           zorder=200)
+precip_img = ax.pcolorfast(lons, lats, precip.data,
+                           cmap=matplotlib.colors.ListedColormap(cols),
+                           alpha=0.9,
+                           zorder=200)
 
 # Label with the date
 ax.text(180/args.zoom-(360/args.zoom)*0.009,
