@@ -40,8 +40,6 @@ parser.add_argument("--npg_longitude", help="Longitude of view centre",
                     default=0,type=float,required=False)
 parser.add_argument("--zoom", help="Scale factor for viewport (1=global)",
                     default=1,type=float,required=False)
-parser.add_argument("--resolution", help="Resolution for plot grid",
-                    default=0.1,type=float,required=False)
 parser.add_argument("--opdir", help="Directory for output files",
                     default="%s/images/opfc_global_3var" % \
                                            os.getenv('SCRATCH'),
@@ -69,8 +67,46 @@ def damp_lat(sst,factor=0.25):
             sst.data[lat_i,:] -= (lmt-mt)*factor
     return(sst)
 
+# In the  temperature field, damp the diurnal cycle, and
+#  boost the short-timescale variability. Load the 
+#  recent data to calculate this.
+stt=dte-datetime.timedelta(days=5)
+ent=dte+datetime.timedelta(days=5)
+ct=stt
+tcount=0
+dcount=0
+tavg=None
+davg=None
+while ct<ent:
+    try:
+        ttmp=opfc.load('air.2m',ct,model='global')
+        tcount += 1
+        if tavg is None:
+            tavg = ttmp.copy()
+        else:
+            tavg.data += ttmp.data
+        if ct.hour==dte.hour:
+            dcount += 1
+            if davg is None:
+                davg = ttmp.copy()
+            else:
+                davg.data += ttmp.data
+    except:
+        ct += datetime.timedelta(hours=1)
+        continue
+    ct += datetime.timedelta(hours=1)
+tavg.data /= tcount
+davg.data /= dcount
+davg.data -= tavg.data
+
 # Load the model data - dealing sensibly with missing fields
 t2m=opfc.load('air.2m',dte,model='global')
+# Damp the diurnal cycle
+t2m.data -= davg.data
+# Enhance the synoptic variability
+t2m.data += t2m.data-tavg.data
+t2m.data += davg.data*0.25
+
 u10m=opfc.load('uwnd.10m',dte,model='global')
 v10m=opfc.load('vwnd.10m',dte,model='global')
 precip=opfc.load('prate',dte,model='global')
@@ -95,7 +131,7 @@ except:
     icec=opfc.load('icec',dte1-datetime.timedelta(days=1),model='global')
 
 # Remap the t2m to highlight small differences
-t2m=damp_lat(t2m,factor=0.4)
+t2m=damp_lat(t2m,factor=0.25)
 s=t2m.data.shape
 t2m.data=numpy.array(qcut(t2m.data.flatten(),1000,labels=False,
                              duplicates='drop').reshape(s))
@@ -157,10 +193,6 @@ def plot_cube(resolution,xmin,xmax,ymin,ymax):
                                dim_coords_and_dims=[(latitude, 0),
                                                     (longitude, 1)])
     return plot_cube
-
-pc=plot_cube(args.resolution,-180/args.zoom,180/args.zoom,
-                             -90/args.zoom,90/args.zoom)   
-
 
 # Make the wind noise
 def wind_field(uw,vw,zf,sequence=None,iterations=50,epsilon=0.003,sscale=1):
