@@ -101,11 +101,14 @@ davg.data -= tavg.data
 
 # Load the model data - dealing sensibly with missing fields
 t2m=opfc.load('air.2m',dte,model='global')
-# Damp the diurnal cycle
+# Remove the diurnal cycle
 t2m.data -= davg.data
 # Enhance the synoptic variability
-t2m.data += t2m.data-tavg.data
+t2m.data += (t2m.data-tavg.data)*0.5
+# Add back a reduced diurnal cycle
 t2m.data += davg.data*0.25
+# Damp the latitude variation 
+t2m=damp_lat(t2m,factor=0.25)
 
 u10m=opfc.load('uwnd.10m',dte,model='global')
 v10m=opfc.load('vwnd.10m',dte,model='global')
@@ -131,7 +134,6 @@ except:
     icec=opfc.load('icec',dte1-datetime.timedelta(days=1),model='global')
 
 # Remap the t2m to highlight small differences
-t2m=damp_lat(t2m,factor=0.25)
 s=t2m.data.shape
 t2m.data=numpy.array(qcut(t2m.data.flatten(),1000,labels=False,
                              duplicates='drop').reshape(s))
@@ -152,10 +154,6 @@ def normalise_precip(p):
    res.data[res.data<34.4e-5]=0.97
    res.data[res.data<0.79]=0.99
    return res
-#s=precip.data.shape
-#precip.data += numpy.random.rand(s[0],s[1])*0.00001
-#precip.data=numpy.array(qcut(precip.data.flatten(),10000,
-#                                labels=False).reshape(s))
 precip=normalise_precip(precip)
 
 # Define the figure (page size, background color, resolution, ...
@@ -240,8 +238,8 @@ def wind_field(uw,vw,zf,sequence=None,iterations=50,epsilon=0.003,sscale=1):
         startpoints=-1       
     for k in range(iterations):
         x += epsilon*vw.data[i,j]
-        x[x>xmax]=x[x>xmax]-xmax+xmin
-        x[x<xmin]=x[x<xmin]-xmin+xmax
+        x[x>xmax]=xmax
+        x[x<xmin]=xmin
         y += epsilon*uw.data[i,j]
         y[y>ymax]=y[y>ymax]-ymax+ymin
         y[y<ymin]=y[y<ymin]-ymin+ymax
@@ -259,7 +257,7 @@ rw=iris.analysis.cartography.rotate_winds(u10m,v10m,cs)
 u10m = rw[0].regrid(wind_pc,iris.analysis.Linear())
 v10m = rw[1].regrid(wind_pc,iris.analysis.Linear())
 seq=(dte-datetime.datetime(2000,1,1)).total_seconds()/3600
-wind_noise_field=wind_field(u10m,v10m,args.zfile,sequence=int(seq*5),epsilon=0.005)
+wind_noise_field=wind_field(u10m,v10m,args.zfile,sequence=int(seq*5),epsilon=0.01)
 
 # Define an axes to contain the plot. In this case our axes covers
 #  the whole figure

@@ -52,7 +52,7 @@ z2=plot_cube(args.resolution*2,-180/args.zoom,180/args.zoom,
                              -90/args.zoom,90/args.zoom)
 (width,height)=z2.data.shape
 z2.data=numpy.random.rand(width,height)-0.5
-z2=z2.regrid(z,iris.analysis.Linear())*100
+z2=z2.regrid(z,iris.analysis.Linear())
 z.data=z.data+z2.data
 
 z4=plot_cube(args.resolution*4,-180/args.zoom,180/args.zoom,
@@ -60,7 +60,7 @@ z4=plot_cube(args.resolution*4,-180/args.zoom,180/args.zoom,
 (width,height)=z4.data.shape
 z4.data=numpy.random.rand(width,height)-0.5
 z4=z4.regrid(z,iris.analysis.Linear())
-z.data=z.data+z4.data
+z.data=z.data+z4.data*100
 
 
 pickle.dump( z, open( args.opfile, "wb" ) )

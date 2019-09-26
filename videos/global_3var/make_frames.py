@@ -24,14 +24,14 @@ def is_done(year,month,day,hour):
 
 f=open("run.txt","w+")
 
-start_day=datetime.datetime(2019,  7,  1,  0)
-end_day  =datetime.datetime(2019,  7, 30, 23)
+start_day=datetime.datetime(2018, 12,  1,  0)
+end_day  =datetime.datetime(2018, 12, 31, 23)
 
 current_day=start_day
 while current_day<=end_day:
     if is_done(current_day.year,current_day.month,
-                   current_day.day,current_day.hour):
-        current_day=current_day+datetime.timedelta(hours=1)
+                   current_day.day,current_day.hour+current_day.minute/60):
+        current_day=current_day+datetime.timedelta(hours=0.5)
         continue
     cmd=("./global_3var.py --year=%d --month=%d " +
          "--day=%d --hour=%f "+
@@ -40,8 +40,8 @@ while current_day<=end_day:
          "--zoom=1 "+
          "\n") % (
            current_day.year,current_day.month,
-           current_day.day,current_day.hour)
+             current_day.day,current_day.hour+current_day.minute/60)
     f.write(cmd)
-    current_day=current_day+datetime.timedelta(hours=1)
+    current_day=current_day+datetime.timedelta(hours=0.5)
 f.close()
 
