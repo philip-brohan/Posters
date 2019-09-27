@@ -4,11 +4,13 @@
 
 import os
 import IRData.opfc as opfc
+import IRData.twcr as twcr
 import datetime
 import pickle
 
 import iris
 import numpy
+import math
 
 import matplotlib
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
@@ -41,11 +43,11 @@ parser.add_argument("--npg_longitude", help="Longitude of view centre",
 parser.add_argument("--zoom", help="Scale factor for viewport (1=global)",
                     default=1,type=float,required=False)
 parser.add_argument("--opdir", help="Directory for output files",
-                    default="%s/images/opfc_global_3var" % \
+                    default="%s/images/20CRv3_global_3var" % \
                                            os.getenv('SCRATCH'),
                     type=str,required=False)
 parser.add_argument("--zfile", help="Noise pickle file name",
-                    default="%s/images/opfc_global_3var/z.pkl" % \
+                    default="%s/images/20CRv3_global_3var/z.pkl" % \
                                            os.getenv('SCRATCH'),
                     type=str,required=False)
 
@@ -57,6 +59,47 @@ if not os.path.isdir(args.opdir):
 dte=datetime.datetime(args.year,args.month,args.day,
                       int(args.hour),int(args.hour%1*60))
 
+# Remap the precipitation to standardise the distribution
+# Normalise a precip field to fixed quantiles
+def normalise_precip(p):
+   res=p.copy()
+   res.data[res.data<=2.00e-5]=0.79
+   res.data[res.data<2.10e-5]=0.81
+   res.data[res.data<2.50e-5]=0.83
+   res.data[res.data<3.10e-5]=0.85
+   res.data[res.data<3.80e-5]=0.87
+   res.data[res.data<4.90e-5]=0.89
+   res.data[res.data<6.60e-5]=0.91
+   res.data[res.data<9.10e-5]=0.93
+   res.data[res.data<13.4e-5]=0.95
+   res.data[res.data<22.0e-5]=0.97
+   res.data[res.data<0.79]=0.99
+   return res
+# Remap the temperature similarly
+def normalise_t2m(p):
+   res=p.copy()
+   res.data[res.data>300.10]=0.95
+   res.data[res.data>299.9]=0.90
+   res.data[res.data>298.9]=0.85
+   res.data[res.data>297.5]=0.80
+   res.data[res.data>295.7]=0.75
+   res.data[res.data>293.5]=0.70
+   res.data[res.data>290.1]=0.65
+   res.data[res.data>287.6]=0.60
+   res.data[res.data>283.7]=0.55
+   res.data[res.data>280.2]=0.50
+   res.data[res.data>277.2]=0.45
+   res.data[res.data>274.4]=0.40
+   res.data[res.data>272.3]=0.35
+   res.data[res.data>268.3]=0.30
+   res.data[res.data>261.4]=0.25
+   res.data[res.data>254.6]=0.20
+   res.data[res.data>249.1]=0.15
+   res.data[res.data>244.9]=0.10
+   res.data[res.data>240.5]=0.05
+   res.data[res.data>0.95]=0.0
+   return res
+
 # Scale down the latitudinal variation in temperature
 def damp_lat(sst,factor=0.25):
     s=sst.shape
@@ -67,95 +110,51 @@ def damp_lat(sst,factor=0.25):
             sst.data[lat_i,:] -= (lmt-mt)*factor
     return(sst)
 
-# In the  temperature field, damp the diurnal cycle, and
-#  boost the short-timescale variability. Load the 
-#  recent data to calculate this.
-stt=dte-datetime.timedelta(days=5)
-ent=dte+datetime.timedelta(days=5)
-ct=stt
-tcount=0
-dcount=0
-tavg=None
-davg=None
-while ct<ent:
-    try:
-        ttmp=opfc.load('air.2m',ct,model='global')
-        tcount += 1
-        if tavg is None:
-            tavg = ttmp.copy()
-        else:
-            tavg.data += ttmp.data
-        if ct.hour==dte.hour:
-            dcount += 1
-            if davg is None:
-                davg = ttmp.copy()
-            else:
-                davg.data += ttmp.data
-    except:
-        ct += datetime.timedelta(hours=1)
-        continue
-    ct += datetime.timedelta(hours=1)
-tavg.data /= tcount
-davg.data /= dcount
-davg.data -= tavg.data
-
 # Load the model data - dealing sensibly with missing fields
-t2m=opfc.load('air.2m',dte,model='global')
-# Remove the diurnal cycle
-t2m.data -= davg.data
-# Enhance the synoptic variability
-t2m.data += (t2m.data-tavg.data)*0.5
-# Add back a reduced diurnal cycle
-t2m.data += davg.data*0.25
+t2m=twcr.load('air.2m',dte,version='4.5.1')
+t2m=t2m.extract(iris.Constraint(member=1))
+t2m=normalise_t2m(t2m)
 # Damp the latitude variation 
 t2m=damp_lat(t2m,factor=0.25)
 
-u10m=opfc.load('uwnd.10m',dte,model='global')
-v10m=opfc.load('vwnd.10m',dte,model='global')
-
-precip=opfc.load('prate',dte,model='global')
-#try:
-#    orog=opfc.load('orog',dte,model='global')
-#except:
-#    orog=opfc.load('orog',dte-datetime.timedelta(days=1),model='global')
-try:
-    mask=opfc.load('lsmask',dte,model='global')
-except:
-    mask=opfc.load('lsmask',dte-datetime.timedelta(days=1),model='global')
-# Icec is only daily, so interpolate manually
-dte1=datetime.datetime(args.year,args.month,args.day)
-dte2=datetime.datetime(args.year,args.month,args.day)+datetime.timedelta(days=1)
-try:
-    icec=opfc.load('icec',dte1,model='global')
-    tmp =opfc.load('icec',dte2,model='global')
-    tmp.attributes=icec.attributes
-    icec=iris.cube.CubeList((icec,tmp)).merge_cube()
-    icec=icec.interpolate([('time',dte)],iris.analysis.Linear())
-except:
-    icec=opfc.load('icec',dte1-datetime.timedelta(days=1),model='global')
-
-# Remap the t2m to highlight small differences
-s=t2m.data.shape
-t2m.data=numpy.array(qcut(t2m.data.flatten(),1000,labels=False,
-                             duplicates='drop').reshape(s))
-
-# Remap the precipitation to standardise the distribution
-# Normalise a precip field to fixed quantiles
-def normalise_precip(p):
-   res=p.copy()
-   res.data[res.data<=0.763e-5]=0.79
-   res.data[res.data<1.13e-5]=0.81
-   res.data[res.data<1.14e-5]=0.83
-   res.data[res.data<1.15e-5]=0.85
-   res.data[res.data<2.29e-5]=0.87
-   res.data[res.data<3.05e-5]=0.89
-   res.data[res.data<4.58e-5]=0.91
-   res.data[res.data<7.63e-5]=0.93
-   res.data[res.data<14.5e-5]=0.95
-   res.data[res.data<34.4e-5]=0.97
-   res.data[res.data<0.79]=0.99
-   return res
+u10m=twcr.load('uwnd.10m',dte,version='4.5.1')
+u10m=u10m.extract(iris.Constraint(member=1))
+v10m=twcr.load('vwnd.10m',dte,version='4.5.1')
+v10m=v10m.extract(iris.Constraint(member=1))
+icec=twcr.load('icec',dte,version='4.5.1')
+icec=icec.extract(iris.Constraint(member=1))
+precip=twcr.load('prate',dte,version='4.5.1')
+precip=precip.extract(iris.Constraint(member=1))
+prmsl=twcr.load('prmsl',dte,version='4.5.1')
+prmsl=prmsl.collapsed('member',iris.analysis.STD_DEV)
 precip=normalise_precip(precip)
+obs=twcr.load_observations_fortime(dte,version='4.5.1')
+
+dte1=datetime.datetime(2018,12,25,12)
+try:
+    mask=opfc.load('lsmask',dte1,model='global')
+except:
+    mask=opfc.load('lsmask',dte1-datetime.timedelta(days=1),model='global')
+
+# Load the climatological prmsl stdev from v2c
+prevt=datetime.datetime(args.year,args.month,args.day,
+                        int(args.hour)-int(args.hour)%6)
+prevcsd=iris.load_cube('/data/users/hadpb/20CR/version_3.4.1/standard.deviation/prmsl.nc',
+                       iris.Constraint(time=iris.time.PartialDateTime(year=1981,
+                                                                      month=prevt.month,
+                                                                      day=prevt.day,
+                                                                      hour=prevt.hour)))
+nextt=prevt+datetime.timedelta(hours=6)
+nextcsd=iris.load_cube('/data/users/hadpb/20CR/version_3.4.1/standard.deviation/prmsl.nc',
+                       iris.Constraint(time=iris.time.PartialDateTime(year=1981,
+                                                                      month=nextt.month,
+                                                                      day=nextt.day,
+                                                                      hour=nextt.hour)))
+w=(dte-prevt).total_seconds()/(nextt-prevt).total_seconds()
+prevcsd.data=prevcsd.data*(1-w)+nextcsd.data*w
+coord_s=iris.coord_systems.GeogCS(iris.fileformats.pp.EARTH_RADIUS)
+prevcsd.coord('latitude').coord_system=coord_s
+prevcsd.coord('longitude').coord_system=coord_s
 
 # Define the figure (page size, background color, resolution, ...
 fig=Figure(figsize=(19.2,10.8),              # Width, Height (inches)
@@ -362,7 +361,7 @@ wind_noise_field.data=qcut(wind_noise_field.data.flatten(),wscale,labels=False,
 
 # Plot as a colour map
 wnf=wind_noise_field.regrid(t2m,iris.analysis.Linear())
-t2m_img = ax.pcolorfast(lons, lats, t2m.data+wnf.data,
+t2m_img = ax.pcolorfast(lons, lats, t2m.data*1000+wnf.data,
                         cmap='RdYlBu_r',
                         alpha=0.8,
                         zorder=100)
@@ -381,6 +380,42 @@ precip_img = ax.pcolorfast(lons, lats, precip.data,
                            cmap=matplotlib.colors.ListedColormap(cols),
                            alpha=0.9,
                            zorder=200)
+
+
+# Plot the observations
+for i in range(0,len(obs['Longitude'].values)):
+    weight=0.85
+    if 'weight' in obs.columns: weight=obs['weight'].values[i]
+    rp=iris.analysis.cartography.rotate_pole(numpy.array(obs['Longitude'].values[i]),
+                                             numpy.array(obs['Latitude'].values[i]),
+                                             args.pole_longitude,
+                                             args.pole_latitude)
+    nlon=rp[0][0]
+    nlat=rp[1][0]
+    ax.add_patch(matplotlib.patches.Circle((nlon,nlat),
+                                            radius=0.4,
+                                            facecolor='black',
+                                            edgecolor='black',
+                                            linewidth=0.1,
+                                            alpha=weight,
+                                            zorder=180))
+
+# Plot the fog of ignorance
+fog_pc=plot_cube(0.25,-180/args.zoom,180/args.zoom,
+                         -90/args.zoom,90/args.zoom)   
+prmsl   = prmsl.regrid(precip_pc,iris.analysis.Linear())
+prevcsd = prevcsd.regrid(precip_pc,iris.analysis.Linear())
+prmsl.data = numpy.minimum(1,prmsl.data/prevcsd.data)
+cols=[]
+def fog_map(x): 
+    return 1/(1+math.exp((x-0.5)*-10))
+for ci in range(100):
+    cols.append([0.8,0.8,0.8,fog_map(ci/100)])
+
+fog_img = ax.pcolorfast(lons, lats, prmsl.data,
+                           cmap=matplotlib.colors.ListedColormap(cols),
+                           alpha=0.95,
+                           zorder=300)
 
 # Label with the date
 ax.text(180/args.zoom-(360/args.zoom)*0.009,
