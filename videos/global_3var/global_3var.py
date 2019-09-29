@@ -158,7 +158,7 @@ def normalise_precip(p):
 precip=normalise_precip(precip)
 
 # Define the figure (page size, background color, resolution, ...
-fig=Figure(figsize=(19.2,10.8),              # Width, Height (inches)
+fig=Figure(figsize=(38.4,21.6),              # Width, Height (inches)
            dpi=100,
            facecolor=(0.5,0.5,0.5,1),
            edgecolor=None,
@@ -393,7 +393,7 @@ ax.text(180/args.zoom-(360/args.zoom)*0.009,
                    edgecolor='black',
                    boxstyle='round',
                    pad=0.5),
-         size=14,
+         size=28,
          clip_on=True,
          zorder=500)
 
