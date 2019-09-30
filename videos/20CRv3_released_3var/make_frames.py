@@ -13,7 +13,7 @@ if not os.path.isdir(opdir):
 
 # Function to check if the job is already done for this timepoint
 def is_done(year,month,day,hour):
-    op_file_name=("%s/images/20CRv2c_global_3var/" +
+    op_file_name=("%s/images/20CRv3_released_3var/" +
                   "%04d%02d%02d%02d%02d.png") % (
                             os.getenv('SCRATCH'),
                             year,month,day,int(hour),
@@ -24,8 +24,8 @@ def is_done(year,month,day,hour):
 
 f=open("run.txt","w+")
 
-start_day=datetime.datetime(2009,  1,  1,  0)
-end_day  =datetime.datetime(2009, 12, 31, 23)
+start_day=datetime.datetime(2005,  1,  1,  0)
+end_day  =datetime.datetime(2005, 1, 31, 23)
 
 current_day=start_day
 while current_day<=end_day:
@@ -33,7 +33,7 @@ while current_day<=end_day:
                    current_day.day,current_day.hour+current_day.minute/60):
         current_day=current_day+datetime.timedelta(hours=1)
         continue
-    cmd=("./20CRv2c_3var.py --year=%d --month=%d " +
+    cmd=("./20CRv3_released.py --year=%d --month=%d " +
          "--day=%d --hour=%f "+
          "--pole_latitude=90 --pole_longitude=180 "+
          "--npg_longitude=0 "+
