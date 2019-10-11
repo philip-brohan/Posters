@@ -16,7 +16,7 @@ parser.add_argument("--resolution", help="Resolution for plot grid",
 parser.add_argument("--zoom", help="Scale factor for viewport (1=global)",
                     default=1,type=float,required=False)
 parser.add_argument("--opfile", help="Output (pickle) file name",
-                    default="%s/images/20CRv3_global_3var/z.pkl" % \
+                    default="%s/images/opfc_global_3var/z.pkl" % \
                                            os.getenv('SCRATCH'),
                     type=str,required=False)
 args = parser.parse_args()

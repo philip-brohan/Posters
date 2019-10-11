@@ -3,7 +3,6 @@
 # Atmospheric state - near-surface temperature, wind, and precip.
 
 import os
-import IRData.opfc as opfc
 import IRData.twcr as twcr
 import datetime
 import pickle
@@ -110,29 +109,6 @@ def damp_lat(sst,factor=0.25):
             sst.data[lat_i,:] -= (lmt-mt)*factor
     return(sst)
 
-# Load the model data 
-def load_v3(var,dte,member=1):
-    if dte.hour%3 !=0:
-        p=load_v3(var,dte-datetime.timedelta(hours=dte.hour%3),member=member)
-        n=load_v3(var,dte+datetime.timedelta(hours=3-dte.hour%3),member=member)
-        n=iris.cube.CubeList((p,n)).merge_cube()
-        return n.interpolate([('time',dte)],iris.analysis.Linear())
-    
-    time_pdt=iris.time.PartialDateTime(year=dte.year,
-                                              month=dte.month,
-                                              day=dte.day,
-                                              hour=dte.hour)
-    file_name="%s/20CR/version_3/%04d/%s.%04d_mem%03d.nc" % (
-                   os.getenv('SCRATCH'),dte.year,var,dte.year,member)
-    f=iris.load_cube(file_name,iris.Constraint(time=time_pdt))
-    coord_s=iris.coord_systems.GeogCS(iris.fileformats.pp.EARTH_RADIUS)
-    f.coord('latitude').coord_system=coord_s
-    f.coord('longitude').coord_system=coord_s
-    try:
-        f=f.collapsed('height', iris.analysis.MEAN)
-    except Exception: 
-        pass
-    return f
 
 # Load data in a range of +- 5 days
 def load_around(var,dte,member=1,hours=5*24):
@@ -145,7 +121,7 @@ def load_around(var,dte,member=1,hours=5*24):
     f.coord('longitude').coord_system=coord_s
     try:
         f=f.collapsed('height', iris.analysis.MEAN)
-    except Exception: 
+    except Exception:
         pass
     return f
 
@@ -159,40 +135,65 @@ dcount=0
 ct=dte-datetime.timedelta(hours=5*24)
 et=dte+datetime.timedelta(hours=5*24)
 while ct<et:
-    if davg is None:
-        davg=recent_t.interpolate([('time',ct)],iris.analysis.Linear())
-        dcount=1
-    else:
-        davg.data += recent_t.interpolate([('time',ct)],iris.analysis.Linear()).data
-        dcount += 1
+    try:
+        if davg is None:
+            davg=recent_t.interpolate([('time',ct)],iris.analysis.Linear(extrapolation_mode='error'))
+            dcount=1
+        else:
+            davg.data += recent_t.interpolate([('time',ct)],iris.analysis.Linear(extrapolation_mode='error')).data
+            dcount += 1
+    except:
+        pass
     ct += datetime.timedelta(hours=24)
+    
 davg.data /= dcount
 davg.data -= tavg.data
 
-t2m=load_v3('TMP2m',dte)
+t2m=twcr.load('TMP2m',dte,version='3',member=1)
 # Remove the diurnal cycle
 t2m.data -= davg.data
 # Enhance the synoptic variability
-t2m.data += (t2m.data-tavg.data)*0.5
+t2m.data += (t2m.data-tavg.data)*1.0
 # Add back a reduced diurnal cycle
 t2m.data += davg.data*0.25
 t2m=normalise_t2m(t2m)
 # Damp the latitude variation 
 #t2m=damp_lat(t2m,factor=0.25)
 
-u10m=load_v3('UGRD10m',dte)
-v10m=load_v3('VGRD10m',dte)
-precip=load_v3('PRATE',dte)
+u10m=twcr.load('UGRD10m',dte,version='3',member=1)
+v10m=twcr.load('VGRD10m',dte,version='3',member=1)
+precip=twcr.load('PRATE',dte,version='3',member=1)
 precip=normalise_precip(precip)
+obs=twcr.load_observations_fortime(dte,version='3')
+# prmsl all members for spread
+prmsl=twcr.load('PRMSL',dte,version='3',member=None)
+prmsl=prmsl.collapsed('member',iris.analysis.STD_DEV)
 
-dte1=datetime.datetime(2018,12,25,12)
-try:
-    mask=opfc.load('lsmask',dte1,model='global')
-except:
-    mask=opfc.load('lsmask',dte1-datetime.timedelta(days=1),model='global')
+mask=iris.load_cube("%s/fixed_fields/land_mask/opfc_global_2019.nc" % os.getenv('DATADIR'))
+
+# Load the climatological prmsl stdev from v2c
+prevt=datetime.datetime(args.year,args.month,args.day,
+                        int(args.hour)-int(args.hour)%6)
+prevcsd=iris.load_cube('/data/users/hadpb/20CR/version_3.4.1/standard.deviation/prmsl.nc',
+                       iris.Constraint(time=iris.time.PartialDateTime(year=1981,
+                                                                      month=prevt.month,
+                                                                      day=prevt.day,
+                                                                      hour=prevt.hour)))
+nextt=prevt+datetime.timedelta(hours=6)
+nextcsd=iris.load_cube('/data/users/hadpb/20CR/version_3.4.1/standard.deviation/prmsl.nc',
+                       iris.Constraint(time=iris.time.PartialDateTime(year=1981,
+                                                                      month=nextt.month,
+                                                                      day=nextt.day,
+                                                                      hour=nextt.hour)))
+w=(dte-prevt).total_seconds()/(nextt-prevt).total_seconds()
+prevcsd.data=prevcsd.data*(1-w)+nextcsd.data*w
+coord_s=iris.coord_systems.GeogCS(iris.fileformats.pp.EARTH_RADIUS)
+prevcsd.coord('latitude').coord_system=coord_s
+prevcsd.coord('longitude').coord_system=coord_s
+
 
 # Define the figure (page size, background color, resolution, ...
-fig=Figure(figsize=(19.2,10.8),              # Width, Height (inches)
+fig=Figure(figsize=(19.2*2,10.8*2),              # Width, Height (inches)
            dpi=100,
            facecolor=(0.5,0.5,0.5,1),
            edgecolor=None,
@@ -404,6 +405,41 @@ precip_img = ax.pcolorfast(lons, lats, precip.data,
                            alpha=0.9,
                            zorder=200)
 
+# Plot the observations
+for i in range(0,len(obs['Longitude'].values)):
+    weight=0.85
+    if 'weight' in obs.columns: weight=obs['weight'].values[i]
+    rp=iris.analysis.cartography.rotate_pole(numpy.array(obs['Longitude'].values[i]),
+                                             numpy.array(obs['Latitude'].values[i]),
+                                             args.pole_longitude,
+                                             args.pole_latitude)
+    nlon=rp[0][0]
+    nlat=rp[1][0]
+    ax.add_patch(matplotlib.patches.Circle((nlon,nlat),
+                                            radius=0.4,
+                                            facecolor='black',
+                                            edgecolor='black',
+                                            linewidth=0.1,
+                                            alpha=weight,
+                                            zorder=180))
+
+# Plot the fog of ignorance
+fog_pc=plot_cube(0.25,-180/args.zoom,180/args.zoom,
+                         -90/args.zoom,90/args.zoom)   
+prmsl   = prmsl.regrid(precip_pc,iris.analysis.Linear())
+prevcsd = prevcsd.regrid(precip_pc,iris.analysis.Linear())
+prmsl.data = numpy.minimum(1,prmsl.data/prevcsd.data)
+cols=[]
+def fog_map(x): 
+    return 1/(1+math.exp((x-0.5)*-10))
+for ci in range(100):
+    cols.append([0.8,0.8,0.8,fog_map(ci/100)])
+
+fog_img = ax.pcolorfast(lons, lats, prmsl.data,
+                           cmap=matplotlib.colors.ListedColormap(cols),
+                           alpha=0.95,
+                           zorder=300)
+
 
 
 # Label with the date
@@ -417,7 +453,7 @@ ax.text(180/args.zoom-(360/args.zoom)*0.009,
                    edgecolor='black',
                    boxstyle='round',
                    pad=0.5),
-         size=14,
+         size=28,
          clip_on=True,
          zorder=500)
 

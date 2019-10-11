@@ -13,7 +13,7 @@ if not os.path.isdir(opdir):
 
 # Function to check if the job is already done for this timepoint
 def is_done(year,month,day,hour):
-    op_file_name=("%s/images/20CRv3_global_3var/" +
+    op_file_name=("%s/images/opfc_global_3var_meanp/" +
                   "%04d%02d%02d%02d%02d.png") % (
                             os.getenv('SCRATCH'),
                             year,month,day,int(hour),
@@ -24,16 +24,16 @@ def is_done(year,month,day,hour):
 
 f=open("run.txt","w+")
 
-start_day=datetime.datetime(1903,  1,  1,  0)
-end_day  =datetime.datetime(1903, 12, 31, 23)
+start_day=datetime.datetime(2019,  1,  1,  0, 15)
+end_day  =datetime.datetime(2019,  5,  7, 23, 45)
 
 current_day=start_day
 while current_day<=end_day:
     if is_done(current_day.year,current_day.month,
                    current_day.day,current_day.hour+current_day.minute/60):
-        current_day=current_day+datetime.timedelta(hours=1)
+        current_day=current_day+datetime.timedelta(minutes=30)
         continue
-    cmd=("./20CRv3_3var.py --year=%d --month=%d " +
+    cmd=("./global_3var.py --year=%d --month=%d " +
          "--day=%d --hour=%f "+
          "--pole_latitude=90 --pole_longitude=180 "+
          "--npg_longitude=0 "+
@@ -42,6 +42,6 @@ while current_day<=end_day:
            current_day.year,current_day.month,
              current_day.day,current_day.hour+current_day.minute/60)
     f.write(cmd)
-    current_day=current_day+datetime.timedelta(hours=1)
+    current_day=current_day+datetime.timedelta(minutes=30)
 f.close()
 
