@@ -99,6 +99,30 @@ t2m.data += (t2m.data-tavg.data)*1
 # Add back a reduced diurnal cycle
 t2m.data += davg.data*0.25
 
+def normalise_t2m(p):
+   res=p.copy()
+   res.data[res.data>300.10]=0.95
+   res.data[res.data>299.9]=0.90
+   res.data[res.data>298.9]=0.85
+   res.data[res.data>297.5]=0.80
+   res.data[res.data>295.7]=0.75
+   res.data[res.data>293.5]=0.70
+   res.data[res.data>290.1]=0.65
+   res.data[res.data>287.6]=0.60
+   res.data[res.data>283.7]=0.55
+   res.data[res.data>280.2]=0.50
+   res.data[res.data>277.2]=0.45
+   res.data[res.data>274.4]=0.40
+   res.data[res.data>272.3]=0.35
+   res.data[res.data>268.3]=0.30
+   res.data[res.data>261.4]=0.25
+   res.data[res.data>254.6]=0.20
+   res.data[res.data>249.1]=0.15
+   res.data[res.data>244.9]=0.10
+   res.data[res.data>240.5]=0.05
+   res.data[res.data>0.95]=0.0
+   return res
+
 u10m=opfc.load('uwnd.10m',dte,model='global')
 v10m=opfc.load('vwnd.10m',dte,model='global')
 
@@ -139,27 +163,11 @@ except:
     icec=opfc.load('icec',dte1-datetime.timedelta(days=1),model='global')
 
 # Remap the t2m to highlight small differences
-s=t2m.data.shape
-t2m.data=numpy.array(qcut(t2m.data.flatten(),1000,labels=False,
-                             duplicates='drop').reshape(s))
-
-# Remap the precipitation to standardise the distribution
-# Normalise a precip field to fixed quantiles
-def normalise_precip(p):
-   res=p.copy()
-   res.data[res.data<=0.763e-5]=0.79
-   res.data[res.data<1.13e-5]=0.81
-   res.data[res.data<1.14e-5]=0.83
-   res.data[res.data<1.15e-5]=0.85
-   res.data[res.data<2.29e-5]=0.87
-   res.data[res.data<3.05e-5]=0.89
-   res.data[res.data<4.58e-5]=0.91
-   res.data[res.data<7.63e-5]=0.93
-   res.data[res.data<14.5e-5]=0.95
-   res.data[res.data<34.4e-5]=0.97
-   res.data[res.data<0.79]=0.99
-   return res
-#precip=normalise_precip(precip)
+#s=t2m.data.shape
+#t2m.data=numpy.array(qcut(t2m.data.flatten(),1000,labels=False,
+#                             duplicates='drop').reshape(s))
+t2m=normalise_t2m(t2m)
+t2m *= 1000
 
 # Define the figure (page size, background color, resolution, ...
 fig=Figure(figsize=(38.4,21.6),              # Width, Height (inches)
@@ -368,6 +376,8 @@ wind_noise_field.data=qcut(wind_noise_field.data.flatten(),wscale,labels=False,
 wnf=wind_noise_field.regrid(t2m,iris.analysis.Linear())
 t2m_img = ax.pcolorfast(lons, lats, t2m.data+wnf.data,
                         cmap='RdYlBu_r',
+                        vmin=-100,
+                        vmax=1100,
                         alpha=0.8,
                         zorder=100)
 
@@ -645,6 +655,8 @@ for c in cm_data:
 cols=cols+cm_data
 precip_img = ax.pcolorfast(lons, lats, precip.data,
                            cmap=matplotlib.colors.ListedColormap(cols),
+                           vmin=0,
+                           vmax=1,
                            alpha=0.8,
                            zorder=200)
 
