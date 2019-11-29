@@ -8,6 +8,7 @@ import sys
 import IRData.opfc as opfc
 import datetime
 import pickle
+import cmocean
 
 import iris
 import numpy
@@ -17,6 +18,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.patches import Rectangle
 from matplotlib.lines import Line2D
+from matplotlib.colors import ListedColormap
 
 from pandas import qcut
 
@@ -77,6 +79,8 @@ t2m.data -= davg.data
 t2m.data += (t2m.data-tavg.data)*1
 # Add back a reduced diurnal cycle
 t2m.data += davg.data*0.25
+#t2m.data -= davg.data
+#t2m.data -= tavg.data
 
 u10m=opfc.load('uwnd.10m',dte,model='global')
 v10m=opfc.load('vwnd.10m',dte,model='global')
@@ -180,6 +184,7 @@ icec_img = ax.pcolorfast(lons, lats, icec.data,
                          zorder=10)
 
 # Plot the T2M
+
 t2m_pc=plot_cube(0.05,-180/args.zoom,180/args.zoom,
                       -90/args.zoom,90/args.zoom,
                       pole_latitude=args.pole_latitude,
@@ -188,8 +193,8 @@ t2m_pc=plot_cube(0.05,-180/args.zoom,180/args.zoom,
 t2m = t2m.regrid(t2m_pc,iris.analysis.Linear())
 tscale=1000
 s=t2m.data.shape
-t2m.data=qcut(t2m.data.flatten(),tscale,labels=False,
-                             duplicates='drop').reshape(s)
+#t2m.data=qcut(t2m.data.flatten(),tscale,labels=False,
+#                             duplicates='drop').reshape(s)
 # Adjust to show the wind
 wscale=200
 s=wind_noise_field.data.shape
@@ -198,11 +203,17 @@ wind_noise_field.data=qcut(wind_noise_field.data.flatten(),wscale,labels=False,
 
 # Plot as a colour map
 wnf=wind_noise_field.regrid(t2m,iris.analysis.Linear())
-t2m_img = ax.pcolorfast(lons, lats, t2m.data+wnf.data,
-                        cmap='RdYlBu_r',
-                        vmin=-100,
-                        vmax=1100,
+#t2m_img = ax.pcolorfast(lons, lats, t2m.data+wnf.data,
+#                        cmap=cmocean.cm.balance,
+#                        vmin=-100,
+#                        vmax=1100,
+#                        alpha=0.8,
+#                        zorder=100)
+t2m_img = ax.pcolorfast(lons, lats, t2m.data,
+                        cmap=cmocean.cm.balance,
                         alpha=0.8,
+                        vmin=257,
+                        vmax=317,
                         zorder=100)
 
 # Plot the precip
