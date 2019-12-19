@@ -21,7 +21,7 @@ h=iris.load_cube('./air.2m.mon.mean.nc','air_temperature')
 # Get the climatology
 n=[]
 for m in range(1,13):
-    mc=iris.Constraint(time=lambda cell: cell.point.month == m and cell.point.year>1700 and cell.point.year<2050)
+    mc=iris.Constraint(time=lambda cell: cell.point.month == m and cell.point.year>1700 and cell.point.year<1869)
     n.append(h.extract(mc).collapsed('time', iris.analysis.MEAN))
 
 # Anomalise
@@ -32,6 +32,8 @@ for tidx in range(len(h.coord('time').points)):
 
 # Average over longitude
 h=h.collapsed('longitude', iris.analysis.MEAN)
+#h=h.extract(iris.Constraint(longitude=0))
+#h=h.extract(iris.Constraint(time=lambda cell: cell.point.month == 1 or cell.point.month == 7))
 ndata=h.data
 # Convert each lat:lon position to a geohash
 #ghl=[]
@@ -74,11 +76,12 @@ ndata=numpy.transpose(ndata)
 #s=ndata.shape
 #ndata=qcut(ndata.flatten(),200,labels=False,
 #                             duplicates='drop').reshape(s),
-y = numpy.linspace(0.001,0.999,s[0])
-x = numpy.linspace(0.001,0.999,s[1])
-img = ax.pcolorfast(x,y,ndata,
-                        cmap='RdYlBu_r',
+y = numpy.linspace(0,1,s[0])
+x = numpy.linspace(0,1,s[1])
+img = ax.pcolorfast(x,numpy.flip(y),ndata,
+                        cmap='magma',
                         alpha=1.0,
                         zorder=100)
 
 fig.savefig('20CR.png')
+#RdYlBu_r

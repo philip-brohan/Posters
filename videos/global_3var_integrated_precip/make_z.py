@@ -16,14 +16,14 @@ parser.add_argument("--resolution", help="Resolution for plot grid",
 parser.add_argument("--zoom", help="Scale factor for viewport (1=global)",
                     default=1,type=float,required=False)
 parser.add_argument("--opfile", help="Output (pickle) file name",
-                    default="%s/images/opfc_global_3var/z.pkl" % \
+                    default="%s/images/opfc_global_3var_meanp/z.pkl" % \
                                            os.getenv('SCRATCH'),
                     type=str,required=False)
 args = parser.parse_args()
 
 
 # Nominal projection
-cs=iris.coord_systems.RotatedGeogCS(90,180,0)
+cs=iris.coord_systems.RotatedGeogCS(0,60,270)
 
 def plot_cube(resolution,xmin,xmax,ymin,ymax):
 
