@@ -5,5 +5,5 @@
 import datetime
 import IRData.twcr as twcr
 
-for year in range(1851,2016):
+for year in range(1836,2016):
     twcr.fetch('observations',datetime.datetime(year,1,1),version='3')

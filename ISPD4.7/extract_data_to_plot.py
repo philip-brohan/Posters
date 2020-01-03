@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# For each month in 1895-2015, pich a random 1-degree longitude band
+# For each month in 1836-2015, pick a random 1-degree longitude band
 #  and get all the observations in that band for that month.
 
 import datetime
@@ -18,7 +18,7 @@ def next_month(dt0):
     return dt3
 
 obs=[]
-for year in range(1851,2016):
+for year in range(1836,2015):
     for month in range(1,13):
         fname= "%s/ISPD_poster/%04d/%02d.pkl" % (os.getenv('SCRATCH'),
                                                  year,month)
