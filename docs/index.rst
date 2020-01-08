@@ -11,6 +11,7 @@ This is a set of visualisations designed to be printed out as large posters. Som
    :maxdepth: 1
 
    posters/ISPD4.7/index
+   posters/Stripes/20CR
    Machine Learning GCM <http://brohan.org/ML_GCM/presentations/index.html>
 
 So far my experiments have been unsuccessful: I want to make a poster that people will spontaniously stop and look at, and which communicates its message to most such readers. None of my posters have achieved this (I think most people don't notice them at all, they certainly don't stop and engage). Why is this so hard?

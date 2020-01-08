@@ -38,23 +38,10 @@ for t in range(s[0]):
    rand_l = numpy.random.randint(0,s[2])
    p.data[t,:]=h.data[t,:,rand_l]
 h=p
-#h=h.extract(iris.Constraint(time=lambda cell: cell.point.month == 1 or cell.point.month == 7))
 ndata=h.data
-# Convert each lat:lon position to a geohash
-#ghl=[]
-#for lat in h.coord('latitude').points:
-#        for lon in h.coord('longitude').points:
-#            ghl.append(geohash2.encode(lat, lon, precision=5))
-# Reshape the HadCRUT4 data from lat:lon into a single location coord
-#s=h.data.shape
-#ndata=h.data.reshape((s[0],s[1]*s[2]))
-# Sort the location coords alphabetically by geohash
-#  Should produce a 1d-array with 2d-close locations close in the 1d.
-#for t in range(s[0]):
-#    ndata[t,:]=[x for _,x in sorted(zip(ghl,ndata[t,:]))]
 
 # Plot the resulting array as a 2d colourmap
-fig=Figure(figsize=(8,2),              # Width, Height (inches)
+fig=Figure(figsize=(72,18),              # Width, Height (inches)
            dpi=300,
            facecolor=(0.5,0.5,0.5,1),
            edgecolor=None,
@@ -88,5 +75,5 @@ img = ax.pcolorfast(x,y,ndata[0],
                         alpha=1.0,
                         zorder=100)
 
-fig.savefig('20CR.png')
+fig.savefig('20CR.pdf')
 #RdYlBu_r

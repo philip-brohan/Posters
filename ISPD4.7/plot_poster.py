@@ -24,7 +24,7 @@ start_year=1836
 end_year = 2015
 
 # Plot the images
-fig=Figure(figsize=(16,2),              # Width, Height (inches)
+fig=Figure(figsize=(72,9),              # Width, Height (inches)
            dpi=300,
            facecolor=(0.5,0.5,0.5,1),
            edgecolor=None,
@@ -36,21 +36,16 @@ fig=Figure(figsize=(16,2),              # Width, Height (inches)
 canvas=FigureCanvas(fig)
 matplotlib.rc('image',aspect='auto')
 
-ax = fig.add_axes([0,0,1,1],facecolor='black')
-ax.set_axis_off() # Don't want surrounding x and y axis
 
-xmin=datetime.datetime(start_year,1,1,0)-datetime.timedelta(days=100)
-xmax=datetime.datetime(end_year,12,13,23)+datetime.timedelta(days=250)
+#ax.add_patch(Rectangle((xmin,ymin),width,height,
+#                        facecolor='#708090',fill=True,zorder=1))
+
+xmin=datetime.datetime(start_year,1,1,0)-datetime.timedelta(days=30)
+xmax=datetime.datetime(end_year,12,13,23)+datetime.timedelta(days=120)
 width=xmax-xmin
-ax.set_xlim(xmin,xmax)
 ymin=-90
 ymax=90
 height=ymax-ymin
-ax.set_ylim(ymin,ymax)
-ax.set_aspect('auto')
-
-ax.add_patch(Rectangle((xmin,ymin),width,height,
-                        facecolor=(0.05,0.05,0.05,1),fill=True,zorder=1))
 
 # For each month, load and plot the observations
 def y_to_j(y):
@@ -75,20 +70,45 @@ for year in range(start_year,end_year+1):
             n_obs[m_count,lat_i[i]] += 1
         n_obs[m_count,:] /= n_steps
 
-
-# Plot the observations locations
 s=n_obs.shape
+ax2 = fig.add_axes([0,0,1,1],facecolor='green')
+ax2.set_axis_off() # Don't want surrounding x and y axis
+nd2=numpy.random.rand(s[1],s[0])
+clrs=[]
+for shade in numpy.linspace(.22+.01,.16+.01):
+    clrs.append((shade,shade,shade,1))
+y = numpy.linspace(0,1,s[1])
+x = numpy.linspace(0,1,s[0])
+img = ax2.pcolormesh(x,y,nd2,
+                        cmap=matplotlib.colors.ListedColormap(clrs),
+                        alpha=1.0,
+                        shading='gouraud',
+                        zorder=10)
+
+ax = fig.add_axes([0,0,1,1],facecolor='black')
+ax.set_axis_off() # Don't want surrounding x and y axis
+
+ax.set_xlim(xmin,xmax)
+ax.set_ylim(ymin,ymax)
+ax.set_aspect('auto')
+# Plot the observations locations
 for i in range(s[0]):
     for j in range(s[1]):
         if n_obs[i,j]==0: continue
-        scale=min(1.0,max(0.05,numpy.sqrt(n_obs[i,j])))
-        ax.add_patch(Rectangle((px[i],j/s[1]*height+ymin),
-                               datetime.timedelta(days=31)*scale,
-                               (height/180)*scale,
-                               facecolor='yellow',
-                               edgecolor='yellow',
-                               linewidth=0.1,
+        scale=min(1.0,max(0.25,numpy.sqrt(n_obs[i,j])))
+        s_colour=(.19*(1-scale)+1*scale,
+                  .19*(1-scale)+0.84*scale,
+                  .19*(1-scale)+0*scale,
+                  1)
+        ax.add_patch(Rectangle((px[i],j/(s[1]+2)*height+ymin+1),
+                               datetime.timedelta(days=31),
+                               (height/180),
+                               facecolor=s_colour,
+                               edgecolor=s_colour,
+                               linewidth=0.001,
                                fill=True,
+                               zorder=100,
                                alpha=1))
+        
 
-fig.savefig('ISPD.png')
+fig.savefig('ISPD.pdf')

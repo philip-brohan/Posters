@@ -1,8 +1,8 @@
-Observations coverage (ISPD4.7)
-===============================
+Warming Stripes (20CRv3 version)
+================================
 
-.. figure:: ../../../ISPD4.7/ISPD.png
-   :target: https://s3-eu-west-1.amazonaws.com/philip.brohan.org.big-files/Posters/ISPD4.7/ISPD.pdf
+.. figure:: ../../../Stripes/20CR.png
+   :target: https://s3-eu-west-1.amazonaws.com/philip.brohan.org.big-files/Posters/Stripes/20CR.pdf
    :width: 95%
    :align: center
    :figwidth: 95%
@@ -11,7 +11,7 @@ This is a static, poster version of `this video <https://oldweather.github.io/20
 
 The vertical axis is latitude (90S to 90N at 1 degree resolution), the horizontal axis is time (Jan 1836 to Dec 2015, at 1 month resolution), each vertical line is at a randomly sampled 1-degree of longitude. The points are bright yellow if the corresponding lat:lon:month contains more observations than analysis periods (more than one observation/6 hours), pale yellow if it has some observations but fewer than one per analysis period, and dark grey if it contains no observations.
 
-* `Full resolution PDF (12Mb, printable) <https://s3-eu-west-1.amazonaws.com/philip.brohan.org.big-files/Posters/ISPD4.7/ISPD.pdf>`_
+* `Full resolution PDF (12Mb, printable) <https://s3-eu-west-1.amazonaws.com/philip.brohan.org.big-files/Posters/Stripes/20CR.pdf>`_
 
 Code to make the poster
 -----------------------
