@@ -1,0 +1,277 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Observations coverage (ISPD4.7) &#8212; Philip&#39;s Posters</title>
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Warming Stripes (20CRv3 version)" href="../Stripes/20CR.html" />
+    <link rel="prev" title="Eye-candy: Philip’s posters" href="../../index.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../Stripes/20CR.html" title="Warming Stripes (20CRv3 version)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../../index.html" title="Eye-candy: Philip’s posters"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Posters</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/Poster.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../index.html">Table of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Observations coverage (ISPD4.7)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Stripes/20CR.html">Warming Stripes (20CRv3 version)</a></li>
+<li class="toctree-l1"><a class="reference external" href="http://brohan.org/ML_GCM/presentations/index.html">Machine Learning GCM</a></li>
+</ul>
+<h3><a href="https://github.com/philip-brohan/Posters">Get the source code</a></h3>
+
+<a href="https://github.com/philip-brohan/Posters"
+           rel="nofollow">Github source repository</a>
+
+<h3>Found a bug, or have a suggestion?</h3>
+
+Please <a href="https://github.com/philip-brohan/Posters/issues/new">raise an issue</a>.
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="observations-coverage-ispd4-7">
+<h1>Observations coverage (ISPD4.7)<a class="headerlink" href="#observations-coverage-ispd4-7" title="Permalink to this headline">¶</a></h1>
+<div class="figure align-center" style="width: 95%">
+<a class="reference external image-reference" href="https://s3-eu-west-1.amazonaws.com/philip.brohan.org.big-files/Posters/ISPD4.7/ISPD.pdf"><img alt="../../_images/ISPD.png" src="../../_images/ISPD.png" style="width: 95%;" /></a>
+</div>
+<p>This is a static, poster version of <a class="reference external" href="https://oldweather.github.io/20CRv3-diagnostics/obs_video/obs_video.html">this video</a>. The idea is to show the change in observations coverage with time.</p>
+<p>The vertical axis is latitude (90S to 90N at 1 degree resolution), the horizontal axis is time (Jan 1836 to Dec 2015, at 1 month resolution), each vertical line is at a randomly sampled 1-degree of longitude. The points are bright yellow if the corresponding lat:lon:month contains more observations than analysis periods (more than one observation/6 hours), pale yellow if it has some observations but fewer than one per analysis period, and dark grey if it contains no observations.</p>
+<ul class="simple">
+<li><a class="reference external" href="https://s3-eu-west-1.amazonaws.com/philip.brohan.org.big-files/Posters/ISPD4.7/ISPD.pdf">Full resolution PDF (12Mb, printable)</a></li>
+</ul>
+<div class="section" id="code-to-make-the-poster">
+<h2>Code to make the poster<a class="headerlink" href="#code-to-make-the-poster" title="Permalink to this headline">¶</a></h2>
+<p>Script to download the observations:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="c1"># Retrieve all the v3 observations files from NERSC</span>
+
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">IRData.twcr</span> <span class="k">as</span> <span class="nn">twcr</span>
+
+<span class="k">for</span> <span class="n">year</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1836</span><span class="p">,</span><span class="mi">2016</span><span class="p">):</span>
+    <span class="n">twcr</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="s1">&#39;observations&#39;</span><span class="p">,</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="n">year</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span><span class="n">version</span><span class="o">=</span><span class="s1">&#39;3&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Script to extract the observations at each sampled degree of lon:month. This is very slow to run, and should be parallelised, but I don’t expect to run it again anytime soon so I haven’t bothered.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="c1"># For each month in 1836-2015, pick a random 1-degree longitude band</span>
+<span class="c1">#  and get all the observations in that band for that month.</span>
+
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">IRData.twcr</span> <span class="k">as</span> <span class="nn">twcr</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">pandas</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="c1">#import os.path</span>
+
+<span class="k">def</span> <span class="nf">next_month</span><span class="p">(</span><span class="n">dt0</span><span class="p">):</span>
+    <span class="n">dt1</span> <span class="o">=</span> <span class="n">dt0</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">day</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">dt2</span> <span class="o">=</span> <span class="n">dt1</span> <span class="o">+</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
+    <span class="n">dt3</span> <span class="o">=</span> <span class="n">dt2</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">day</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dt3</span>
+
+<span class="n">obs</span><span class="o">=</span><span class="p">[]</span>
+<span class="k">for</span> <span class="n">year</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1836</span><span class="p">,</span><span class="mi">2015</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">month</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">13</span><span class="p">):</span>
+        <span class="n">fname</span><span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/ISPD_poster/</span><span class="si">%04d</span><span class="s2">/</span><span class="si">%02d</span><span class="s2">.pkl&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;SCRATCH&#39;</span><span class="p">),</span>
+                                                 <span class="n">year</span><span class="p">,</span><span class="n">month</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span> <span class="k">continue</span>
+        <span class="n">sdate</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="n">year</span><span class="p">,</span><span class="n">month</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">edate</span> <span class="o">=</span> <span class="n">next_month</span><span class="p">(</span><span class="n">sdate</span><span class="p">)</span>
+        <span class="n">m_ob</span> <span class="o">=</span> <span class="n">twcr</span><span class="o">.</span><span class="n">load_observations</span><span class="p">(</span><span class="n">sdate</span><span class="p">,</span><span class="n">edate</span><span class="p">,</span><span class="n">version</span><span class="o">=</span><span class="s1">&#39;3&#39;</span><span class="p">)</span>
+        <span class="n">rand_l</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">360</span><span class="p">)</span>
+        <span class="n">longs</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">m_ob</span><span class="p">[</span><span class="s1">&#39;Longitude&#39;</span><span class="p">])</span>
+        <span class="n">lats</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">m_ob</span><span class="p">[</span><span class="s1">&#39;Latitude&#39;</span><span class="p">])</span>
+        <span class="n">w</span><span class="o">=</span><span class="p">((</span><span class="n">numpy</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">longs</span><span class="p">))</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">lats</span><span class="p">))</span> <span class="o">&amp;</span>
+                    <span class="p">(</span><span class="n">longs</span><span class="o">&gt;=</span><span class="n">rand_l</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">longs</span> <span class="o">&lt;</span><span class="p">(</span><span class="n">rand_l</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="o">&amp;</span>
+                    <span class="p">(</span><span class="n">lats</span><span class="o">&gt;=-</span><span class="mi">90</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">lats</span> <span class="o">&lt;=</span><span class="mi">90</span><span class="p">))</span>
+        <span class="n">s_ob</span> <span class="o">=</span> <span class="n">m_ob</span><span class="p">[</span><span class="n">w</span><span class="p">]</span>
+        <span class="n">fname</span><span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/ISPD_poster/</span><span class="si">%04d</span><span class="s2">/</span><span class="si">%02d</span><span class="s2">.pkl&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;SCRATCH&#39;</span><span class="p">),</span>
+                                                 <span class="n">year</span><span class="p">,</span><span class="n">month</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">fname</span><span class="p">)):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">fname</span><span class="p">))</span>
+        <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span> <span class="n">s_ob</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span> <span class="n">fname</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span> <span class="p">)</span> <span class="p">)</span>
+
+        
+</pre></div>
+</div>
+<p>Script to plot the poster:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="c1"># Make a poster showing ISPD4.7 obs coverage.</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+
+<span class="kn">import</span> <span class="nn">iris</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="kn">from</span> <span class="nn">matplotlib.backends.backend_agg</span> <span class="k">import</span> <span class="n">FigureCanvasAgg</span> <span class="k">as</span> <span class="n">FigureCanvas</span>
+<span class="kn">from</span> <span class="nn">matplotlib.figure</span> <span class="k">import</span> <span class="n">Figure</span>
+<span class="kn">from</span> <span class="nn">matplotlib.patches</span> <span class="k">import</span> <span class="n">Rectangle</span>
+
+<span class="kn">import</span> <span class="nn">pickle</span>
+
+<span class="k">def</span> <span class="nf">next_month</span><span class="p">(</span><span class="n">dt0</span><span class="p">):</span>
+    <span class="n">dt1</span> <span class="o">=</span> <span class="n">dt0</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">day</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">dt2</span> <span class="o">=</span> <span class="n">dt1</span> <span class="o">+</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
+    <span class="n">dt3</span> <span class="o">=</span> <span class="n">dt2</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">day</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dt3</span>
+
+<span class="n">start_year</span><span class="o">=</span><span class="mi">1836</span>
+<span class="n">end_year</span> <span class="o">=</span> <span class="mi">2015</span>
+
+<span class="c1"># Plot the images</span>
+<span class="n">fig</span><span class="o">=</span><span class="n">Figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">72</span><span class="p">,</span><span class="mi">9</span><span class="p">),</span>              <span class="c1"># Width, Height (inches)</span>
+           <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+           <span class="n">facecolor</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span>
+           <span class="n">edgecolor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+           <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+           <span class="n">frameon</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>                <span class="c1"># Don&#39;t draw a frame</span>
+           <span class="n">subplotpars</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+           <span class="n">tight_layout</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="c1"># Attach a canvas</span>
+<span class="n">canvas</span><span class="o">=</span><span class="n">FigureCanvas</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+<span class="n">matplotlib</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;image&#39;</span><span class="p">,</span><span class="n">aspect</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">)</span>
+
+
+<span class="c1">#ax.add_patch(Rectangle((xmin,ymin),width,height,</span>
+<span class="c1">#                        facecolor=&#39;#708090&#39;,fill=True,zorder=1))</span>
+
+<span class="n">xmin</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="n">start_year</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span><span class="o">-</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+<span class="n">xmax</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="n">end_year</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span><span class="mi">13</span><span class="p">,</span><span class="mi">23</span><span class="p">)</span><span class="o">+</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">120</span><span class="p">)</span>
+<span class="n">width</span><span class="o">=</span><span class="n">xmax</span><span class="o">-</span><span class="n">xmin</span>
+<span class="n">ymin</span><span class="o">=-</span><span class="mi">90</span>
+<span class="n">ymax</span><span class="o">=</span><span class="mi">90</span>
+<span class="n">height</span><span class="o">=</span><span class="n">ymax</span><span class="o">-</span><span class="n">ymin</span>
+
+<span class="c1"># For each month, load and plot the observations</span>
+<span class="k">def</span> <span class="nf">y_to_j</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">height</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">numpy</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> 
+            <span class="n">numpy</span><span class="o">.</span><span class="n">floor</span><span class="p">((</span><span class="n">y</span><span class="o">-</span><span class="n">ymin</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">ymax</span><span class="o">-</span><span class="n">ymin</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">height</span><span class="o">-</span><span class="mi">1</span><span class="p">))))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+<span class="n">n_obs</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">([(</span><span class="n">end_year</span><span class="o">+</span><span class="mi">1</span><span class="o">-</span><span class="n">start_year</span><span class="p">)</span><span class="o">*</span><span class="mi">12</span><span class="p">,</span><span class="mi">180</span><span class="p">])</span>
+<span class="n">px</span><span class="o">=</span><span class="p">[]</span>
+<span class="k">for</span> <span class="n">year</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start_year</span><span class="p">,</span><span class="n">end_year</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">month</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">13</span><span class="p">):</span>
+        <span class="n">m_count</span> <span class="o">=</span> <span class="p">(</span><span class="n">year</span><span class="o">-</span><span class="n">start_year</span><span class="p">)</span><span class="o">*</span><span class="mi">12</span> <span class="o">+</span> <span class="n">month</span><span class="o">-</span><span class="mi">1</span>
+        <span class="n">px</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="n">year</span><span class="p">,</span><span class="n">month</span><span class="p">,</span><span class="mi">15</span><span class="p">))</span>
+        <span class="n">fname</span><span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/ISPD_poster/</span><span class="si">%04d</span><span class="s2">/</span><span class="si">%02d</span><span class="s2">.pkl&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;SCRATCH&#39;</span><span class="p">),</span>
+                                                 <span class="n">year</span><span class="p">,</span><span class="n">month</span><span class="p">)</span>
+        <span class="n">s_ob</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span> <span class="nb">open</span><span class="p">(</span> <span class="n">fname</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span> <span class="p">)</span> <span class="p">)</span>
+        <span class="n">sdate</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="n">year</span><span class="p">,</span><span class="n">month</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">edate</span> <span class="o">=</span> <span class="n">next_month</span><span class="p">(</span><span class="n">sdate</span><span class="p">)</span>
+        <span class="n">n_steps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">edate</span><span class="o">-</span><span class="n">sdate</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span><span class="o">/</span><span class="p">(</span><span class="mi">3600</span><span class="o">*</span><span class="mi">6</span><span class="p">))</span>
+        <span class="n">lats</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">s_ob</span><span class="p">[</span><span class="s1">&#39;Latitude&#39;</span><span class="p">])</span>
+        <span class="n">lat_i</span><span class="o">=</span><span class="n">y_to_j</span><span class="p">(</span><span class="n">lats</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lat_i</span><span class="p">)):</span>
+            <span class="n">n_obs</span><span class="p">[</span><span class="n">m_count</span><span class="p">,</span><span class="n">lat_i</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">n_obs</span><span class="p">[</span><span class="n">m_count</span><span class="p">,:]</span> <span class="o">/=</span> <span class="n">n_steps</span>
+
+<span class="n">s</span><span class="o">=</span><span class="n">n_obs</span><span class="o">.</span><span class="n">shape</span>
+<span class="n">ax2</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span> <span class="c1"># Don&#39;t want surrounding x and y axis</span>
+<span class="n">nd2</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">clrs</span><span class="o">=</span><span class="p">[]</span>
+<span class="k">for</span> <span class="n">shade</span> <span class="ow">in</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">.</span><span class="mi">22</span><span class="o">+.</span><span class="mi">01</span><span class="p">,</span><span class="o">.</span><span class="mi">16</span><span class="o">+.</span><span class="mi">01</span><span class="p">):</span>
+    <span class="n">clrs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">shade</span><span class="p">,</span><span class="n">shade</span><span class="p">,</span><span class="n">shade</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">img</span> <span class="o">=</span> <span class="n">ax2</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">nd2</span><span class="p">,</span>
+                        <span class="n">cmap</span><span class="o">=</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">ListedColormap</span><span class="p">(</span><span class="n">clrs</span><span class="p">),</span>
+                        <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+                        <span class="n">shading</span><span class="o">=</span><span class="s1">&#39;gouraud&#39;</span><span class="p">,</span>
+                        <span class="n">zorder</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span> <span class="c1"># Don&#39;t want surrounding x and y axis</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">xmin</span><span class="p">,</span><span class="n">xmax</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">ymin</span><span class="p">,</span><span class="n">ymax</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">&#39;auto&#39;</span><span class="p">)</span>
+<span class="c1"># Plot the observations locations</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="n">n_obs</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span> <span class="k">continue</span>
+        <span class="n">scale</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span><span class="nb">max</span><span class="p">(</span><span class="mf">0.25</span><span class="p">,</span><span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n_obs</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">])))</span>
+        <span class="n">s_colour</span><span class="o">=</span><span class="p">(</span><span class="o">.</span><span class="mi">19</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">scale</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="o">*</span><span class="n">scale</span><span class="p">,</span>
+                  <span class="o">.</span><span class="mi">19</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">scale</span><span class="p">)</span><span class="o">+</span><span class="mf">0.84</span><span class="o">*</span><span class="n">scale</span><span class="p">,</span>
+                  <span class="o">.</span><span class="mi">19</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">scale</span><span class="p">)</span><span class="o">+</span><span class="mi">0</span><span class="o">*</span><span class="n">scale</span><span class="p">,</span>
+                  <span class="mi">1</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">Rectangle</span><span class="p">((</span><span class="n">px</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">j</span><span class="o">/</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">height</span><span class="o">+</span><span class="n">ymin</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span>
+                               <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">31</span><span class="p">),</span>
+                               <span class="p">(</span><span class="n">height</span><span class="o">/</span><span class="mi">180</span><span class="p">),</span>
+                               <span class="n">facecolor</span><span class="o">=</span><span class="n">s_colour</span><span class="p">,</span>
+                               <span class="n">edgecolor</span><span class="o">=</span><span class="n">s_colour</span><span class="p">,</span>
+                               <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span>
+                               <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                               <span class="n">zorder</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+                               <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+        
+
+<span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;ISPD.pdf&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../Stripes/20CR.html" title="Warming Stripes (20CRv3 version)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../../index.html" title="Eye-candy: Philip’s posters"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Posters</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    </div>
+  </body>
+</html>
