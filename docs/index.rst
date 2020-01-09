@@ -10,6 +10,7 @@ This is a set of visualisations designed to be printed out as large posters. Som
    :titlesonly:
    :maxdepth: 1
 
+   posters/Spilhaus/ostia
    posters/ISPD4.7/index
    posters/Stripes/20CR
    Machine Learning GCM <http://brohan.org/ML_GCM/presentations/index.html>

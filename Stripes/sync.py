@@ -103,3 +103,4 @@ else:
         if ( locald['Size']!=s3d['Size'] and
              locald['LastModified']<s3d['LastModified'] ):
             download()
+print("\n")

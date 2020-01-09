@@ -3,9 +3,14 @@
 # Ocean-centred projection. Equirectangular, but inspired by Spilhaus.
 # Meto global data.
 
+import os
+import datetime
+import IRData.opfc as opfc
 import Meteorographica as mg
 import iris
 import numpy
+
+dte=datetime.datetime(2019,3,12,6)
 
 import matplotlib
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
@@ -27,31 +32,15 @@ def damp_lat(sst,factor=0.5):
     return(sst)
 
 # Load the Meto SST
-sst=iris.load_cube('/scratch/hadpb/Posters/Spilhaus/tsurf.nc')
-# Get rid of the (1-member) time dimension
-sst=sst.collapsed('t', iris.analysis.MEAN)
-sst=sst.collapsed('Surface', iris.analysis.MEAN)
-coord_s=iris.coord_systems.GeogCS(iris.fileformats.pp.EARTH_RADIUS)
-sst.coord('latitude').coord_system=coord_s
-sst.coord('longitude').coord_system=coord_s
+sst=opfc.load('tsurf',dte,model='global')
 # And the sea-ice
-icec=iris.load_cube('/scratch/hadpb/Posters/Spilhaus/icec.nc')
-icec=icec.collapsed('t', iris.analysis.MEAN)
-icec=icec.collapsed('Surface', iris.analysis.MEAN)
-icec.coord('latitude').coord_system=coord_s
-icec.coord('longitude').coord_system=coord_s
+icec=opfc.load('icec',dte,model='global')
 # And the orography
-orog=iris.load_cube('/scratch/hadpb/Posters/Spilhaus/orography.nc')
-orog=orog.collapsed('t', iris.analysis.MEAN)
-orog=orog.collapsed('Surface', iris.analysis.MEAN)
-orog.coord('latitude').coord_system=coord_s
-orog.coord('longitude').coord_system=coord_s
+orog=iris.load_cube("%s/fixed_fields/orography/opfc_global_2019.nc" % 
+                                                  os.getenv('SCRATCH'))
 # And the land-sea mask
-mask=iris.load_cube('/scratch/hadpb/Posters/Spilhaus/land_mask.nc')
-mask=mask.collapsed('t', iris.analysis.MEAN)
-mask=mask.collapsed('Surface', iris.analysis.MEAN)
-mask.coord('latitude').coord_system=coord_s
-mask.coord('longitude').coord_system=coord_s
+mask=iris.load_cube("%s/fixed_fields/land_mask/opfc_global_2019.nc" % 
+                                                  os.getenv('SCRATCH'))
 
 # Apply the LS mask to turn tsurf into SST
 sst.data[mask.data>=0.5]=numpy.nan
@@ -60,7 +49,7 @@ sst.data=numpy.ma.array(sst.data,
 sst=damp_lat(sst,factor=0.25)
 
 # Define the figure (page size, background color, resolution, ...
-fig=Figure(figsize=(46.8,33.1),              # Width, Height (inches)
+fig=Figure(figsize=(46.8,23.4),              # Width, Height (inches)
            dpi=300,
            facecolor=(0.5,0.5,0.5,1),
            edgecolor=None,
@@ -231,5 +220,5 @@ orog_img = ax.pcolorfast(lons, lats, orog.data,
                          zorder=500)
 
 
-# Render the figure as a png
-fig.savefig('poster_meto.png')
+# Render the figure as a pdf
+fig.savefig('spilhaus_ostia_meto.pdf')
