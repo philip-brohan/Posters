@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 
-# Make a poster showing 20CR monthly temperatures.
+# Make a poster showing HadCRUT5 monthly temperatures.
 # Inspired by the climate stripes popularised by Ed Hawkins.
 
 import os
 import iris
-#import geohash2
 import numpy
 import datetime
 
@@ -16,28 +15,20 @@ from matplotlib.patches import Rectangle
 
 from pandas import qcut
 
+# Choose one ensemble member (arbitrarily)
+member = 87
+
 # Load the 20CR data
-h=iris.load_cube('./air.2m.mon.mean.nc','air_temperature')
-# Get the climatology
-n=[]
-for m in range(1,13):
-    mc=iris.Constraint(time=lambda cell: cell.point.month == m and cell.point.year>1960 and cell.point.year<1991)
-    n.append(h.extract(mc).collapsed('time', iris.analysis.MEAN))
+h=iris.load_cube("/scratch/hadcc/hadcrut5/build/HadCRUT5/analysis/"+
+                 "HadCRUT.5.0.0.0.analysis.anomalies.%d.nc" % member)
 
-# Anomalise
-for tidx in range(len(h.coord('time').points)):
-    tpt=datetime.datetime(1800,1,1)+datetime.timedelta(hours=h.coord('time').points[tidx])
-    midx=tpt.month-1
-    h.data[tidx,:,:] -= n[midx].data
-
-# Average over longitude
-#h=h.collapsed('longitude', iris.analysis.MEAN)
+# Pick a random longitude at each month
 p=h.extract(iris.Constraint(longitude=0))
 s=h.data.shape
 for t in range(s[0]):
-    for lat in range(s[1]):
-        rand_l = numpy.random.randint(0,s[2])
-        p.data[t,lat]=h.data[t,lat,rand_l]
+   for lat in range(s[1]):
+       rand_l = numpy.random.randint(0,s[2])
+       p.data[t,lat]=h.data[t,lat,rand_l]
 h=p
 ndata=h.data
 
@@ -54,21 +45,28 @@ fig=Figure(figsize=(72,18),              # Width, Height (inches)
 # Attach a canvas
 canvas=FigureCanvas(fig)
 matplotlib.rc('image',aspect='auto')
+
+# Speckled grey background
+s=ndata.shape
+ax2 = fig.add_axes([0,0,1,1],facecolor='green')
+ax2.set_axis_off() # Don't want surrounding x and y axis
+nd2=numpy.random.rand(s[1],s[0])
+clrs=[]
+for shade in numpy.linspace(.42+.01,.36+.01):
+    clrs.append((shade,shade,shade,1))
+y = numpy.linspace(0,1,s[1])
+x = numpy.linspace(0,1,s[0])
+img = ax2.pcolormesh(x,y,nd2,
+                        cmap=matplotlib.colors.ListedColormap(clrs),
+                        alpha=1.0,
+                        shading='gouraud',
+                        zorder=10)
+
 ax = fig.add_axes([0,0,1,1],facecolor='black',xlim=(0,1),ylim=(0,1))
 ax.set_axis_off() # Don't want surrounding x and y axis
-# Axes ignores facecolor, so set background explicitly
-#ax.add_patch(Rectangle((0,0),1,1,facecolor=(0.88,0.88,0.88,1),fill=True,zorder=1))
-
-# Nomalise by latitude
-#s=ndata.shape
-#for lat in range(s[1]):
-#   qn=qcut(ndata[:,lat],100,labels=False,duplicates='drop')
-#   ndata[:,lat]=qn
 
 ndata=numpy.transpose(ndata)
 s=ndata.shape
-#ndata=qcut(ndata.flatten(),200,labels=False,
-#                             duplicates='drop').reshape(s),
 y = numpy.linspace(0,1,s[0])
 x = numpy.linspace(0,1,s[1])
 img = ax.pcolorfast(x,y,numpy.cbrt(ndata),
@@ -78,5 +76,4 @@ img = ax.pcolorfast(x,y,numpy.cbrt(ndata),
                         vmax=1.7,
                         zorder=100)
 
-fig.savefig('20CR.pdf')
-#RdYlBu_r
+fig.savefig('m%d.pdf' % member)
