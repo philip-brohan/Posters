@@ -1,0 +1,1 @@
+../../../../Stripes/EUSTACE/data/from_mass.py
