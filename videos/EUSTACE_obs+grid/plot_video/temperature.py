@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
 # Plot temperature and observations from EUSTACE
+# Video version.
 
 import os
 import sys
+import datetime
 
 import iris
 import numpy
@@ -25,13 +27,27 @@ from load import EUSTACE_sds
 from load import EUSTACE_stations_for_day
 from load import ICOADS_for_day
 
-year=1931
-month=3
-day=12
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("--year", help="Year",
+                    type=int,required=True)
+parser.add_argument("--month", help="Integer month",
+                    type=int,required=True)
+parser.add_argument("--day", help="Day of month",
+                    type=int,required=True)
+parser.add_argument("--opdir", help="Directory for output files",
+                    default="%s/images/EUSTACE_video" % \
+                                           os.getenv('SCRATCH'),
+                    type=str,required=False)
+args = parser.parse_args()
+if not os.path.isdir(args.opdir):
+    os.makedirs(args.opdir)
+
+target = datetime.date(args.year,args.month,args.day)
 
 # Fix dask SPICE bug
-#import dask
-#dask.config.set(scheduler='single-threaded')
+import dask
+dask.config.set(scheduler='single-threaded')
 
 # Geometry for plotting
 def plot_cube(resolution,xmin=-180,xmax=180,
@@ -129,16 +145,31 @@ def quantile_normalise_t2m(p):
    return res
 
 # Temperature normals
-normal=EUSTACE_normals(month,day)
-sd=EUSTACE_sds(month,day)
+normal=EUSTACE_normals(args.month,args.day)
+sd=EUSTACE_sds(args.month,args.day)
 
 # Temperature analysis
-analysis_m = EUSTACE_average_for_day(year,month,day)
+analysis_m = EUSTACE_average_for_day(args.year,args.month,args.day)
+pday = target-datetime.timedelta(days=1)
+analysis_m += EUSTACE_average_for_day(pday.year,pday.month,pday.day)*0.5
+pday = target+datetime.timedelta(days=1)
+analysis_m += EUSTACE_average_for_day(pday.year,pday.month,pday.day)*0.5
+analysis_m /= 2
 # Compromise between actuals and anomalies
 analysis_m += analysis_m-normal
 analysis_n = quantile_normalise_t2m(analysis_m)
 
-analysis_o = EUSTACE_obs_influence_for_day(year,month,day)
+# Smooth the obs influence - it's undersampled
+analysis_o = EUSTACE_obs_influence_for_day(args.year,args.month,args.day)
+#pday = target-datetime.timedelta(days=2)
+#analysis_o += EUSTACE_obs_influence_for_day(pday.year,pday.month,pday.day)*0.25
+pday = target-datetime.timedelta(days=1)
+analysis_o += EUSTACE_obs_influence_for_day(pday.year,pday.month,pday.day)*0.5
+pday = target+datetime.timedelta(days=1)
+analysis_o += EUSTACE_obs_influence_for_day(pday.year,pday.month,pday.day)*0.5
+#pday = target+datetime.timedelta(days=2)
+#analysis_o += EUSTACE_obs_influence_for_day(pday.year,pday.month,pday.day)*0.25
+analysis_o /= 2
 
 analysis_n = analysis_n.regrid(cplot,iris.analysis.Linear())
 analysis_o = analysis_o.regrid(cplot,iris.analysis.Linear())
@@ -156,19 +187,12 @@ for a in range(100):
                             vmax=1,
                             zorder=100)
 
-# station obs
-st_obs = EUSTACE_stations_for_day(year,month,day)
-# ship obs
-sh_obs = ICOADS_for_day(year,month,day)
-# Reduce the obs to 1-degree mean pseudo-obs
 width=360
 height=180
 xmin=-180
 xmax=180
 ymin=-90
 ymax=90
-obs = numpy.ma.array(numpy.zeros([width,height]), mask = True)
-counts = numpy.zeros([width,height])
 def x_to_i(x):
     return numpy.minimum(width-1,numpy.maximum(0, 
             numpy.floor((x-xmin)/(xmax-xmin)*(width-1)))).astype(int)
@@ -179,44 +203,66 @@ def i_to_x(i):
     return xmin + ((i+1)/width) * (xmax-xmin)
 def j_to_y(j):
     return ymin + ((j+1)/height) * (ymax-ymin)
-lon_i=x_to_i(st_obs['longitude'])
-lat_i=y_to_j(st_obs['latitude'])
-for i in range(len(lon_i)):
-    obs.mask[lon_i[i],lat_i[i]]=False
-    obs[lon_i[i],lat_i[i]] += (st_obs['tasmin'][i]+st_obs['tasmax'][i])/2
-    counts[lon_i[i],lat_i[i]] += 1
-lon_i=x_to_i(sh_obs['longitude'])
-lat_i=y_to_j(sh_obs['latitude'])
-for i in range(len(lon_i)):
-    obs.mask[lon_i[i],lat_i[i]]=False
-    obs[lon_i[i],lat_i[i]] += sh_obs['AT'][i]
-    counts[lon_i[i],lat_i[i]] += 1
+def get_obs(year,month,day):
+    # station obs
+    st_obs = EUSTACE_stations_for_day(year,month,day)
+    # ship obs
+    sh_obs = ICOADS_for_day(year,month,day)
+    # Reduce the obs to 1-degree mean pseudo-obs
+    obs = numpy.ma.array(numpy.zeros([width,height]), mask = True)
+    counts = numpy.zeros([width,height])
+    lon_i=x_to_i(st_obs['longitude'])
+    lat_i=y_to_j(st_obs['latitude'])
+    for i in range(len(lon_i)):
+        obs.mask[lon_i[i],lat_i[i]]=False
+        obs[lon_i[i],lat_i[i]] += (st_obs['tasmin'][i]+st_obs['tasmax'][i])/2
+        counts[lon_i[i],lat_i[i]] += 1
+    lon_i=x_to_i(sh_obs['longitude'])
+    lat_i=y_to_j(sh_obs['latitude'])
+    for i in range(len(lon_i)):
+        obs.mask[lon_i[i],lat_i[i]]=False
+        obs[lon_i[i],lat_i[i]] += sh_obs['AT'][i]
+        counts[lon_i[i],lat_i[i]] += 1
 
-obs /= counts
+    obs /= counts
+    return(obs)
 
 # Plot the observations locations
-for i in range(width):
-    for j in range(height):
-        if obs.mask[i,j]: continue
-        rp=iris.analysis.cartography.rotate_pole(numpy.array(i_to_x(i)),
-                                                 numpy.array(j_to_y(j)),
-                                                 180,
-                                                 90)
-        nlon=rp[0][0]
-        nlat=rp[1][0]
-        ax.add_patch(matplotlib.patches.Circle((nlon,nlat),
-                                                radius=0.29,
-                                                facecolor='black',
-                                                edgecolor='black',
-                                                linewidth=0.1,
-                                                alpha=1,
-                                                zorder=180))
+def plot_obs(obs,alpha):
+    for i in range(width):
+        for j in range(height):
+            if obs.mask[i,j]: continue
+            rp=iris.analysis.cartography.rotate_pole(numpy.array(i_to_x(i)),
+                                                     numpy.array(j_to_y(j)),
+                                                     180,
+                                                     90)
+            nlon=rp[0][0]
+            nlat=rp[1][0]
+            ax.add_patch(matplotlib.patches.Circle((nlon,nlat),
+                                                    radius=0.2,
+                                                    facecolor='black',
+                                                    edgecolor='black',
+                                                    linewidth=0.1,
+                                                    alpha=alpha,
+                                                    zorder=180))
+    
+# Plot obs from a few days around the target, for a smooth video
+pday = target-datetime.timedelta(days=2)
+plot_obs(get_obs(pday.year,pday.month,pday.day),0.25)
+pday = target-datetime.timedelta(days=1)
+plot_obs(get_obs(pday.year,pday.month,pday.day),0.5)
+pday = target
+plot_obs(get_obs(pday.year,pday.month,pday.day),1)
+pday = target+datetime.timedelta(days=1)
+plot_obs(get_obs(pday.year,pday.month,pday.day),0.5)
+pday = target+datetime.timedelta(days=2)
+plot_obs(get_obs(pday.year,pday.month,pday.day),0.25)
 
 
 # Label with the date
 ax.text(177.5,
          88,
-         "%04d-%02d-%02d" % (year,month,day),
+         "%04d-%02d-%02d" % (args.year,args.month,args.day),
          horizontalalignment='right',
          verticalalignment='top',
          color='black',
@@ -229,4 +275,5 @@ ax.text(177.5,
          zorder=500)
 
 # Render the figure as a png
-fig.savefig('EUSTACE.png')
+fig.savefig('%s/%04d%02d%02d00.png' % (args.opdir,args.year,
+                                     args.month,args.day))
