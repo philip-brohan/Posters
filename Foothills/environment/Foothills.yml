@@ -1,0 +1,10 @@
+name: Foothills
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.9
+  - rasterio=1.2
+  - matplotlib=3.5
+# Optional, code formatter
+  - black
