@@ -12,22 +12,20 @@ import iris.analysis
 import matplotlib
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
-from matplotlib.lines import Line2D
 
 import cmocean
-from pandas import qcut
 
 # Define the region to plot
 latMin = -6
 latMax = 6
 lonMin = -3.75
-lonMax = 4.5
+lonMax = 4.25
 pole_latitude = 35
 pole_longitude = 175
 aspect = (lonMax - lonMin) / (latMax - latMin)
 
 fig = Figure(
-    figsize=(22 * aspect, 22),  # Width, Height (inches)
+    figsize=(24, 36),  # Width, Height (inches)
     dpi=300,
     facecolor=(0.5, 0.5, 0.5, 1),
     edgecolor=None,
@@ -104,7 +102,7 @@ orog = iris.load_cube(
 )
 orog.coord("latitude").coord_system = coord_s
 orog.coord("longitude").coord_system = coord_s
-pc = plot_cube(0.002, lonMin, lonMax, latMin, latMax, pole_latitude, pole_longitude)
+pc = plot_cube(0.001, lonMin, lonMax, latMin, latMax, pole_latitude, pole_longitude)
 orog = orog.regrid(pc, iris.analysis.Linear())
 omax = orog.data.max()
 lats = orog.coord("latitude").points
