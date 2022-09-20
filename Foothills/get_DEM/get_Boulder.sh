@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 # Download the 30m DEM for the Region araound Boulder, Colorado
 
