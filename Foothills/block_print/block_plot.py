@@ -14,6 +14,12 @@ from matplotlib.patches import Rectangle
 
 import cmocean
 
+from Met_palettes import MET_PALETTES
+
+mCols = list(MET_PALETTES["Pillement"]["colors"])
+# mCols.reverse()
+mCmap = matplotlib.colors.LinearSegmentedColormap.from_list("Test", mCols)
+
 view_lon = -105.18807
 # view_lat = 39.96774
 view_lat = 39.96774
@@ -83,63 +89,76 @@ axb.add_patch(
 lat_scale = p_lat_max - p_lat_min
 
 
-def plot_layer(lon_idx, colour):
-    height_series = rdata[:, lon_idx]
+def make_line(lon_idx, shift=0, rfr=0.5):
+    height = rdata[:, lon_idx]
     llats = lats[:, lon_idx]
     llons = lons[:, lon_idx]
-    (p_lats, p_heights) = project_coordinates(llats, llons, height_series)
-    height_series = p_heights[
-        (p_lats > (p_lat_min * 1.1)) & (p_lats < p_lat_max * 1.05)
-    ]
-    llats = p_lats[(p_lats > p_lat_min * 1.1) & (p_lats < p_lat_max * 1.05)]
-    poly_y = np.concatenate((height_series, np.zeros(height_series.shape) + bottom))
-    poly_x = np.concatenate((llats, np.flip(llats)))
-    cscale = lon_idx / 3600
-    cscale = 0.5
-    col = (
-        min((1 - cscale) * 1.1, 1),
-        min((1 - cscale) * 1.1, 1),
-        min((1 - cscale) * 1.1, 1),
-        1.0,
-    )
-    mask_img = axb.fill(
-        poly_x - lat_scale / 1000,
-        poly_y,
-        facecolor=col,
-        edgecolor="white",
-        lw=0.0,
-        zorder=lon_idx * 10,
-    )
-    col = (
-        min((1 - cscale) * 0.9, 1),
-        min((1 - cscale) * 0.9, 1),
-        min((1 - cscale) * 0.9, 1),
-        1.0,
-    )
-    mask_img = axb.fill(
-        poly_x + lat_scale / 1000,
-        poly_y,
-        facecolor=col,
-        edgecolor="white",
-        lw=0.0,
-        zorder=lon_idx * 10,
-    )
-    mask_img = axb.fill(
-        poly_x,
-        poly_y,
-        facecolor=(0, 0, 0, 0),
-        edgecolor="white",
-        lw=0.1,
-        zorder=lon_idx * 10 + 9,
+    (l_lats, l_heights) = project_coordinates(llats, llons, height)
+    if shift != 0:
+        sscale = 1.0 - rfr + np.random.random(len(l_lats)) * rfr
+        lld = np.concatenate((np.zeros(1), np.diff(l_lats))) * shift * sscale
+        l_lats += lld
+    return (l_lats, l_heights)
+
+
+def make_poly(idx1, idx2, shift=0):
+    lats1, heights1 = make_line(idx1, shift=shift)
+    lats2, heights2 = make_line(idx2, shift=shift)
+    return (
+        np.concatenate((lats1, np.flip(lats2))),
+        np.concatenate((heights1, np.flip(heights2))),
     )
 
 
-for lon_idx in range(359, 3600, 1):
+def lighten(colour, scale=1.0):
+    col = (
+        max(0.0, min(1.0, colour[0] * scale)),
+        max(0.0, min(1.0, colour[1] * scale)),
+        max(0.0, min(1.0, colour[2] * scale)),
+        colour[3],
+    )
+    return col
+
+
+def plot_layer(idx1, idx2, colour):
+    px, py = make_poly(idx1, idx2, shift=1)
+    py = py[(px > p_lat_min * 1.1) & (px < p_lat_max * 1.05)]
+    px = px[(px > p_lat_min * 1.1) & (px < p_lat_max * 1.05)]
+    mask_img = axb.fill(
+        px,
+        py,
+        facecolor=lighten(col, 1.2),
+        edgecolor="white",
+        lw=0.0,
+        zorder=idx2 * 10,
+    )
+    px, py = make_poly(idx1, idx2, shift=-1)
+    py = py[(px > p_lat_min * 1.1) & (px < p_lat_max * 1.05)]
+    px = px[(px > p_lat_min * 1.1) & (px < p_lat_max * 1.05)]
+    mask_img = axb.fill(
+        px,
+        py,
+        facecolor=lighten(col, 0.8),
+        edgecolor="white",
+        lw=0.0,
+        zorder=idx2 * 10,
+    )
+    px, py = make_line(int((idx1 + idx2) / 2))
+    py = py[(px > p_lat_min * 1.1) & (px < p_lat_max * 1.05)]
+    px = px[(px > p_lat_min * 1.1) & (px < p_lat_max * 1.05)]
+    mean_line = axb.plot(px, py, "-", color=(0, 0, 0, 1), lw=0.1, zorder=idx2 * 10 + 19)
+
+
+for lon_idx in range(1, 2920, 1):
+    ifrac = max(1, int((2920 - lon_idx) / 200))
+    if lon_idx % ifrac != 0:
+        continue
     lon = lons[:, lon_idx][0]
     if lon > (view_lon - 0.001):
         continue
     cscale = lon_idx / 3600
     col = (1 - cscale, 1 - cscale, 1 - cscale, 1.0)
-    plot_layer(lon_idx, col)
+    col = mCmap(np.sqrt(max(0, min(1, (2920 - lon_idx) / 2920))))
+    plot_layer(lon_idx - (ifrac + 1), lon_idx, col)
 
 fig.savefig("Blocks.png")

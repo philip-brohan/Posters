@@ -4,4 +4,4 @@
 
 mkdir -p $SCRATCH/DEM
 
-eio clip -o $SCRATCH/DEM/Boulder.tif --bounds -106 39 -105 41
+eio clip -o $SCRATCH/DEM/Boulder.tif --bounds -106 39 -104 41
