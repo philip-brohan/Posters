@@ -54,7 +54,7 @@ lons = np.array(xs)
 lats = np.array(ys)
 
 fig = Figure(
-    figsize=(20, 5),  # Width, Height (inches)
+    figsize=(20, 7),  # Width, Height (inches)
     dpi=300,
     facecolor=(0.5, 0.5, 0.5, 1),
     edgecolor=None,
@@ -69,24 +69,34 @@ canvas = FigureCanvas(fig)
 
 # Scale height range for the plot (m)
 bottom = -200
-top = 100
+top = 220
 
 axb = fig.add_axes([0, 0, 1, 1])
 axb.set_axis_off()
 axb.set_xlim(p_lat_min, p_lat_max)
 axb.set_ylim(bottom, top)
 axb.set_aspect("auto")
-axb.add_patch(
-    Rectangle(
-        (p_lat_min, bottom),
-        p_lat_max - p_lat_min,
-        top - bottom,
-        facecolor=(0.25, 0.65, 0.95, 1),
-        fill=True,
-        zorder=1,
-    )
-)
 lat_scale = p_lat_max - p_lat_min
+height_scale = top - bottom
+aspect_scale = (height_scale / lat_scale) * (20 / 7)
+s = (2000, 700)
+sun_x = 0.0 * lat_scale + p_lat_min
+sun_y = 0.4 * height_scale + bottom
+y = np.linspace(bottom, top, s[1])
+x = np.linspace(p_lat_min, p_lat_max, s[0])
+xm, ym = np.meshgrid(x, y)
+xm = xm - sun_x
+ym = 4 * (ym - sun_y) / aspect_scale
+nd2 = np.sqrt(xm * xm + ym * ym)
+nd2 /= np.max(nd2)
+nd2 = np.sqrt(nd2)
+nd2 += np.random.rand(s[1], s[0]) * 0.1
+sCols = list(MET_PALETTES["Hiroshige"]["colors"])
+# sCols = list(MET_PALETTES["Troy"]["colors"])
+# sCols.reverse()
+sCmap = matplotlib.colors.LinearSegmentedColormap.from_list("Sun", sCols)
+
+img = axb.pcolormesh(x, y, nd2, cmap=sCmap, alpha=1.0, shading="gouraud", zorder=1)
 
 
 def make_line(lon_idx, shift=0, rfr=0.5):
