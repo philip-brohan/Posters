@@ -21,7 +21,6 @@ mCols = list(MET_PALETTES["Pillement"]["colors"])
 mCmap = matplotlib.colors.LinearSegmentedColormap.from_list("Test", mCols)
 
 view_lon = -105.18807
-# view_lat = 39.96774
 view_lat = 39.96774
 # 3716,2920 in pixel coordinates
 view_height = 1721 + 200  # m
@@ -30,6 +29,7 @@ view_height = 1721 + 200  # m
 # are as they woud appear on a plane 1km away
 def project_coordinates(lat, lon, height):
     dlat = (lat - view_lat) * 111000  # in m
+    dlat /= 10  # Reduce fisheye effect
     dlon = (view_lon - lon) * 85000
     dheight = height - view_height
     distance = np.sqrt(dlat ** 2 + dlon ** 2)
@@ -38,10 +38,10 @@ def project_coordinates(lat, lon, height):
     return (slat, sheight)
 
 
-lat_min = 39.75
-lat_max = 40.25
-p_lat_min = project_coordinates(39.75, view_lon - 1 / 111, view_height)[0] / 40
-p_lat_max = project_coordinates(40.25, view_lon - 1 / 111, view_height)[0] / 40
+lat_min = view_lat - 0.41
+lat_max = view_lat + 0.41
+p_lat_min = project_coordinates(lat_min, view_lon - 1 / 111, view_height)[0] / 40
+p_lat_max = project_coordinates(lat_max, view_lon - 1 / 111, view_height)[0] / 40
 
 img = rasterio.open("%s/DEM/Boulder.tif" % os.getenv("SCRATCH"))
 aspect = (img.bounds.top - img.bounds.bottom) / (img.bounds.right - img.bounds.left)
@@ -54,7 +54,7 @@ lons = np.array(xs)
 lats = np.array(ys)
 
 fig = Figure(
-    figsize=(20, 7),  # Width, Height (inches)
+    figsize=(20, 5),  # Width, Height (inches)
     dpi=300,
     facecolor=(0.5, 0.5, 0.5, 1),
     edgecolor=None,
@@ -161,8 +161,8 @@ def plot_layer(idx1, idx2, colour):
 
 for lon_idx in range(1, 2920, 1):
     ifrac = max(1, int((2920 - lon_idx) / 200))
-    if lon_idx % ifrac != 0:
-        continue
+    # if lon_idx % ifrac != 0:
+    #    continue
     lon = lons[:, lon_idx][0]
     if lon > (view_lon - 0.001):
         continue
