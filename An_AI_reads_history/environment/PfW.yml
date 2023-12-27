@@ -1,0 +1,13 @@
+name: PfW
+channels:
+  - conda-forge
+dependencies:
+# Basics
+  - python=3.12
+  - matplotlib=3.8
+  - pillow=10.1
+# Optional, code formatter
+  - black
+# Optional, documentation generator
+  - sphinx
+  

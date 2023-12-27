@@ -1,0 +1,76 @@
+Name,birth year,death year,sex,category,wikipedia URL,
+'Taylor Swift',1989,0,f,musician,https://en.wikipedia.org/wiki/Taylor_Swift
+'Queen Elizabeth II',1926,2022,f,monarch,https://en.wikipedia.org/wiki/Elizabeth_II
+'Jeanne Calment',1875,1997,f,supercentinarian,https://en.wikipedia.org/wiki/Jeanne_Calment
+'Buffalo Bill',1846,1917,m,cowboy,https://en.wikipedia.org/wiki/Buffalo_Bill
+'Wordsworth',1770,1850,m,poet,https://en.wikipedia.org/wiki/William_Wordsworth
+'Tobias Smollett,1721,1771,m,author,https://en.wikipedia.org/wiki/Tobias_Smollett
+'Antoine Watteau',1684,1721,m,painter,https://en.wikipedia.org/wiki/Antoine_Watteau
+'King Charles II',1630,1685,m,monarch,https://en.wikipedia.org/wiki/Charles_II_of_England
+'Johannes Kepler',1571,1630,m,astronomer,https://en.wikipedia.org/wiki/Johannes_Kepler
+'William Shakespear',1564,1616,m,writer,https://en.wikipedia.org/wiki/William_Shakespeare
+'Michelangelo',1475,1564,m,artist,https://en.wikipedia.org/wiki/Michelangelo
+'Vlad Dracula',1428,1477,m,ruler,https://en.wikipedia.org/wiki/Vlad_the_Impaler
+'Joan of Arc',1412,1431,f,saint,https://en.wikipedia.org/wiki/Joan_of_Arc
+'Admiral Zheng He',1371,1435,m,admiral,https://en.wikipedia.org/wiki/Zheng_He
+'King Henry IV',1367,1413,m,monarch,https://en.wikipedia.org/wiki/Henry_IV_of_England
+'Geoffrey Chaucer',1345,1400,m,author,https://en.wikipedia.org/wiki/Geoffrey_Chaucer
+'The Black Prince',1330,1376,m,general,https://en.wikipedia.org/wiki/Edward_the_Black_Prince
+'Mansa Musa',1290,1337,m,monarch,https://en.wikipedia.org/wiki/Mansa_Musa
+'John Duns Scotus',1265,1308,m,philosopher,https://en.wikipedia.org/wiki/Duns_Scotus
+'Thomas Aquinas',1225,1274,m,saint,https://en.wikipedia.org/wiki/Thomas_Aquinas
+'Llywelyn the Great',1173,1240,m,monarch,https://en.wikipedia.org/wiki/Llywelyn_ab_Iorwerth
+'Saladin',1137,1193,m,monarch,https://en.wikipedia.org/wiki/Saladin
+'Thomas à Becket',1119,1170,m,saint,https://en.wikipedia.org/wiki/Thomas_Becket
+'Geoffrey of Monmouth',1095,1155,m,writer,https://en.wikipedia.org/wiki/Geoffrey_of_Monmouth
+'St. Anselm',1033,1109,m,theologian,https://en.wikipedia.org/wiki/Anselm_of_Canterbury
+'King Canute',990,1035,m,monarch,https://en.wikipedia.org/wiki/Cnut
+'Leif Erikson',975,1025,m,explorer,https://en.wikipedia.org/wiki/Leif_Erikson
+'Sei Shōnagon',966,1017,f,author,https://en.wikipedia.org/wiki/Sei_Sh%C5%8Dnagon
+'Byrhtnoth',931,991,m,general,https://en.wikipedia.org/wiki/Byrhtnoth
+'Archbishop Dunstan',909,988,m,priest,https://en.wikipedia.org/wiki/Dunstan
+'Harald Fairhair',850,932,m,monarch,https://en.wikipedia.org/wiki/Harald_Fairhair
+'Alfred the Great',849,899,m,monarch,https://en.wikipedia.org/wiki/Alfred_the_Great
+'Ivar the Boneless',787,873,m,monarch,https://en.wikipedia.org/wiki/Ivar_the_Boneless
+'Harun al-Rashid',763,809,m,monarch,https://en.wikipedia.org/wiki/Harun_al-Rashid
+'Offa of Mercia',735,796,m,monarch,https://en.wikipedia.org/wiki/Offa_of_Mercia
+'Venerable Bede',672,735,m,historian,https://en.wikipedia.org/wiki/Bede
+'Empress Wu Zetian',624,705,f,monarch,https://en.wikipedia.org/wiki/Wu_Zetian
+'Muhammad',570,632,m,prophet,https://en.wikipedia.org/wiki/Muhammad
+'Gregory of Tours',538,594,m,historian,https://en.wikipedia.org/wiki/Gregory_of_Tours
+'Count Belisarius',500,565,m,general,https://en.wikipedia.org/wiki/Belisarius
+'Boethius',480,524,m,philosopher,https://en.wikipedia.org/wiki/Boethius
+'Odoacer',433,493,m,general,https://en.wikipedia.org/wiki/Odoacer
+'Attila the Hun',406,453,m,monarch,https://en.wikipedia.org/wiki/Attila
+'St. Jerome',342,420,m,saint,https://en.wikipedia.org/wiki/Jerome
+'Wang Xizhi',303,361,m,calligrapher,https://en.wikipedia.org/wiki/Wang_Xizhi
+'Constantine the Great',272,337,m,monarch,https://en.wikipedia.org/wiki/Constantine_the_Great
+'Plotinus',204,270,m,philosopher,https://en.wikipedia.org/wiki/Plotinus
+'Galen',129,216,m,doctor,https://en.wikipedia.org/wiki/Galen
+'Marcus Aurelius',121,180,m,monarch,https://en.wikipedia.org/wiki/Marcus_Aurelius
+'Suetonius',69,123,m,historian,https://en.wikipedia.org/wiki/Suetonius
+'Hero of Alexandria',50*,100*,m,engineer,https://en.wikipedia.org/wiki/Hero_of_Alexandria
+'Boudica',30*,61,f,monarch,https://en.wikipedia.org/wiki/Boudica
+'Jesus',-6,33,m,prophet,https://en.wikipedia.org/wiki/Jesus
+'Augustus Caesar',-63,14,m,monarch,https://en.wikipedia.org/wiki/Augustus
+'Cleopatra',-70,-30,f,monarch,https://en.wikipedia.org/wiki/Cleopatra
+'Julius Caesar',-100,-44,m,monarch,https://en.wikipedia.org/wiki/Julius_Caesar
+'Cato the Censor',-234,-149,m,politician,https://en.wikipedia.org/wiki/Cato_the_Elder
+'Archimedes',-287,-212,m,mathmatician,https://en.wikipedia.org/wiki/Archimedes
+'Alexander the Great',-356,-323,m,monarch,https://en.wikipedia.org/wiki/Alexander_the_Great
+'Praxiteles',-370*,-320*,m,sculptor,https://en.wikipedia.org/wiki/Praxiteles
+'Plato',-428,-348,m,philosopher,https://en.wikipedia.org/wiki/Plato
+'Herodotus',-484,-425,m,historian,https://en.wikipedia.org/wiki/Herodotus
+'Confucius',-551,-479,m,philosopher,https://en.wikipedia.org/wiki/Confucius
+'Gautama Buddah',-563,-483,m,teacher,https://en.wikipedia.org/wiki/The_Buddha
+'Pythagoras',-570,-495,m,mathematician,https://en.wikipedia.org/wiki/Pythagoras
+'Sappho',-630,-570,f,poet,https://en.wikipedia.org/wiki/Sappho
+'Homer',-775*,-725*,m,writer,https://en.wikipedia.org/wiki/Homer
+'Zoroaster',-1025*,-975*,m,prophet,https://en.wikipedia.org/wiki/Zoroaster
+'Ramesses the Great',-1303,-1213,m,monarch,https://en.wikipedia.org/wiki/Ramesses_II
+'Tutankhamun',-1341,-1323,m,monarch,https://en.wikipedia.org/wiki/Tutankhamun
+'Hatshepsut',-1507,-1458,f,monarch,https://en.wikipedia.org/wiki/Hatshepsut
+'Ea-nāṣir',-1775*,-1725*,m*,merchant,https://en.wikipedia.org/wiki/Complaint_tablet_to_Ea-n%C4%81%E1%B9%A3ir
+'Hammurabi',-1810,-1750,m,monarch,https://en.wikipedia.org/wiki/Hammurabi
+'Cheops',-2609*,-2566,m,monarch,https://en.wikipedia.org/wiki/Khufu
+'Pharaoh Iry-Hor',-3175*,-3125*,m,monarch,https://en.wikipedia.org/wiki/Iry-Hor

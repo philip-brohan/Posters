@@ -1,0 +1,111 @@
+Name                  ,birth year ,death year ,sex ,category    ,wikipedia URL
+Taylor Swift          ,1989       ,2023       ,f   ,musician    ,https://en.wikipedia.org/wiki/Taylor_Swift
+Queen Elizabeth II    ,1926       ,2022       ,f   ,monarch     ,https://en.wikipedia.org/wiki/Elizabeth_II
+Thomas Hardy          ,1840       ,1928       ,m   ,writer      ,https://en.wikipedia.org/wiki/Thomas_Hardy
+Robert Southey        ,1774       ,1843       ,m   ,poet        ,https://en.wikipedia.org/wiki/Robert_Southey
+David Hume            ,1711       ,1776       ,m   ,philosopher ,https://en.wikipedia.org/wiki/David_Hume
+King Louis XIV        ,1638       ,1715       ,m   ,monarch     ,https://en.wikipedia.org/wiki/Louis_XIV
+Anthony van Dyck      ,1599       ,1641       ,m   ,artist      ,https://en.wikipedia.org/wiki/Anthony_van_Dyck
+Queen Elizabeth I     ,1533       ,1603       ,f   ,monarch     ,https://en.wikipedia.org/wiki/Elizabeth_I
+Sir Thomas More       ,1478       ,1535       ,m   ,politician  ,https://en.wikipedia.org/wiki/Thomas_More
+Mehmed the Conqueror  ,1432       ,1481       ,m   ,monarch     ,https://en.wikipedia.org/wiki/Mehmed_II
+Emperor Zhu Di        ,1360       ,1424       ,m   ,monarch     ,https://en.wikipedia.org/wiki/Yongle_Emperor
+Giovanni Boccaccio    ,1313       ,1375       ,m   ,writer      ,https://en.wikipedia.org/wiki/Giovanni_Boccaccio
+Dante Alighieri       ,1265       ,1321       ,m   ,writer      ,https://en.wikipedia.org/wiki/Dante_Alighieri
+Thomas Aquinas        ,1225       ,1274       ,m   ,saint       ,https://en.wikipedia.org/wiki/Thomas_Aquinas
+Francis of Assisi     ,1181       ,1226       ,m   ,saint       ,https://en.wikipedia.org/wiki/Francis_of_Assisi
+Minamoto no Yoritomo  ,1147       ,1199       ,m   ,monarch     ,https://en.wikipedia.org/wiki/Minamoto_no_Yoritomo
+Bernard of Clairvaux  ,1090       ,1153       ,m   ,priest      ,https://en.wikipedia.org/wiki/Bernard_of_Clairvaux
+El Cid                ,1043       ,1099       ,m   ,general     ,https://en.wikipedia.org/wiki/El_Cid
+Edward the Confessor  ,1003       ,1066       ,m   ,monarch     ,https://en.wikipedia.org/wiki/Edward_the_Confessor
+Sweyn Forkbeard       ,963        ,1014       ,m   ,monarch     ,https://en.wikipedia.org/wiki/Sweyn_Forkbeard
+Pope John XII         ,930        ,964        ,m   ,priest      ,https://en.wikipedia.org/wiki/Pope_John_XII
+King Henry the Fowler ,876        ,936        ,m   ,monarch     ,https://en.wikipedia.org/wiki/Henry_the_Fowler
+Methodius             ,815        ,885        ,m   ,priest      ,https://en.wikipedia.org/wiki/Cyril_and_Methodius
+Louis the Pious       ,778        ,840        ,m   ,monarch     ,https://en.wikipedia.org/wiki/Louis_the_Pious
+Offa of Mercia        ,735        ,796        ,m   ,monarch     ,https://en.wikipedia.org/wiki/Offa_of_Mercia
+Charles Martel        ,688        ,741        ,m   ,monarch     ,https://en.wikipedia.org/wiki/Charles_Martel
+Cædwalla of Wessex    ,659        ,689        ,m   ,monarch     ,https://en.wikipedia.org/wiki/C%C3%A6dwalla_of_Wessex
+Eligius               ,588        ,660        ,m   ,priest      ,https://en.wikipedia.org/wiki/Saint_Eligius
+Leander of Seville    ,534        ,600        ,m   ,priest      ,https://en.wikipedia.org/wiki/Leander_of_Seville
+Count Belisarius      ,500        ,565        ,m   ,general     ,https://en.wikipedia.org/wiki/Belisarius
+Clovis I              ,466        ,511        ,m   ,monarch     ,https://en.wikipedia.org/wiki/Clovis_I
+Procopius Anthemius   ,420        ,472        ,m   ,monarch     ,https://en.wikipedia.org/wiki/Anthemius
+St. Jerome            ,342        ,420        ,m   ,priest      ,https://en.wikipedia.org/wiki/Jerome
+St. Nicholas          ,270        ,343        ,m   ,priest      ,https://en.wikipedia.org/wiki/Saint_Nicholas
+Emperor Aurelian      ,214        ,275        ,m   ,monarch     ,https://en.wikipedia.org/wiki/Aurelian
+Hippolytus of Rome    ,170        ,235        ,m   ,priest      ,https://en.wikipedia.org/wiki/Hippolytus_of_Rome
+Ptolemy               ,100        ,170        ,m   ,scientist   ,https://en.wikipedia.org/wiki/Ptolemy
+Plutarch              ,46         ,120        ,m   ,writer      ,https://en.wikipedia.org/wiki/Plutarch
+Boudica               ,30         ,61         ,f   ,general     ,https://en.wikipedia.org/wiki/Boudica
+Jesus                 ,-6         ,33         ,m   ,religious   ,https://en.wikipedia.org/wiki/Jesus
+Augustus Caesar       ,-63        ,14         ,m   ,monarch     ,https://en.wikipedia.org/wiki/Augustus
+Cicero                ,-106       ,-43        ,m   ,writer      ,https://en.wikipedia.org/wiki/Cicero
+Mithridates VI        ,-134       ,-63        ,m   ,monarch     ,https://en.wikipedia.org/wiki/Mithridates_VI
+Attalus III           ,-170       ,-133       ,m   ,monarch     ,https://en.wikipedia.org/wiki/Attalus_III
+Cato the Elder        ,-234       ,-149       ,m   ,writer      ,https://en.wikipedia.org/wiki/Cato_the_Elder
+Archimedes            ,-287       ,-212       ,m   ,scientist   ,https://en.wikipedia.org/wiki/Archimedes
+Lysimachus            ,-361       ,-281       ,m   ,monarch     ,https://en.wikipedia.org/wiki/Lysimachus
+Plato                 ,-428       ,-348       ,m   ,philosopher ,https://en.wikipedia.org/wiki/Plato
+Pericles              ,-495       ,-429       ,m   ,monarch     ,https://en.wikipedia.org/wiki/Pericles
+Pythagoras            ,-570       ,-495       ,m   ,philosopher ,https://en.wikipedia.org/wiki/Pythagoras
+Nebuchadnezzar II     ,-642       ,-562       ,m   ,monarch     ,https://en.wikipedia.org/wiki/Nebuchadnezzar_II
+Ashurbanipal          ,-685       ,-631       ,m   ,monarch     ,https://en.wikipedia.org/wiki/Ashurbanipal
+Sennacherib           ,-745       ,-681       ,m   ,monarch     ,https://en.wikipedia.org/wiki/Sennacherib
+Tiglath-Pileser III   ,-795       ,-727       ,m   ,monarch     ,https://en.wikipedia.org/wiki/Tiglath-Pileser_III
+Adad-nirari III       ,-825       ,-783       ,m   ,monarch     ,https://en.wikipedia.org/wiki/Adad-nirari_III
+Shalmaneser III       ,-893       ,-824       ,m   ,monarch     ,https://en.wikipedia.org/wiki/Shalmaneser_III
+Adad-nirari II        ,-931       ,-891       ,m   ,monarch     ,https://en.wikipedia.org/wiki/Adad-nirari_II
+Solomon               ,-990       ,-931       ,m   ,monarch     ,https://en.wikipedia.org/wiki/Solomon
+King David            ,-1040      ,-970       ,m   ,monarch     ,https://en.wikipedia.org/wiki/David
+Samuel                ,-1070      ,-1015      ,m   ,religious   ,https://en.wikipedia.org/wiki/Samuel
+King Wen of Zhou      ,-1112      ,-1050      ,m   ,monarch     ,https://en.wikipedia.org/wiki/King_Wen_of_Zhou
+Ramesses XI           ,-1127      ,-1077      ,m   ,monarch     ,https://en.wikipedia.org/wiki/Ramesses_XI
+Ramesses III          ,-1186      ,-1155      ,m   ,monarch     ,https://en.wikipedia.org/wiki/Ramesses_III
+
+Ramesses the Great    ,-1303      ,-1213      ,m   ,monarch     ,https://en.wikipedia.org/wiki/Ramesses_II
+
+Tutankhamun           ,-1341      ,-1323      ,m   ,monarch     ,https://en.wikipedia.org/wiki/Tutankhamun
+Tushratta             ,-1378      ,-1335      ,m   ,monarch     ,https://en.wikipedia.org/wiki/Tushratta
+Amenhotep III         ,-1410      ,-1352      ,m   ,monarch     ,https://en.wikipedia.org/wiki/Amenhotep_III
+Amenhotep II          ,-1447      ,-1401      ,m   ,monarch     ,https://en.wikipedia.org/wiki/Amenhotep_II
+Thutmose III          ,-1481      ,-1425      ,m   ,monarch     ,https://en.wikipedia.org/wiki/Thutmose_III
+Hatshepsut            ,-1507      ,-1458      ,f   ,monarch     ,https://en.wikipedia.org/wiki/Hatshepsut
+
+
+
+
+
+Ea-nāṣir              ,-1775      ,-1725      ,m   ,merchant    ,https://en.wikipedia.org/wiki/Complaint_tablet_to_Ea-n%C4%81%E1%B9%A3ir
+Hammurabi             ,-1810      ,-1750      ,m   ,monarch     ,https://en.wikipedia.org/wiki/Hammurabi
+
+
+
+
+
+
+Ur-Nammu              ,-2068      ,-2030      ,m   ,monarch     ,https://en.wikipedia.org/wiki/Ur-Nammu
+Shulgi                ,-2104      ,-2047      ,m   ,monarch     ,https://en.wikipedia.org/wiki/Shulgi
+
+
+
+Naram-Sin             ,-2274      ,-2218      ,m   ,monarch     ,https://en.wikipedia.org/wiki/Naram-Sin_of_Akkad
+
+Sargon of Akkad       ,-2354      ,-2279      ,m   ,monarch     ,https://en.wikipedia.org/wiki/Sargon_of_Akkad
+
+
+
+
+
+Cheops                ,-2609      ,-2566      ,m   ,monarch     ,https://en.wikipedia.org/wiki/Khufu
+
+
+
+
+
+
+
+
+
+Iry-Hor               ,-3175      ,-3125      ,m   ,monarch     ,https://en.wikipedia.org/wiki/Iry-Hor
+
