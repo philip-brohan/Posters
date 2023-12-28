@@ -1,7 +1,7 @@
 An AI reads history
 ===================
 
-.. figure:: ../../../An_AI_reads_history/AI_reads_history.png
+.. figure:: ../../../An_AI_reads_history/AI_reads_history.jpg
    :width: 95%
    :align: center
    :figwidth: 95%
