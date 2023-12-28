@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>An AI reads history &#8212; Philip&#39;s Posters</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinxdoc.css?v=d59dc883" />
+    <script src="../../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="prev" title="Warming Stripes (20CRv3 version)" href="../Stripes/20CR.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../Stripes/20CR.html" title="Warming Stripes (20CRv3 version)"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Posters</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">An AI reads history</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="an-ai-reads-history">
+<h1>An AI reads history<a class="headerlink" href="#an-ai-reads-history" title="Link to this heading">¶</a></h1>
+<figure class="align-center" style="width: 95%">
+<a class="reference internal image-reference" href="../../_images/AI_reads_history.jpg"><img alt="../../_images/AI_reads_history.jpg" src="../../_images/AI_reads_history.jpg" style="width: 95%;" /></a>
+</figure>
+<p>I was struck, years ago, by <a class="reference external" href="https://www.dailykos.com/stories/2007/03/09/310038/-Science-Friday-Sixty-Men-from-Ur">Sixty men from Ur</a> - which points out that human recorded history is short, when measured in human lifetimes. I wanted to extend the point - by using not lifetimes in the abstract, but actual lifetimes of real people. Until recently, however, this would be a pain to do, because it’s difficult to find a set of famous people who’s lifetimes match up appropriately. But now we have <a class="reference external" href="https://chat.openai.com">ChatGPT</a>, and we can just ask it for what we want.</p>
+<p>So I chose the first two people: <a class="reference external" href="https://en.wikipedia.org/wiki/Taylor_Swift">Taylor Swift</a>, possibly the most famous person currently alive, and <a class="reference external" href="https://en.wikipedia.org/wiki/Elizabeth_II">Queen Elizabeth II</a>, a recent famous person who’s been alive for a long time. And then I asked ChatGPT for the most famous person who had died just after Elizabeth II was born, and it nominated <a class="reference external" href="https://en.wikipedia.org/wiki/Thomas_Hardy">Thomas Hardy</a>. So I addded him to the list and proceeded by induction. I checked that everyone nominated was famous enough to have a Wikipedia page, and took birth and death dates from that page. Just for kicks, I also asked ChatGPT to draw a <a class="reference external" href="pictures.html">picture of everyone it nominated</a>.</p>
+<p>I bent the rules a bit:</p>
+<ul class="simple">
+<li><p>In the recent period, when there are lots of candidates to choose from, I often rejected the first sugestion if they were a monarch. I didn’t want just a list of ‘names of kings’.</p></li>
+<li><p>In the early period, where it is hard to find candidates, I allowed candidates whos date of birth was not known (to Wikipedia) - deciding that monarchs all ascend the throne at age 20 unless there is information to the contrary.</p></li>
+<li><p>Sometimes ChatGPT offered no good candidates. In this case I left a gap and restarted with someone earlier.</p></li>
+<li><p>I forced <a class="reference external" href="https://en.wikipedia.org/wiki/Iry-Hor">Iry-Hor</a> to be the earliest person, because he’s the obvious end point: possibly the first person who’s name we know. I made up his dates (choosing plausible values within the Wikipedia range).</p></li>
+<li><p>I forced <a class="reference external" href="https://en.wikipedia.org/wiki/Complaint_tablet_to_Ea-n%C4%81%E1%B9%A3ir">Ea-nāṣir</a> into the list (no suggestions from ChatGPT for his period, and he’s not a king). I made up his dates (choosing plausible values within the Wikipedia range).</p></li>
+<li><p>A couple of people were suggested by <a class="reference external" href="https://github.com/features/copilot">GitHub Copilot</a>, not ChatGPT. I edited the list of selected people (see below) as a csv file, using a Copilot-enabled editor. And Copilot rapidly worked out the format of that file, so I generally only had to type the first few characters of each new person’s name, and Copilot would suggest the rest (always with the right dates and URL, in the correct format). Copilot would also suggest the next line (next person in the series), but it never quite worked out what algorithm I was using to choose the next person, so the suggestions were generally tempting, but had the wrong death date. On a couple of occasions it did suggest the perfect person, however, and in those cases I just hit ESC and took the suggestion.</p></li>
+</ul>
+<section id="list-of-selected-people">
+<h2>List of selected people<a class="headerlink" href="#list-of-selected-people" title="Link to this heading">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Name</span>                  <span class="p">,</span><span class="n">birth</span> <span class="n">year</span> <span class="p">,</span><span class="n">death</span> <span class="n">year</span> <span class="p">,</span><span class="n">sex</span> <span class="p">,</span><span class="n">category</span>    <span class="p">,</span><span class="n">wikipedia</span> <span class="n">URL</span>
+<span class="n">Taylor</span> <span class="n">Swift</span>          <span class="p">,</span><span class="mi">1989</span>       <span class="p">,</span><span class="mi">2023</span>       <span class="p">,</span><span class="n">f</span>   <span class="p">,</span><span class="n">musician</span>    <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Taylor_Swift</span>
+<span class="n">Queen</span> <span class="n">Elizabeth</span> <span class="n">II</span>    <span class="p">,</span><span class="mi">1926</span>       <span class="p">,</span><span class="mi">2022</span>       <span class="p">,</span><span class="n">f</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Elizabeth_II</span>
+<span class="n">Thomas</span> <span class="n">Hardy</span>          <span class="p">,</span><span class="mi">1840</span>       <span class="p">,</span><span class="mi">1928</span>       <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">writer</span>      <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Thomas_Hardy</span>
+<span class="n">Robert</span> <span class="n">Southey</span>        <span class="p">,</span><span class="mi">1774</span>       <span class="p">,</span><span class="mi">1843</span>       <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">poet</span>        <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Robert_Southey</span>
+<span class="n">David</span> <span class="n">Hume</span>            <span class="p">,</span><span class="mi">1711</span>       <span class="p">,</span><span class="mi">1776</span>       <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">philosopher</span> <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">David_Hume</span>
+<span class="n">King</span> <span class="n">Louis</span> <span class="n">XIV</span>        <span class="p">,</span><span class="mi">1638</span>       <span class="p">,</span><span class="mi">1715</span>       <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Louis_XIV</span>
+<span class="n">Anthony</span> <span class="n">van</span> <span class="n">Dyck</span>      <span class="p">,</span><span class="mi">1599</span>       <span class="p">,</span><span class="mi">1641</span>       <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">artist</span>      <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Anthony_van_Dyck</span>
+<span class="n">Queen</span> <span class="n">Elizabeth</span> <span class="n">I</span>     <span class="p">,</span><span class="mi">1533</span>       <span class="p">,</span><span class="mi">1603</span>       <span class="p">,</span><span class="n">f</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Elizabeth_I</span>
+<span class="n">Sir</span> <span class="n">Thomas</span> <span class="n">More</span>       <span class="p">,</span><span class="mi">1478</span>       <span class="p">,</span><span class="mi">1535</span>       <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">politician</span>  <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Thomas_More</span>
+<span class="n">Mehmed</span> <span class="n">the</span> <span class="n">Conqueror</span>  <span class="p">,</span><span class="mi">1432</span>       <span class="p">,</span><span class="mi">1481</span>       <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Mehmed_II</span>
+<span class="n">Emperor</span> <span class="n">Zhu</span> <span class="n">Di</span>        <span class="p">,</span><span class="mi">1360</span>       <span class="p">,</span><span class="mi">1424</span>       <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Yongle_Emperor</span>
+<span class="n">Giovanni</span> <span class="n">Boccaccio</span>    <span class="p">,</span><span class="mi">1313</span>       <span class="p">,</span><span class="mi">1375</span>       <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">writer</span>      <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Giovanni_Boccaccio</span>
+<span class="n">Dante</span> <span class="n">Alighieri</span>       <span class="p">,</span><span class="mi">1265</span>       <span class="p">,</span><span class="mi">1321</span>       <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">writer</span>      <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Dante_Alighieri</span>
+<span class="n">Thomas</span> <span class="n">Aquinas</span>        <span class="p">,</span><span class="mi">1225</span>       <span class="p">,</span><span class="mi">1274</span>       <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">saint</span>       <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Thomas_Aquinas</span>
+<span class="n">Francis</span> <span class="n">of</span> <span class="n">Assisi</span>     <span class="p">,</span><span class="mi">1181</span>       <span class="p">,</span><span class="mi">1226</span>       <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">saint</span>       <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Francis_of_Assisi</span>
+<span class="n">Minamoto</span> <span class="n">no</span> <span class="n">Yoritomo</span>  <span class="p">,</span><span class="mi">1147</span>       <span class="p">,</span><span class="mi">1199</span>       <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Minamoto_no_Yoritomo</span>
+<span class="n">Bernard</span> <span class="n">of</span> <span class="n">Clairvaux</span>  <span class="p">,</span><span class="mi">1090</span>       <span class="p">,</span><span class="mi">1153</span>       <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">priest</span>      <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Bernard_of_Clairvaux</span>
+<span class="n">El</span> <span class="n">Cid</span>                <span class="p">,</span><span class="mi">1043</span>       <span class="p">,</span><span class="mi">1099</span>       <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">general</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">El_Cid</span>
+<span class="n">Edward</span> <span class="n">the</span> <span class="n">Confessor</span>  <span class="p">,</span><span class="mi">1003</span>       <span class="p">,</span><span class="mi">1066</span>       <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Edward_the_Confessor</span>
+<span class="n">Sweyn</span> <span class="n">Forkbeard</span>       <span class="p">,</span><span class="mi">963</span>        <span class="p">,</span><span class="mi">1014</span>       <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Sweyn_Forkbeard</span>
+<span class="n">Pope</span> <span class="n">John</span> <span class="n">XII</span>         <span class="p">,</span><span class="mi">930</span>        <span class="p">,</span><span class="mi">964</span>        <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">priest</span>      <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Pope_John_XII</span>
+<span class="n">King</span> <span class="n">Henry</span> <span class="n">the</span> <span class="n">Fowler</span> <span class="p">,</span><span class="mi">876</span>        <span class="p">,</span><span class="mi">936</span>        <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Henry_the_Fowler</span>
+<span class="n">Methodius</span>             <span class="p">,</span><span class="mi">815</span>        <span class="p">,</span><span class="mi">885</span>        <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">priest</span>      <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Cyril_and_Methodius</span>
+<span class="n">Louis</span> <span class="n">the</span> <span class="n">Pious</span>       <span class="p">,</span><span class="mi">778</span>        <span class="p">,</span><span class="mi">840</span>        <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Louis_the_Pious</span>
+<span class="n">Offa</span> <span class="n">of</span> <span class="n">Mercia</span>        <span class="p">,</span><span class="mi">735</span>        <span class="p">,</span><span class="mi">796</span>        <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Offa_of_Mercia</span>
+<span class="n">Charles</span> <span class="n">Martel</span>        <span class="p">,</span><span class="mi">688</span>        <span class="p">,</span><span class="mi">741</span>        <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Charles_Martel</span>
+<span class="n">Cædwalla</span> <span class="n">of</span> <span class="n">Wessex</span>    <span class="p">,</span><span class="mi">659</span>        <span class="p">,</span><span class="mi">689</span>        <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">C</span><span class="o">%</span><span class="n">C3</span><span class="o">%</span><span class="n">A6dwalla_of_Wessex</span>
+<span class="n">Eligius</span>               <span class="p">,</span><span class="mi">588</span>        <span class="p">,</span><span class="mi">660</span>        <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">priest</span>      <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Saint_Eligius</span>
+<span class="n">Leander</span> <span class="n">of</span> <span class="n">Seville</span>    <span class="p">,</span><span class="mi">534</span>        <span class="p">,</span><span class="mi">600</span>        <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">priest</span>      <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Leander_of_Seville</span>
+<span class="n">Count</span> <span class="n">Belisarius</span>      <span class="p">,</span><span class="mi">500</span>        <span class="p">,</span><span class="mi">565</span>        <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">general</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Belisarius</span>
+<span class="n">Clovis</span> <span class="n">I</span>              <span class="p">,</span><span class="mi">466</span>        <span class="p">,</span><span class="mi">511</span>        <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Clovis_I</span>
+<span class="n">Procopius</span> <span class="n">Anthemius</span>   <span class="p">,</span><span class="mi">420</span>        <span class="p">,</span><span class="mi">472</span>        <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Anthemius</span>
+<span class="n">St</span><span class="o">.</span> <span class="n">Jerome</span>            <span class="p">,</span><span class="mi">342</span>        <span class="p">,</span><span class="mi">420</span>        <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">priest</span>      <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Jerome</span>
+<span class="n">St</span><span class="o">.</span> <span class="n">Nicholas</span>          <span class="p">,</span><span class="mi">270</span>        <span class="p">,</span><span class="mi">343</span>        <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">priest</span>      <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Saint_Nicholas</span>
+<span class="n">Emperor</span> <span class="n">Aurelian</span>      <span class="p">,</span><span class="mi">214</span>        <span class="p">,</span><span class="mi">275</span>        <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Aurelian</span>
+<span class="n">Hippolytus</span> <span class="n">of</span> <span class="n">Rome</span>    <span class="p">,</span><span class="mi">170</span>        <span class="p">,</span><span class="mi">235</span>        <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">priest</span>      <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Hippolytus_of_Rome</span>
+<span class="n">Ptolemy</span>               <span class="p">,</span><span class="mi">100</span>        <span class="p">,</span><span class="mi">170</span>        <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">scientist</span>   <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Ptolemy</span>
+<span class="n">Plutarch</span>              <span class="p">,</span><span class="mi">46</span>         <span class="p">,</span><span class="mi">120</span>        <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">writer</span>      <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Plutarch</span>
+<span class="n">Boudica</span>               <span class="p">,</span><span class="mi">30</span>         <span class="p">,</span><span class="mi">61</span>         <span class="p">,</span><span class="n">f</span>   <span class="p">,</span><span class="n">general</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Boudica</span>
+<span class="n">Jesus</span>                 <span class="p">,</span><span class="o">-</span><span class="mi">6</span>         <span class="p">,</span><span class="mi">33</span>         <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">religious</span>   <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Jesus</span>
+<span class="n">Augustus</span> <span class="n">Caesar</span>       <span class="p">,</span><span class="o">-</span><span class="mi">63</span>        <span class="p">,</span><span class="mi">14</span>         <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Augustus</span>
+<span class="n">Cicero</span>                <span class="p">,</span><span class="o">-</span><span class="mi">106</span>       <span class="p">,</span><span class="o">-</span><span class="mi">43</span>        <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">writer</span>      <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Cicero</span>
+<span class="n">Mithridates</span> <span class="n">VI</span>        <span class="p">,</span><span class="o">-</span><span class="mi">134</span>       <span class="p">,</span><span class="o">-</span><span class="mi">63</span>        <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Mithridates_VI</span>
+<span class="n">Attalus</span> <span class="n">III</span>           <span class="p">,</span><span class="o">-</span><span class="mi">170</span>       <span class="p">,</span><span class="o">-</span><span class="mi">133</span>       <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Attalus_III</span>
+<span class="n">Cato</span> <span class="n">the</span> <span class="n">Elder</span>        <span class="p">,</span><span class="o">-</span><span class="mi">234</span>       <span class="p">,</span><span class="o">-</span><span class="mi">149</span>       <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">writer</span>      <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Cato_the_Elder</span>
+<span class="n">Archimedes</span>            <span class="p">,</span><span class="o">-</span><span class="mi">287</span>       <span class="p">,</span><span class="o">-</span><span class="mi">212</span>       <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">scientist</span>   <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Archimedes</span>
+<span class="n">Lysimachus</span>            <span class="p">,</span><span class="o">-</span><span class="mi">361</span>       <span class="p">,</span><span class="o">-</span><span class="mi">281</span>       <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Lysimachus</span>
+<span class="n">Plato</span>                 <span class="p">,</span><span class="o">-</span><span class="mi">428</span>       <span class="p">,</span><span class="o">-</span><span class="mi">348</span>       <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">philosopher</span> <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Plato</span>
+<span class="n">Pericles</span>              <span class="p">,</span><span class="o">-</span><span class="mi">495</span>       <span class="p">,</span><span class="o">-</span><span class="mi">429</span>       <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Pericles</span>
+<span class="n">Pythagoras</span>            <span class="p">,</span><span class="o">-</span><span class="mi">570</span>       <span class="p">,</span><span class="o">-</span><span class="mi">495</span>       <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">philosopher</span> <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Pythagoras</span>
+<span class="n">Nebuchadnezzar</span> <span class="n">II</span>     <span class="p">,</span><span class="o">-</span><span class="mi">642</span>       <span class="p">,</span><span class="o">-</span><span class="mi">562</span>       <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Nebuchadnezzar_II</span>
+<span class="n">Ashurbanipal</span>          <span class="p">,</span><span class="o">-</span><span class="mi">685</span>       <span class="p">,</span><span class="o">-</span><span class="mi">631</span>       <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Ashurbanipal</span>
+<span class="n">Sennacherib</span>           <span class="p">,</span><span class="o">-</span><span class="mi">745</span>       <span class="p">,</span><span class="o">-</span><span class="mi">681</span>       <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Sennacherib</span>
+<span class="n">Tiglath</span><span class="o">-</span><span class="n">Pileser</span> <span class="n">III</span>   <span class="p">,</span><span class="o">-</span><span class="mi">795</span>       <span class="p">,</span><span class="o">-</span><span class="mi">727</span>       <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Tiglath</span><span class="o">-</span><span class="n">Pileser_III</span>
+<span class="n">Adad</span><span class="o">-</span><span class="n">nirari</span> <span class="n">III</span>       <span class="p">,</span><span class="o">-</span><span class="mi">825</span>       <span class="p">,</span><span class="o">-</span><span class="mi">783</span>       <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Adad</span><span class="o">-</span><span class="n">nirari_III</span>
+<span class="n">Shalmaneser</span> <span class="n">III</span>       <span class="p">,</span><span class="o">-</span><span class="mi">893</span>       <span class="p">,</span><span class="o">-</span><span class="mi">824</span>       <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Shalmaneser_III</span>
+<span class="n">Adad</span><span class="o">-</span><span class="n">nirari</span> <span class="n">II</span>        <span class="p">,</span><span class="o">-</span><span class="mi">931</span>       <span class="p">,</span><span class="o">-</span><span class="mi">891</span>       <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Adad</span><span class="o">-</span><span class="n">nirari_II</span>
+<span class="n">Solomon</span>               <span class="p">,</span><span class="o">-</span><span class="mi">990</span>       <span class="p">,</span><span class="o">-</span><span class="mi">931</span>       <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Solomon</span>
+<span class="n">King</span> <span class="n">David</span>            <span class="p">,</span><span class="o">-</span><span class="mi">1040</span>      <span class="p">,</span><span class="o">-</span><span class="mi">970</span>       <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">David</span>
+<span class="n">Samuel</span>                <span class="p">,</span><span class="o">-</span><span class="mi">1070</span>      <span class="p">,</span><span class="o">-</span><span class="mi">1015</span>      <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">religious</span>   <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Samuel</span>
+<span class="n">King</span> <span class="n">Wen</span> <span class="n">of</span> <span class="n">Zhou</span>      <span class="p">,</span><span class="o">-</span><span class="mi">1112</span>      <span class="p">,</span><span class="o">-</span><span class="mi">1050</span>      <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">King_Wen_of_Zhou</span>
+<span class="n">Ramesses</span> <span class="n">XI</span>           <span class="p">,</span><span class="o">-</span><span class="mi">1127</span>      <span class="p">,</span><span class="o">-</span><span class="mi">1077</span>      <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Ramesses_XI</span>
+<span class="n">Ramesses</span> <span class="n">III</span>          <span class="p">,</span><span class="o">-</span><span class="mi">1186</span>      <span class="p">,</span><span class="o">-</span><span class="mi">1155</span>      <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Ramesses_III</span>
+
+<span class="n">Ramesses</span> <span class="n">the</span> <span class="n">Great</span>    <span class="p">,</span><span class="o">-</span><span class="mi">1303</span>      <span class="p">,</span><span class="o">-</span><span class="mi">1213</span>      <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Ramesses_II</span>
+
+<span class="n">Tutankhamun</span>           <span class="p">,</span><span class="o">-</span><span class="mi">1341</span>      <span class="p">,</span><span class="o">-</span><span class="mi">1323</span>      <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Tutankhamun</span>
+<span class="n">Tushratta</span>             <span class="p">,</span><span class="o">-</span><span class="mi">1378</span>      <span class="p">,</span><span class="o">-</span><span class="mi">1335</span>      <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Tushratta</span>
+<span class="n">Amenhotep</span> <span class="n">III</span>         <span class="p">,</span><span class="o">-</span><span class="mi">1410</span>      <span class="p">,</span><span class="o">-</span><span class="mi">1352</span>      <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Amenhotep_III</span>
+<span class="n">Amenhotep</span> <span class="n">II</span>          <span class="p">,</span><span class="o">-</span><span class="mi">1447</span>      <span class="p">,</span><span class="o">-</span><span class="mi">1401</span>      <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Amenhotep_II</span>
+<span class="n">Thutmose</span> <span class="n">III</span>          <span class="p">,</span><span class="o">-</span><span class="mi">1481</span>      <span class="p">,</span><span class="o">-</span><span class="mi">1425</span>      <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Thutmose_III</span>
+<span class="n">Hatshepsut</span>            <span class="p">,</span><span class="o">-</span><span class="mi">1507</span>      <span class="p">,</span><span class="o">-</span><span class="mi">1458</span>      <span class="p">,</span><span class="n">f</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Hatshepsut</span>
+
+
+
+
+
+<span class="n">Ea</span><span class="o">-</span><span class="n">nāṣir</span>              <span class="p">,</span><span class="o">-</span><span class="mi">1775</span>      <span class="p">,</span><span class="o">-</span><span class="mi">1725</span>      <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">merchant</span>    <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Complaint_tablet_to_Ea</span><span class="o">-</span><span class="n">n</span><span class="o">%</span><span class="n">C4</span><span class="o">%</span><span class="mi">81</span><span class="o">%</span><span class="n">E1</span><span class="o">%</span><span class="n">B9</span><span class="o">%</span><span class="n">A3ir</span>
+<span class="n">Hammurabi</span>             <span class="p">,</span><span class="o">-</span><span class="mi">1810</span>      <span class="p">,</span><span class="o">-</span><span class="mi">1750</span>      <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Hammurabi</span>
+
+
+
+
+
+
+<span class="n">Ur</span><span class="o">-</span><span class="n">Nammu</span>              <span class="p">,</span><span class="o">-</span><span class="mi">2068</span>      <span class="p">,</span><span class="o">-</span><span class="mi">2030</span>      <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Ur</span><span class="o">-</span><span class="n">Nammu</span>
+<span class="n">Shulgi</span>                <span class="p">,</span><span class="o">-</span><span class="mi">2104</span>      <span class="p">,</span><span class="o">-</span><span class="mi">2047</span>      <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Shulgi</span>
+
+
+
+<span class="n">Naram</span><span class="o">-</span><span class="n">Sin</span>             <span class="p">,</span><span class="o">-</span><span class="mi">2274</span>      <span class="p">,</span><span class="o">-</span><span class="mi">2218</span>      <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Naram</span><span class="o">-</span><span class="n">Sin_of_Akkad</span>
+
+<span class="n">Sargon</span> <span class="n">of</span> <span class="n">Akkad</span>       <span class="p">,</span><span class="o">-</span><span class="mi">2354</span>      <span class="p">,</span><span class="o">-</span><span class="mi">2279</span>      <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Sargon_of_Akkad</span>
+
+
+
+
+
+<span class="n">Cheops</span>                <span class="p">,</span><span class="o">-</span><span class="mi">2609</span>      <span class="p">,</span><span class="o">-</span><span class="mi">2566</span>      <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Khufu</span>
+
+
+
+
+
+
+
+
+
+<span class="n">Iry</span><span class="o">-</span><span class="n">Hor</span>               <span class="p">,</span><span class="o">-</span><span class="mi">3175</span>      <span class="p">,</span><span class="o">-</span><span class="mi">3125</span>      <span class="p">,</span><span class="n">m</span>   <span class="p">,</span><span class="n">monarch</span>     <span class="p">,</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">en</span><span class="o">.</span><span class="n">wikipedia</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="n">Iry</span><span class="o">-</span><span class="n">Hor</span>
+
+</pre></div>
+</div>
+</section>
+<section id="code-to-make-the-poster">
+<h2>Code to make the poster<a class="headerlink" href="#code-to-make-the-poster" title="Link to this heading">¶</a></h2>
+<p>Written with much assistance from the awesome <a class="reference external" href="https://github.com/features/copilot">GitHub Copilot</a>. (This whole project was a test of the value of AI assistance, and I’m completely sold on it.)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="c1"># Plain rectangular format</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="kn">from</span> <span class="nn">matplotlib.backends.backend_agg</span> <span class="kn">import</span> <span class="n">FigureCanvasAgg</span> <span class="k">as</span> <span class="n">FigureCanvas</span>
+<span class="kn">from</span> <span class="nn">matplotlib.figure</span> <span class="kn">import</span> <span class="n">Figure</span>
+<span class="kn">from</span> <span class="nn">matplotlib.patches</span> <span class="kn">import</span> <span class="n">Rectangle</span>
+
+<span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">random</span>
+
+<span class="c1"># Load the data from a csv file</span>
+<span class="kn">import</span> <span class="nn">csv</span>
+
+<span class="c1"># Open the CSV file</span>
+<span class="n">people</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;people.csv&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+    <span class="c1"># Create a CSV reader</span>
+    <span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+
+    <span class="c1"># Get the header row</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">reader</span><span class="p">)</span>
+
+    <span class="c1"># Loop through each row in the CSV</span>
+    <span class="n">countBack</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">people</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">people</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+                    <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                    <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>
+                    <span class="n">row</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+                    <span class="n">row</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+                    <span class="n">row</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">,</span>
+                    <span class="n">countBack</span><span class="p">,</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+        <span class="n">countBack</span> <span class="o">+=</span> <span class="mi">1</span>
+
+<span class="c1"># Create a figure</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">Figure</span><span class="p">(</span>
+    <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mf">42.43</span><span class="p">),</span>
+    <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+    <span class="n">facecolor</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">edgecolor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">frameon</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">subplotpars</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">tight_layout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">canvas</span> <span class="o">=</span> <span class="n">FigureCanvas</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+<span class="n">font</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;family&quot;</span><span class="p">:</span> <span class="s2">&quot;sans-serif&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sans-serif&quot;</span><span class="p">:</span> <span class="s2">&quot;Arial&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="s2">&quot;normal&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="n">matplotlib</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s2">&quot;font&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">font</span><span class="p">)</span>
+
+<span class="c1"># Plain background</span>
+<span class="n">bgcolour</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.95</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">axb</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">axb</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>
+<span class="n">axb</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span>
+    <span class="n">Rectangle</span><span class="p">(</span>
+        <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+        <span class="mi">1</span><span class="p">,</span>
+        <span class="mi">1</span><span class="p">,</span>
+        <span class="n">facecolor</span><span class="o">=</span><span class="n">bgcolour</span><span class="p">,</span>
+        <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">zorder</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="n">fig_width</span><span class="p">,</span> <span class="n">fig_height</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">get_size_inches</span><span class="p">()</span>
+<span class="n">fig_aspect</span> <span class="o">=</span> <span class="n">fig_width</span> <span class="o">/</span> <span class="n">fig_height</span>
+
+
+<span class="c1"># Set the margins</span>
+<span class="n">borderFractions</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.025</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">]</span>
+
+<span class="c1"># Axes for plot</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="n">borderFractions</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="n">borderFractions</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+        <span class="mi">1</span> <span class="o">-</span> <span class="n">borderFractions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">borderFractions</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+        <span class="mi">1</span> <span class="o">-</span> <span class="n">borderFractions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">borderFractions</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+    <span class="p">],</span>
+    <span class="n">facecolor</span><span class="o">=</span><span class="p">(</span><span class="mf">0.95</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">ax_aspect</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">fig_width</span>
+    <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">borderFractions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">borderFractions</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+    <span class="o">/</span> <span class="n">fig_height</span>
+    <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">borderFractions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">borderFractions</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+<span class="p">)</span>
+
+
+<span class="c1"># No black border</span>
+<span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;top&quot;</span><span class="p">,</span> <span class="s2">&quot;right&quot;</span><span class="p">]:</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="n">edge</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="c1"># X axis from -3200 to present+space</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">-</span><span class="mi">4200</span><span class="p">,</span> <span class="mi">3250</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Year&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">3500</span><span class="p">,</span> <span class="mi">2100</span><span class="p">,</span> <span class="mi">500</span><span class="p">))</span>
+
+<span class="c1"># Y axis from 0 to length of csv</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Lifetimes ago&quot;</span><span class="p">)</span>
+<span class="c1"># Y axis integers in csv length</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">people</span><span class="p">)</span> <span class="o">+</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">people</span><span class="p">)</span> <span class="o">+</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;auto&quot;</span><span class="p">)</span>
+
+<span class="c1"># Add a grid</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">),</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=-</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="n">Austria</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">colors</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;#a40000&quot;</span><span class="p">,</span> <span class="s2">&quot;#16317d&quot;</span><span class="p">,</span> <span class="s2">&quot;#007e2f&quot;</span><span class="p">,</span> <span class="s2">&quot;#ffcd12&quot;</span><span class="p">,</span> <span class="s2">&quot;#b86092&quot;</span><span class="p">,</span> <span class="s2">&quot;#721b3e&quot;</span><span class="p">,</span> <span class="s2">&quot;#00b7a7&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+
+
+<span class="c1"># Different professions in different colours</span>
+<span class="c1"># Uses &#39;Austria&#39; palette from MetBrewer</span>
+<span class="k">def</span> <span class="nf">set_color</span><span class="p">(</span><span class="n">person</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">person</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;monarch&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;#a40000&quot;</span>
+    <span class="k">elif</span> <span class="n">person</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;writer&quot;</span> <span class="ow">or</span> <span class="n">person</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;poet&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;#16317d&quot;</span>
+    <span class="k">elif</span> <span class="n">person</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;philosopher&quot;</span> <span class="ow">or</span> <span class="n">person</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;scientist&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;#007e2f&quot;</span>
+    <span class="k">elif</span> <span class="n">person</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;priest&quot;</span> <span class="ow">or</span> <span class="n">person</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;saint&quot;</span> <span class="ow">or</span> <span class="n">person</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;religious&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;#ffcd12&quot;</span>
+    <span class="k">elif</span> <span class="n">person</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;artist&quot;</span> <span class="ow">or</span> <span class="n">person</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;musician&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;#b86092&quot;</span>
+    <span class="k">elif</span> <span class="n">person</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;general&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;#721b3e&quot;</span>
+    <span class="k">elif</span> <span class="n">person</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;politician&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;#00b7a7&quot;</span>
+    <span class="k">elif</span> <span class="n">person</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;merchant&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mf">0.722</span><span class="p">,</span> <span class="mf">0.451</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+
+<span class="c1"># Find the spot to add an image</span>
+<span class="k">def</span> <span class="nf">getImageExtent</span><span class="p">(</span><span class="n">box_bb</span><span class="p">,</span> <span class="n">name_bb</span><span class="p">,</span> <span class="n">pIdx</span><span class="p">):</span>
+    <span class="n">ximscale</span> <span class="o">=</span> <span class="mf">0.05</span>
+    <span class="n">ximsize</span> <span class="o">=</span> <span class="p">(</span><span class="n">ax</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">ximscale</span>
+    <span class="n">aspect</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">ax</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">ax</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="p">)</span>
+    <span class="n">yimsize</span> <span class="o">=</span> <span class="n">ximsize</span> <span class="o">*</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_data_ratio</span><span class="p">()</span> <span class="o">*</span> <span class="n">ax_aspect</span>
+    <span class="n">xoffset</span> <span class="o">=</span> <span class="n">ximsize</span>
+    <span class="n">yoffset</span> <span class="o">=</span> <span class="n">yimsize</span>
+    <span class="k">if</span> <span class="n">pIdx</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">%</span> <span class="mi">3</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">xoffset</span> <span class="o">+=</span> <span class="n">ximsize</span>
+        <span class="n">yoffset</span> <span class="o">+=</span> <span class="n">yimsize</span>
+    <span class="k">if</span> <span class="n">pIdx</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">%</span> <span class="mi">3</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">xoffset</span> <span class="o">+=</span> <span class="n">ximsize</span>
+        <span class="n">yoffset</span> <span class="o">+=</span> <span class="n">yimsize</span>
+    <span class="k">if</span> <span class="n">pIdx</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># Bottom right</span>
+        <span class="n">xoffset</span> <span class="o">-=</span> <span class="mi">100</span>
+        <span class="n">yoffset</span> <span class="o">-=</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="n">box_bb</span><span class="o">.</span><span class="n">x1</span> <span class="o">+</span> <span class="n">xoffset</span><span class="p">,</span>
+            <span class="n">box_bb</span><span class="o">.</span><span class="n">x1</span> <span class="o">+</span> <span class="n">xoffset</span> <span class="o">+</span> <span class="n">ximsize</span><span class="p">,</span>
+            <span class="n">box_bb</span><span class="o">.</span><span class="n">y0</span> <span class="o">+</span> <span class="n">yoffset</span> <span class="o">+</span> <span class="n">yimsize</span><span class="p">,</span>
+            <span class="n">box_bb</span><span class="o">.</span><span class="n">y0</span> <span class="o">+</span> <span class="n">yoffset</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">xoffset</span> <span class="o">+=</span> <span class="mi">1000</span>  <span class="c1"># Need space for names</span>
+        <span class="k">if</span> <span class="n">pIdx</span> <span class="o">==</span> <span class="mi">108</span><span class="p">:</span>  <span class="c1"># Don&#39;t waste space on Iry-Hor</span>
+            <span class="n">xoffset</span> <span class="o">-=</span> <span class="mi">1000</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="n">box_bb</span><span class="o">.</span><span class="n">x0</span> <span class="o">-</span> <span class="n">xoffset</span> <span class="o">+</span> <span class="n">ximsize</span><span class="p">,</span>
+            <span class="n">box_bb</span><span class="o">.</span><span class="n">x0</span> <span class="o">-</span> <span class="n">xoffset</span><span class="p">,</span>
+            <span class="n">box_bb</span><span class="o">.</span><span class="n">y0</span> <span class="o">-</span> <span class="n">yoffset</span> <span class="o">+</span> <span class="n">yimsize</span><span class="p">,</span>
+            <span class="n">box_bb</span><span class="o">.</span><span class="n">y0</span> <span class="o">-</span> <span class="n">yoffset</span><span class="p">,</span>
+        <span class="p">]</span>
+
+
+<span class="c1"># For each person, plot a bar showing their lifespan</span>
+<span class="k">for</span> <span class="n">pIdx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">people</span><span class="p">)):</span>
+    <span class="n">person</span> <span class="o">=</span> <span class="n">people</span><span class="p">[</span><span class="n">pIdx</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">person</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">col</span> <span class="o">=</span> <span class="n">set_color</span><span class="p">(</span><span class="n">person</span><span class="p">)</span>
+        <span class="n">box</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span>
+            <span class="n">Rectangle</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">person</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">pIdx</span> <span class="o">-</span> <span class="mf">0.48</span><span class="p">),</span>
+                <span class="n">person</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">person</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                <span class="mf">0.96</span><span class="p">,</span>
+                <span class="n">facecolor</span><span class="o">=</span><span class="n">col</span><span class="p">,</span>
+                <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">zorder</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+            <span class="n">person</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">25</span><span class="p">,</span>
+            <span class="n">pIdx</span><span class="p">,</span>
+            <span class="n">person</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">horizontalalignment</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">,</span>
+            <span class="n">verticalalignment</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="n">zorder</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+            <span class="n">fontsize</span><span class="o">=</span><span class="mi">24</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">name_bg</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>  <span class="c1"># Background for name text</span>
+            <span class="n">person</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">25</span><span class="p">,</span>
+            <span class="n">pIdx</span><span class="p">,</span>
+            <span class="n">person</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">horizontalalignment</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">,</span>
+            <span class="n">verticalalignment</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="n">bgcolour</span><span class="p">,</span>
+            <span class="n">zorder</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+            <span class="n">fontsize</span><span class="o">=</span><span class="mi">24</span><span class="p">,</span>
+            <span class="n">backgroundcolor</span><span class="o">=</span><span class="n">bgcolour</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Get plot positions of box and name to use placing picture</span>
+        <span class="n">box_bb</span> <span class="o">=</span> <span class="n">box</span><span class="o">.</span><span class="n">get_bbox</span><span class="p">()</span>  <span class="c1"># In ax data coords</span>
+        <span class="n">name_bb</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">get_window_extent</span><span class="p">()</span>  <span class="c1"># In display coords</span>
+        <span class="n">name_bb</span> <span class="o">=</span> <span class="n">name_bb</span><span class="o">.</span><span class="n">transformed</span><span class="p">(</span><span class="n">ax</span><span class="o">.</span><span class="n">transData</span><span class="o">.</span><span class="n">inverted</span><span class="p">())</span>  <span class="c1"># In ax data coords</span>
+        <span class="n">img_extent</span> <span class="o">=</span> <span class="n">getImageExtent</span><span class="p">(</span><span class="n">box_bb</span><span class="p">,</span> <span class="n">name_bb</span><span class="p">,</span> <span class="n">pIdx</span><span class="p">)</span>
+
+        <span class="n">img</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;pictures/</span><span class="si">%s</span><span class="s2">.webp&quot;</span> <span class="o">%</span> <span class="n">person</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">img_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+        <span class="n">imgs</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">img_array</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">img_extent</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span>
+        <span class="c1"># Draw a line linking box and name</span>
+        <span class="k">if</span> <span class="n">pIdx</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># Below right</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">box_bb</span><span class="o">.</span><span class="n">x1</span> <span class="o">+</span> <span class="mi">10</span><span class="p">,</span> <span class="n">img_extent</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
+                <span class="p">[(</span><span class="n">box_bb</span><span class="o">.</span><span class="n">y0</span> <span class="o">+</span> <span class="n">box_bb</span><span class="o">.</span><span class="n">y1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">img_extent</span><span class="p">[</span><span class="mi">3</span><span class="p">]],</span>
+                <span class="n">color</span><span class="o">=</span><span class="n">col</span><span class="p">,</span>
+                <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.35</span><span class="p">,</span>
+                <span class="n">zorder</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">name_bb</span><span class="o">.</span><span class="n">x0</span> <span class="o">-</span> <span class="mi">10</span><span class="p">,</span> <span class="n">img_extent</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
+                <span class="p">[(</span><span class="n">name_bb</span><span class="o">.</span><span class="n">y0</span> <span class="o">+</span> <span class="n">name_bb</span><span class="o">.</span><span class="n">y1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">img_extent</span><span class="p">[</span><span class="mi">2</span><span class="p">]],</span>
+                <span class="n">color</span><span class="o">=</span><span class="n">col</span><span class="p">,</span>
+                <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.35</span><span class="p">,</span>
+                <span class="n">zorder</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+            <span class="p">)</span>
+
+<span class="c1"># Add some overall descriptive text</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+    <span class="o">-</span><span class="mi">4000</span><span class="p">,</span>
+    <span class="o">-</span><span class="mi">9</span><span class="p">,</span>
+    <span class="s2">&quot;An AI Reads History&quot;</span><span class="p">,</span>
+    <span class="n">horizontalalignment</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span>
+    <span class="n">verticalalignment</span><span class="o">=</span><span class="s2">&quot;top&quot;</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">fontsize</span><span class="o">=</span><span class="mi">56</span><span class="p">,</span>
+    <span class="n">zorder</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">backgroundcolor</span><span class="o">=</span><span class="n">bgcolour</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+    <span class="o">-</span><span class="mi">4000</span><span class="p">,</span>
+    <span class="o">-</span><span class="mf">6.5</span><span class="p">,</span>
+    <span class="s2">&quot;78 people from Wikipedia&quot;</span><span class="p">,</span>
+    <span class="n">horizontalalignment</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span>
+    <span class="n">verticalalignment</span><span class="o">=</span><span class="s2">&quot;top&quot;</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">fontsize</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
+    <span class="n">zorder</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">backgroundcolor</span><span class="o">=</span><span class="n">bgcolour</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+    <span class="o">-</span><span class="mi">4000</span><span class="p">,</span>
+    <span class="o">-</span><span class="mi">0</span><span class="p">,</span>
+    <span class="s2">&quot;How many overlapping human lifetimes does it take </span><span class="se">\n</span><span class="s2">to cover recorded history.</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+    <span class="o">+</span> <span class="s2">&quot;People selected, and pictured, by ChatGPT.&quot;</span><span class="p">,</span>
+    <span class="n">horizontalalignment</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span>
+    <span class="n">verticalalignment</span><span class="o">=</span><span class="s2">&quot;top&quot;</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">fontsize</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+    <span class="n">zorder</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">backgroundcolor</span><span class="o">=</span><span class="n">bgcolour</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">axb</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+    <span class="mf">0.99</span><span class="p">,</span>
+    <span class="mf">0.005</span><span class="p">,</span>
+    <span class="s2">&quot;Philip Brohan, 2023-12-28</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="o">+</span> <span class="s2">&quot;https://brohan.org/Posters/posters/An_AI_reads_history&quot;</span><span class="p">,</span>
+    <span class="n">horizontalalignment</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">,</span>
+    <span class="n">verticalalignment</span><span class="o">=</span><span class="s2">&quot;bottom&quot;</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
+    <span class="n">zorder</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">backgroundcolor</span><span class="o">=</span><span class="n">bgcolour</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="c1"># Output as png</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">&quot;AI_reads_history.png&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/Poster.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../index.html">Table of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Spilhaus/ostia.html">Ostia data in the Spilhaus projection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ISPD4.7/index.html">Observations coverage (ISPD4.7)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Stripes/20CR.html">Warming Stripes (20CRv3 version)</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">An AI reads history</a></li>
+</ul>
+<h3><a href="https://github.com/philip-brohan/Posters">Get the source code</a></h3>
+
+<a href="https://github.com/philip-brohan/Posters"
+           rel="nofollow">Github source repository</a>
+
+<h3>Found a bug, or have a suggestion?</h3>
+
+Please <a href="https://github.com/philip-brohan/Posters/issues/new">raise an issue</a>.
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../Stripes/20CR.html" title="Warming Stripes (20CRv3 version)"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Posters</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">An AI reads history</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    </div>
+  </body>
+</html>
