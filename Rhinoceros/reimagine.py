@@ -60,7 +60,7 @@ header = (
     + " the\nstandard representation of the animal for centuries, and remains iconic"
     + " today. In 2003 John Hunter released matplotlib, a python library for"
     + " making 2d plots, which has since become an invaluable tool\nfor scientific"
-    + " visualisation. The scope and power of matplotib make it the perfect choice"
+    + " visualization. The scope and power of matplotib make it the perfect choice"
     + " for reimagining a classic image."
 )
 axb.text(
