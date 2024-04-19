@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 
-<html lang="en" data-content_root="../../">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Warming Stripes (20CRv3 version) &#8212; Philip&#39;s Posters</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
-    <link rel="stylesheet" type="text/css" href="../../_static/sphinxdoc.css?v=d59dc883" />
-    <script src="../../_static/documentation_options.js?v=8d563738"></script>
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinxdoc.css?v=0a676766" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=af2ce170"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
-    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="An AI reads history" href="../An_AI_reads_history/index.html" />
@@ -39,18 +39,22 @@
           <div class="body" role="main">
             
   <section id="warming-stripes-20crv3-version">
-<h1>Warming Stripes (20CRv3 version)<a class="headerlink" href="#warming-stripes-20crv3-version" title="Link to this heading">¶</a></h1>
+<h1>Warming Stripes (20CRv3 version)<a class="headerlink" href="#warming-stripes-20crv3-version" title="Permalink to this heading">¶</a></h1>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This idea has been developed into the <a class="reference external" href="http://brohan.org/Stripes/index.html">generalised Stripes</a> .</p>
+</div>
 <figure class="align-center" style="width: 95%">
 <a class="reference external image-reference" href="https://s3-eu-west-1.amazonaws.com/philip.brohan.org.big-files/Posters/Stripes/20CR.pdf"><img alt="../../_images/20CR.png" src="../../_images/20CR.png" style="width: 95%;" /></a>
 </figure>
 <p>The <a class="reference external" href="https://en.wikipedia.org/wiki/Warming_stripes">warming stripes</a> are a spectacularly successful tool for communicating climate change - can we build on them by making more complex versions containing more information? In particular, I’d like to make an equivalent plot that used temperatures resolved in time and space - this would show the large-scale change in the context of smaller-scale variability, much closer to climate change as we experience it.</p>
 <p>Hourly data proved a bit much, but we can go to monthly: The vertical axis of this plot is latitude (90S to 90N at 1 degree resolution), the horizontal axis is time (Jan 1836 to Dec 2015, at 1 month resolution), each vertical line is at a randomly sampled 1-degree of longitude. Colour gives temperature anomaly (w.r.t 1900-1950 climatology). Data are from <a class="reference external" href="https://www.esrl.noaa.gov/psd/data/gridded/data.20thC_ReanV3.html">20CR version 3.</a></p>
-<p>Note that, unlike the original warming stripes, this visualisation says more about the uncertainties and biases in the data set construction than about actual climate.</p>
+<p>Note that, unlike the original warming stripes, this visualization says more about the uncertainties and biases in the data set construction than about actual climate.</p>
 <ul class="simple">
 <li><p><a class="reference external" href="https://s3-eu-west-1.amazonaws.com/philip.brohan.org.big-files/Posters/Stripes/20CR.pdf">Full resolution PDF (12Mb, printable)</a></p></li>
 </ul>
 <section id="code-to-make-the-poster">
-<h2>Code to make the poster<a class="headerlink" href="#code-to-make-the-poster" title="Link to this heading">¶</a></h2>
+<h2>Code to make the poster<a class="headerlink" href="#code-to-make-the-poster" title="Permalink to this heading">¶</a></h2>
 <p>Download the data file (netCDF) from the <a class="reference external" href="https://www.esrl.noaa.gov/psd/data/gridded/data.20thC_ReanV3.html">20CRv3 website</a> (<a class="reference external" href="ftp://ftp.cdc.noaa.gov/Datasets/20thC_ReanV3/Monthlies/2mSI-MO/air.2m.mon.mean.nc">direct link</a>).</p>
 <p>Script to plot the poster:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python</span>
@@ -156,6 +160,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../ISPD4.7/index.html">Observations coverage (ISPD4.7)</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Warming Stripes (20CRv3 version)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../An_AI_reads_history/index.html">An AI reads history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Rhinoceros/index.html">A modern Rhinoceros</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../UK_land_use/index.html">UK Land Use</a></li>
 </ul>
 <h3><a href="https://github.com/philip-brohan/Posters">Get the source code</a></h3>
 

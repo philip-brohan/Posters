@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>A modern Rhinoceros &#8212; Philip&#39;s Posters</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinxdoc.css?v=0a676766" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=af2ce170"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Rhinoceros: Top Left panel" href="pTL.html" />
+    <link rel="prev" title="Rogue’s gallery of historical figures" href="../An_AI_reads_history/pictures.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="pTL.html" title="Rhinoceros: Top Left panel"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../An_AI_reads_history/pictures.html" title="Rogue’s gallery of historical figures"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Posters</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">A modern Rhinoceros</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="a-modern-rhinoceros">
+<h1>A modern Rhinoceros<a class="headerlink" href="#a-modern-rhinoceros" title="Permalink to this heading">¶</a></h1>
+<figure class="align-center" style="width: 95%">
+<a class="reference internal image-reference" href="../../_images/modern_rhinoceros.webp"><img alt="../../_images/modern_rhinoceros.webp" src="../../_images/modern_rhinoceros.webp" style="width: 95%;" /></a>
+</figure>
+<p>One of my favourite artworks is Albrecht Dürer’s Rhinoceros (<a class="reference external" href="https://upload.wikimedia.org/wikipedia/commons/b/bc/The_Rhinoceros_%28NGA_1964.8.697%29_enhanced.png">image</a>, <a class="reference external" href="https://en.wikipedia.org/wiki/D%C3%BCrer%27s_Rhinoceros">wikipedia</a>). It’s a woodcut of a rhinoceros, made in 1515, based on a written description and a sketch of a rhinoceros that had been brought to Lisbon from India. Dürer never actually saw the rhinoceros, and his image is an early example of what we’d now call a <a class="reference external" href="https://en.wikipedia.org/wiki/Hallucination_(artificial_intelligence)">hallucination</a>. But Dürer’s genius is such that his image is better than the real thing - this is what a Rhinoceros <em>ought</em> to look like.</p>
+<p>I also enjoyed <a class="reference external" href="https://github.com/rougier/scientific-visualization-book">Nicholas Rougier’s book “Scientific Visualization: Python + Matplotlib”</a> which reminded me that we can do so much more with <a class="reference external" href="https://matplotlib.org/">matplotlib</a> than just plot graphs. I wanted to expand my repertoire of plotting techniques, so I decided to reimagine Dürer’s Rhinoceros as a matplotlib plot.</p>
+<p>The plan was to use as many as possible of matplotlib’s built-in graph types, and to use each type only once. I didn’t quite manage this, but it’s close. As a single woodblock, Dürer’s original is in one colour - modern technology allows removal of this restriction, but choosing colours is very difficult, so this version is in one colour palette: <a class="reference external" href="https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html">viridis</a> (along with a bit of grey and black).</p>
+<section id="code-to-make-the-poster">
+<h2>Code to make the poster<a class="headerlink" href="#code-to-make-the-poster" title="Permalink to this heading">¶</a></h2>
+<p>Written with much assistance from the awesome <a class="reference external" href="https://github.com/features/copilot">GitHub Copilot</a>. Copilot’s encyclopaedic knowledge of matplotlib, and endless patience answering questions along the lines of “How do I do … ?” made the project enormously easier.</p>
+<p>The main script creates the <a class="reference external" href="https://matplotlib.org/stable/api/figure_api.html">figure</a>, adds some <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.text.html">text</a> to the top, and delegates the rest of the job to a <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.gridspec.GridSpec.html">grid of subplots</a>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="c1"># Re-draw Durer&#39;s Rhinecerous using Matplotlib</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="kn">from</span> <span class="nn">matplotlib.backends.backend_agg</span> <span class="kn">import</span> <span class="n">FigureCanvasAgg</span> <span class="k">as</span> <span class="n">FigureCanvas</span>
+<span class="kn">from</span> <span class="nn">matplotlib.figure</span> <span class="kn">import</span> <span class="n">Figure</span>
+<span class="kn">from</span> <span class="nn">matplotlib.patches</span> <span class="kn">import</span> <span class="n">Polygon</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">font_manager</span>
+
+<span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="n">smoothLine</span><span class="p">,</span> <span class="n">viridis</span><span class="p">,</span> <span class="n">colours</span>
+
+<span class="c1"># Load the original</span>
+<span class="n">bg_im</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;The_Rhinoceros_(NGA_1964.8.697)_enhanced.png&quot;</span><span class="p">)</span>
+<span class="n">bg_im</span> <span class="o">=</span> <span class="n">bg_im</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="s2">&quot;RGB&quot;</span><span class="p">)</span>
+<span class="c1"># Convert to numpy array on 0-1</span>
+<span class="n">bg_im</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">bg_im</span><span class="p">)</span> <span class="o">/</span> <span class="mf">255.0</span>
+
+<span class="c1"># Figure showing the original image, reconstructed image, and latent space</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">Figure</span><span class="p">(</span>
+    <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">3000</span> <span class="o">/</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">2368</span> <span class="o">/</span> <span class="mi">100</span><span class="p">),</span>  <span class="c1"># Width, Height (inches)</span>
+    <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+    <span class="n">facecolor</span><span class="o">=</span><span class="n">colours</span><span class="p">[</span><span class="s2">&quot;background&quot;</span><span class="p">],</span>
+    <span class="n">edgecolor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">frameon</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">subplotpars</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">tight_layout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">canvas</span> <span class="o">=</span> <span class="n">FigureCanvas</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+<span class="n">font</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;family&quot;</span><span class="p">:</span> <span class="s2">&quot;sans-serif&quot;</span><span class="p">,</span> <span class="s2">&quot;sans-serif&quot;</span><span class="p">:</span> <span class="s2">&quot;Arial&quot;</span><span class="p">,</span> <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="s2">&quot;normal&quot;</span><span class="p">,</span> <span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="mi">18</span><span class="p">}</span>
+<span class="n">matplotlib</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s2">&quot;font&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">font</span><span class="p">)</span>
+
+<span class="c1"># Put image in as background</span>
+<span class="n">axb</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">axb</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>
+<span class="n">axb</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">axb</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="c1"># Add the image</span>
+<span class="n">bgi_extent</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.03</span><span class="p">,</span> <span class="mf">0.98</span><span class="p">,</span> <span class="mf">0.03</span><span class="p">,</span> <span class="mf">0.98</span><span class="p">]</span>
+<span class="c1"># axb.imshow(bg_im, extent=bgi_extent, aspect=&quot;auto&quot;, alpha=0.5)</span>
+
+<span class="c1"># Put some text in at the top</span>
+<span class="n">header_font</span> <span class="o">=</span> <span class="n">font_manager</span><span class="o">.</span><span class="n">FontProperties</span><span class="p">(</span>
+    <span class="n">family</span><span class="o">=</span><span class="s2">&quot;Noto Serif&quot;</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="s2">&quot;bold&quot;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;italic&quot;</span>
+<span class="p">)</span>
+<span class="n">header</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;On 20 May 1515, an Indian rhinoceros named Ulysses arrived in Lisbon&quot;</span>
+    <span class="o">+</span> <span class="s2">&quot; from the Far East - the first rhinoceros seen in Europe since Roman times.&quot;</span>
+    <span class="o">+</span> <span class="s2">&quot; It was a gift to to King Manuel I of Portugal&quot;</span>
+    <span class="o">+</span> <span class="s2">&quot; from Afonso de </span><span class="se">\n</span><span class="s2"> Albuquerque, governor of Portuguese India. The king regifted&quot;</span>
+    <span class="o">+</span> <span class="s2">&quot; it to Pope Leo X, but it died in a shipwreck off the coast of Italy.&quot;</span>
+    <span class="o">+</span> <span class="s2">&quot; Although the artist Albrecht Dürer never saw the animal, he created a&quot;</span>
+    <span class="o">+</span> <span class="s2">&quot; famous</span><span class="se">\n</span><span class="s2">woodcut of it, based on a sketch and description.&quot;</span>
+    <span class="o">+</span> <span class="s2">&quot; Dürer&#39;s genius was such that his image, while not anatomically accurate, is&quot;</span>
+    <span class="o">+</span> <span class="s2">&quot; better than reality - it shows what a rhinoceros ought to look like. It was&quot;</span>
+    <span class="o">+</span> <span class="s2">&quot; the</span><span class="se">\n</span><span class="s2">standard representation of the animal for centuries, and remains iconic&quot;</span>
+    <span class="o">+</span> <span class="s2">&quot; today. In 2003 John Hunter released matplotlib, a python library for&quot;</span>
+    <span class="o">+</span> <span class="s2">&quot; making 2d plots, which has since become an invaluable tool</span><span class="se">\n</span><span class="s2">for scientific&quot;</span>
+    <span class="o">+</span> <span class="s2">&quot; visualisation. The scope and power of matplotib make it the perfect choice&quot;</span>
+    <span class="o">+</span> <span class="s2">&quot; for reimagining a classic image.&quot;</span>
+<span class="p">)</span>
+<span class="n">axb</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="mf">0.98</span><span class="p">,</span>
+    <span class="n">s</span><span class="o">=</span><span class="n">header</span><span class="p">,</span>
+    <span class="n">ha</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span>
+    <span class="n">va</span><span class="o">=</span><span class="s2">&quot;top&quot;</span><span class="p">,</span>
+    <span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+    <span class="n">fontproperties</span><span class="o">=</span><span class="n">header_font</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Add a grid of axes</span>
+<span class="n">gspec</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">gridspec</span><span class="o">.</span><span class="n">GridSpec</span><span class="p">(</span>
+    <span class="n">ncols</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">nrows</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">figure</span><span class="o">=</span><span class="n">fig</span><span class="p">,</span>
+    <span class="n">width_ratios</span><span class="o">=</span><span class="p">[</span>
+        <span class="mf">1.5</span><span class="p">,</span>
+        <span class="mf">1.5</span><span class="p">,</span>
+        <span class="mf">1.5</span><span class="p">,</span>
+        <span class="mf">1.5</span><span class="p">,</span>
+    <span class="p">],</span>
+    <span class="n">height_ratios</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+    <span class="n">wspace</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">hspace</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="c1"># Set the space the subplots take up</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mf">0.99</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="mf">0.9</span><span class="p">)</span>
+
+
+<span class="c1"># Each subplot has a separate function to draw it</span>
+
+<span class="c1"># Top Left</span>
+<span class="kn">from</span> <span class="nn">pTL</span> <span class="kn">import</span> <span class="n">pTL</span>
+
+<span class="n">ax_TL</span> <span class="o">=</span> <span class="n">pTL</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">gspec</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+<span class="c1"># Top Centre Left</span>
+<span class="kn">from</span> <span class="nn">pTCL</span> <span class="kn">import</span> <span class="n">pTCL</span>
+
+<span class="n">ax_TCL</span> <span class="o">=</span> <span class="n">pTCL</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">gspec</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+<span class="c1"># Top Right and Centre Right</span>
+<span class="kn">from</span> <span class="nn">pTCR_TR</span> <span class="kn">import</span> <span class="n">pTCR_TR</span>
+
+<span class="n">ax_TCR_TR</span> <span class="o">=</span> <span class="n">pTCR_TR</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">gspec</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">])</span>
+
+<span class="c1"># 2nd Left</span>
+<span class="kn">from</span> <span class="nn">p2L</span> <span class="kn">import</span> <span class="n">p2L</span>
+
+<span class="n">ax_2L</span> <span class="o">=</span> <span class="n">p2L</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">gspec</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+<span class="c1"># 2nd and 3rd Centre Left</span>
+<span class="kn">from</span> <span class="nn">p2CL_3CL</span> <span class="kn">import</span> <span class="n">p2CL_3CL</span>
+
+<span class="n">ax_2CL_3CL</span> <span class="o">=</span> <span class="n">p2CL_3CL</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">gspec</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+<span class="c1"># 2nd Centre Right</span>
+<span class="kn">from</span> <span class="nn">p2CR</span> <span class="kn">import</span> <span class="n">p2CR</span>
+
+<span class="n">ax_2CR</span> <span class="o">=</span> <span class="n">p2CR</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">gspec</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+
+<span class="c1"># 2nd Right</span>
+<span class="kn">from</span> <span class="nn">p2R</span> <span class="kn">import</span> <span class="n">p2R</span>
+
+<span class="n">ax_2R</span> <span class="o">=</span> <span class="n">p2R</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">gspec</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">bg_im</span><span class="p">,</span> <span class="n">bgi_extent</span><span class="p">)</span>
+
+<span class="c1"># 3rd Left</span>
+<span class="kn">from</span> <span class="nn">p3L</span> <span class="kn">import</span> <span class="n">p3L</span>
+
+<span class="n">ax_3L</span> <span class="o">=</span> <span class="n">p3L</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">gspec</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+<span class="c1"># 3rd Centre Right</span>
+<span class="kn">from</span> <span class="nn">p3CR</span> <span class="kn">import</span> <span class="n">p3CR</span>
+
+<span class="n">ax_3CR</span> <span class="o">=</span> <span class="n">p3CR</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">gspec</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+
+<span class="c1"># 3rd and 4th Right</span>
+<span class="kn">from</span> <span class="nn">p3R_4R</span> <span class="kn">import</span> <span class="n">p3R_4R</span>
+
+<span class="n">ax_3R_4R</span> <span class="o">=</span> <span class="n">p3R_4R</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">gspec</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">bg_im</span><span class="p">,</span> <span class="n">bgi_extent</span><span class="p">)</span>
+
+<span class="c1"># 4th and 5th Left</span>
+<span class="kn">from</span> <span class="nn">p4L_5L</span> <span class="kn">import</span> <span class="n">p4L_5L</span>
+
+<span class="n">ax_4L_5L</span> <span class="o">=</span> <span class="n">p4L_5L</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">gspec</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+<span class="c1"># 4th Centre Left</span>
+<span class="kn">from</span> <span class="nn">p4CL</span> <span class="kn">import</span> <span class="n">p4CL</span>
+
+<span class="n">ax_4CL</span> <span class="o">=</span> <span class="n">p4CL</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">gspec</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+<span class="c1"># 4th and 5th Centre Right</span>
+<span class="kn">from</span> <span class="nn">p4CR_5CR</span> <span class="kn">import</span> <span class="n">p4CR_5CR</span>
+
+<span class="n">ax_4CR_5CR</span> <span class="o">=</span> <span class="n">p4CR_5CR</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">gspec</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+
+<span class="c1"># 5th Centre Left</span>
+<span class="kn">from</span> <span class="nn">p5CL</span> <span class="kn">import</span> <span class="n">p5CL</span>
+
+<span class="n">ax_5CL</span> <span class="o">=</span> <span class="n">p5CL</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">gspec</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+<span class="c1"># 5th Right</span>
+<span class="kn">from</span> <span class="nn">p5R</span> <span class="kn">import</span> <span class="n">p5R</span>
+
+<span class="n">ax_5R</span> <span class="o">=</span> <span class="n">p5R</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">gspec</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+
+<span class="c1"># Render the new image</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">&quot;modern_rhinoceros.webp&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Each subplot has its own drawing function:</p>
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="pTL.html"><span class="doc">Top Left panel</span></a></p></td>
+<td><p><a class="reference internal" href="pTCL.html"><span class="doc">Top Centre-Left panel</span></a></p></td>
+<td colspan="2"><p><a class="reference internal" href="pTCR_TR.html"><span class="doc">Top Centre-Right &amp; Right panel</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="p2L.html"><span class="doc">2nd Left panel</span></a></p></td>
+<td rowspan="2"><p><a class="reference internal" href="p2CL_3CL.html"><span class="doc">2nd and 3rd Centre-Left panel</span></a></p></td>
+<td><p><a class="reference internal" href="p2CR.html"><span class="doc">2nd Centre-Right panel</span></a></p></td>
+<td><p><a class="reference internal" href="p2R.html"><span class="doc">2nd Right panel</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="p3L.html"><span class="doc">3rd Left panel</span></a></p></td>
+<td><p><a class="reference internal" href="p3CR.html"><span class="doc">3rd Centre-Right panel</span></a></p></td>
+<td rowspan="2"><p><a class="reference internal" href="p3R_4R.html"><span class="doc">3rd &amp; 4th Right panel</span></a></p></td>
+</tr>
+<tr class="row-even"><td rowspan="2"><p><a class="reference internal" href="p4L_5L.html"><span class="doc">4th &amp; 5th Left panel</span></a></p></td>
+<td><p><a class="reference internal" href="p4CL.html"><span class="doc">4th Centre-Left panel</span></a></p></td>
+<td rowspan="2"><p><a class="reference internal" href="p4CR_5CR.html"><span class="doc">4th &amp; 5th Centre-Right panel</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="p5CL.html"><span class="doc">5th Centre-Left panel</span></a></p></td>
+<td><p><a class="reference internal" href="p5R.html"><span class="doc">5th Right panel</span></a></p></td>
+</tr>
+</tbody>
+</table>
+<p>Or as a list:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="pTL.html">Rhinoceros: Top Left panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pTCL.html">Rhinoceros: Top Centre-Left panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pTCR_TR.html">Rhinoceros: Top Centre-Right &amp; Right panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="p2L.html">Rhinoceros: 2nd Left panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="p2CL_3CL.html">Rhinoceros: 2nd and 3rd Centre-Left panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="p2CR.html">Rhinoceros: 2nd Centre-Right panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="p2R.html">Rhinoceros: 2nd Right panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="p3L.html">Rhinoceros: 3rd Left panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="p3CR.html">Rhinoceros: 3rd Centre-Right panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="p3R_4R.html">Rhinoceros: 3rd &amp; 4th Right panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="p4L_5L.html">Rhinoceros: 4th and 5th Left panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="p4CL.html">Rhinoceros: 4th Centre-Left panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="p4CR_5CR.html">Rhinoceros: 4th and 5th Centre-Right panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="p5CL.html">Rhinoceros: 5th Centre-Left panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="p5R.html">Rhinoceros: 5th Right panel</a></li>
+</ul>
+</div>
+<p>And a few utility functions and definitions are split off into their own file</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">Rhinoceros: Utilities</a></li>
+</ul>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/Poster.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../index.html">Table of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Spilhaus/ostia.html">Ostia data in the Spilhaus projection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ISPD4.7/index.html">Observations coverage (ISPD4.7)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Stripes/20CR.html">Warming Stripes (20CRv3 version)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../An_AI_reads_history/index.html">An AI reads history</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">A modern Rhinoceros</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../UK_land_use/index.html">UK Land Use</a></li>
+</ul>
+<h3><a href="https://github.com/philip-brohan/Posters">Get the source code</a></h3>
+
+<a href="https://github.com/philip-brohan/Posters"
+           rel="nofollow">Github source repository</a>
+
+<h3>Found a bug, or have a suggestion?</h3>
+
+Please <a href="https://github.com/philip-brohan/Posters/issues/new">raise an issue</a>.
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="pTL.html" title="Rhinoceros: Top Left panel"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../An_AI_reads_history/pictures.html" title="Rogue’s gallery of historical figures"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Posters</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">A modern Rhinoceros</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    </div>
+  </body>
+</html>

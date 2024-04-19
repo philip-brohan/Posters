@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Rhinoceros: 4th and 5th Left panel &#8212; Philip&#39;s Posters</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinxdoc.css?v=0a676766" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=af2ce170"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Rhinoceros: 4th Centre-Left panel" href="p4CL.html" />
+    <link rel="prev" title="Rhinoceros: 3rd &amp; 4th Right panel" href="p3R_4R.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="p4CL.html" title="Rhinoceros: 4th Centre-Left panel"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="p3R_4R.html" title="Rhinoceros: 3rd &amp; 4th Right panel"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Posters</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">A modern Rhinoceros</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Rhinoceros: 4th and 5th Left panel</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="rhinoceros-4th-and-5th-left-panel">
+<h1>Rhinoceros: 4th and 5th Left panel<a class="headerlink" href="#rhinoceros-4th-and-5th-left-panel" title="Permalink to this heading">¶</a></h1>
+<figure class="align-center" style="width: 95%">
+<a class="reference internal image-reference" href="../../_images/p4L_5L.webp"><img alt="../../_images/p4L_5L.webp" src="../../_images/p4L_5L.webp" style="width: 95%;" /></a>
+</figure>
+<p>The 4th and 5th left panel uses <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.streamplot.html">a streamplot</a>, <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.patches.Polygon.html">polygon patches</a>, <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.vlines.html">vlines</a>, and <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.imshow.html">imshow</a>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># function to plot the contents of the row 4 and 5 Left panel</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">matplotlib.patches</span> <span class="kn">import</span> <span class="n">Polygon</span>
+<span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="n">smoothLine</span><span class="p">,</span> <span class="n">colours</span><span class="p">,</span> <span class="n">viridis</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span>
+
+
+<span class="k">def</span> <span class="nf">p4L_5L</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">gspec</span><span class="p">):</span>
+    <span class="n">ax_4L_5L</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span>
+        <span class="n">gspec</span><span class="p">,</span>
+        <span class="n">frameon</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">xlim</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span>
+        <span class="n">xticks</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span>
+        <span class="n">ylim</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="n">yticks</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="n">ax_4L_5L</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="n">colours</span><span class="p">[</span><span class="s2">&quot;ax_bg&quot;</span><span class="p">])</span>
+    <span class="n">ax_4L_5L</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s2">&quot;right&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">ax_4L_5L</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s2">&quot;top&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># Bottom of the hip plate</span>
+    <span class="n">hipl</span> <span class="o">=</span> <span class="n">smoothLine</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">30</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mf">0.65</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">70</span><span class="p">,</span> <span class="mf">0.55</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">80</span><span class="p">,</span> <span class="mf">0.65</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">90</span><span class="p">,</span> <span class="mf">0.72</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
+            <span class="p">]</span>
+        <span class="p">),</span>
+        <span class="n">horizontal</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">k</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">hip_patch</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">patches</span><span class="o">.</span><span class="n">Polygon</span><span class="p">(</span>
+        <span class="n">hipl</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="n">colours</span><span class="p">[</span><span class="s2">&quot;ax_bg&quot;</span><span class="p">],</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">200</span>
+    <span class="p">)</span>
+    <span class="n">ax_4L_5L</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">hip_patch</span><span class="p">)</span>
+
+    <span class="c1"># Fill the hip patch with a streamplot</span>
+    <span class="c1"># make a stream function:</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">200</span><span class="p">))</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="p">((</span><span class="n">X</span> <span class="o">-</span> <span class="mi">60</span><span class="p">)</span> <span class="o">/</span> <span class="mi">10</span><span class="p">)</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">+</span> <span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="p">(</span><span class="n">Y</span> <span class="o">-</span> <span class="mf">0.7</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="c1"># make U and V out of the streamfunction:</span>
+    <span class="n">V</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">Z</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">U</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">Z</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">sps</span> <span class="o">=</span> <span class="n">ax_4L_5L</span><span class="o">.</span><span class="n">streamplot</span><span class="p">(</span>
+        <span class="n">X</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">:],</span>
+        <span class="n">Y</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">:],</span>
+        <span class="n">U</span><span class="p">,</span>
+        <span class="n">V</span><span class="p">,</span>
+        <span class="n">arrowsize</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>  <span class="c1"># Arrows can&#39;t be clipped - they will be drawn outside the hip patch</span>
+        <span class="n">density</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">linewidth</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="n">colours</span><span class="p">[</span><span class="s2">&quot;purple&quot;</span><span class="p">],</span>
+        <span class="n">zorder</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">sps</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">set_clip_path</span><span class="p">(</span><span class="n">hip_patch</span><span class="p">)</span>
+
+    <span class="c1"># Rear right leg</span>
+    <span class="n">legr_l</span> <span class="o">=</span> <span class="n">smoothLine</span><span class="p">(</span>  <span class="c1"># Left side</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">[</span><span class="mi">30</span><span class="p">,</span> <span class="mf">0.85</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">18</span><span class="p">,</span> <span class="mf">0.65</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">23</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mf">0.22</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">28</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span>
+            <span class="p">]</span>
+        <span class="p">),</span>
+        <span class="n">horizontal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">legr_b</span> <span class="o">=</span> <span class="n">smoothLine</span><span class="p">(</span>  <span class="c1"># Bottom</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">[</span><span class="mi">28</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">40</span><span class="p">,</span> <span class="mf">0.06</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">60</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">78</span><span class="p">,</span> <span class="mf">0.08</span><span class="p">],</span>
+            <span class="p">]</span>
+        <span class="p">),</span>
+        <span class="n">horizontal</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">k</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">legr_r</span> <span class="o">=</span> <span class="n">smoothLine</span><span class="p">(</span>  <span class="c1"># Right side</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">[</span><span class="mi">78</span><span class="p">,</span> <span class="mf">0.08</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">70</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">60</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">55</span><span class="p">,</span> <span class="mf">0.35</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">60</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">65</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">],</span>
+            <span class="p">]</span>
+        <span class="p">),</span>
+        <span class="n">horizontal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">k</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">legr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">legr_l</span><span class="p">,</span> <span class="n">legr_b</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">legr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">legr</span><span class="p">,</span> <span class="n">legr_r</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">legr_patch</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">patches</span><span class="o">.</span><span class="n">Polygon</span><span class="p">(</span>
+        <span class="n">legr</span><span class="p">,</span>
+        <span class="n">facecolor</span><span class="o">=</span><span class="n">colours</span><span class="p">[</span><span class="s2">&quot;ax_bg&quot;</span><span class="p">],</span>
+        <span class="n">edgecolor</span><span class="o">=</span><span class="n">colours</span><span class="p">[</span><span class="s2">&quot;green&quot;</span><span class="p">],</span>
+        <span class="n">hatch</span><span class="o">=</span><span class="s2">&quot;X&quot;</span><span class="p">,</span>
+        <span class="n">linewidth</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+        <span class="n">zorder</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ax_4L_5L</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">legr_patch</span><span class="p">)</span>
+
+    <span class="c1"># Rear left leg</span>
+    <span class="n">legl</span> <span class="o">=</span> <span class="n">smoothLine</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">95</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">90</span><span class="p">,</span> <span class="mf">0.45</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">80</span><span class="p">,</span> <span class="mf">0.65</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">70</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">85</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
+            <span class="p">]</span>
+        <span class="p">),</span>
+        <span class="n">horizontal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">k</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">legl_patch</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">patches</span><span class="o">.</span><span class="n">Polygon</span><span class="p">(</span>
+        <span class="n">legl</span><span class="p">,</span>
+        <span class="n">facecolor</span><span class="o">=</span><span class="n">colours</span><span class="p">[</span><span class="s2">&quot;ax_bg&quot;</span><span class="p">],</span>
+        <span class="n">edgecolor</span><span class="o">=</span><span class="n">colours</span><span class="p">[</span><span class="s2">&quot;blue&quot;</span><span class="p">],</span>
+        <span class="n">hatch</span><span class="o">=</span><span class="s2">&quot;//&quot;</span><span class="p">,</span>
+        <span class="n">linewidth</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+        <span class="n">zorder</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ax_4L_5L</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">legl_patch</span><span class="p">)</span>
+
+    <span class="c1"># Ground shading with a clipped gradient</span>
+    <span class="n">phi</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">)])</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">v</span> <span class="o">@</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">v</span> <span class="o">@</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span> <span class="p">[</span><span class="n">v</span> <span class="o">@</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">v</span> <span class="o">@</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]])</span>
+    <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="p">(</span><span class="n">b</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span> <span class="o">/</span> <span class="n">X</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">*</span> <span class="n">X</span>
+    <span class="n">im</span> <span class="o">=</span> <span class="n">ax_4L_5L</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
+        <span class="n">X</span><span class="p">,</span>
+        <span class="n">interpolation</span><span class="o">=</span><span class="s2">&quot;bicubic&quot;</span><span class="p">,</span>
+        <span class="n">clim</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="n">aspect</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+        <span class="n">extent</span><span class="o">=</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;gray_r&quot;</span><span class="p">,</span>
+        <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+        <span class="n">zorder</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">im</span><span class="o">.</span><span class="n">set_clip_path</span><span class="p">(</span>
+        <span class="n">Polygon</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">],</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">],</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span> <span class="n">transform</span><span class="o">=</span><span class="n">ax_4L_5L</span><span class="o">.</span><span class="n">transData</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># bottom part of tail</span>
+    <span class="n">yt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+    <span class="n">lengths</span> <span class="o">=</span> <span class="mf">0.07</span>  <span class="c1"># + np.random.rand(yt.shape[0]) * 0.1</span>
+    <span class="n">ax_4L_5L</span><span class="o">.</span><span class="n">vlines</span><span class="p">(</span>
+        <span class="n">yt</span><span class="p">,</span>
+        <span class="n">ymin</span><span class="o">=</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">lengths</span><span class="p">,</span>
+        <span class="n">ymax</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">colors</span><span class="o">=</span><span class="n">colours</span><span class="p">[</span><span class="s2">&quot;blue&quot;</span><span class="p">],</span>
+        <span class="n">linewidths</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">zorder</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">yt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">lengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">yt</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="mf">0.05</span> <span class="o">+</span> <span class="mf">0.05</span>
+    <span class="n">ax_4L_5L</span><span class="o">.</span><span class="n">vlines</span><span class="p">(</span>
+        <span class="n">yt</span><span class="p">,</span>
+        <span class="n">ymin</span><span class="o">=</span><span class="mf">0.95</span> <span class="o">-</span> <span class="n">lengths</span><span class="p">,</span>
+        <span class="n">ymax</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span>
+        <span class="n">colors</span><span class="o">=</span><span class="n">colours</span><span class="p">[</span><span class="s2">&quot;blue&quot;</span><span class="p">],</span>
+        <span class="n">linewidths</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">zorder</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">yt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">lengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">yt</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="mf">0.05</span> <span class="o">+</span> <span class="mf">0.05</span>
+    <span class="n">ax_4L_5L</span><span class="o">.</span><span class="n">vlines</span><span class="p">(</span>
+        <span class="n">yt</span><span class="p">,</span>
+        <span class="n">ymin</span><span class="o">=</span><span class="mf">0.95</span> <span class="o">-</span> <span class="n">lengths</span><span class="p">,</span>
+        <span class="n">ymax</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span>
+        <span class="n">colors</span><span class="o">=</span><span class="n">colours</span><span class="p">[</span><span class="s2">&quot;blue&quot;</span><span class="p">],</span>
+        <span class="n">linewidths</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">zorder</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ax_4L_5L</span>
+</pre></div>
+</div>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/Poster.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../index.html">Table of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Spilhaus/ostia.html">Ostia data in the Spilhaus projection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ISPD4.7/index.html">Observations coverage (ISPD4.7)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Stripes/20CR.html">Warming Stripes (20CRv3 version)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../An_AI_reads_history/index.html">An AI reads history</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">A modern Rhinoceros</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../UK_land_use/index.html">UK Land Use</a></li>
+</ul>
+<h3><a href="https://github.com/philip-brohan/Posters">Get the source code</a></h3>
+
+<a href="https://github.com/philip-brohan/Posters"
+           rel="nofollow">Github source repository</a>
+
+<h3>Found a bug, or have a suggestion?</h3>
+
+Please <a href="https://github.com/philip-brohan/Posters/issues/new">raise an issue</a>.
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="p4CL.html" title="Rhinoceros: 4th Centre-Left panel"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="p3R_4R.html" title="Rhinoceros: 3rd &amp; 4th Right panel"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Posters</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >A modern Rhinoceros</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Rhinoceros: 4th and 5th Left panel</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    </div>
+  </body>
+</html>

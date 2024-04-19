@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>UK Land Use &#8212; Philip&#39;s Posters</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinxdoc.css?v=0a676766" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=af2ce170"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="prev" title="Rhinoceros: Utilities" href="../Rhinoceros/utils.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../Rhinoceros/utils.html" title="Rhinoceros: Utilities"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Posters</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">UK Land Use</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="uk-land-use">
+<h1>UK Land Use<a class="headerlink" href="#uk-land-use" title="Permalink to this heading">¶</a></h1>
+<figure class="align-center" id="id1" style="width: 65%">
+<a class="reference internal image-reference" href="../../_images/UKLU.png"><img alt="../../_images/UKLU.png" src="../../_images/UKLU.png" style="width: 65%;" /></a>
+<figcaption>
+<p><span class="caption-text">Red - urban, Dark Green - Forest, Light Green - Grassland, Yellow - cropland, higher orography is shown by less-saturated colours.</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</figcaption>
+</figure>
+<p>Data are from <a class="reference external" href="https://zenodo.org/records/3939050">Copernicus Global Land Service: Land Cover 100m: collection 3</a>.</p>
+<section id="code-to-make-the-poster">
+<h2>Code to make the poster<a class="headerlink" href="#code-to-make-the-poster" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="c1"># Plot land-use over the UK</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">iris</span>
+<span class="kn">import</span> <span class="nn">iris.analysis</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="kn">from</span> <span class="nn">matplotlib.backends.backend_agg</span> <span class="kn">import</span> <span class="n">FigureCanvasAgg</span> <span class="k">as</span> <span class="n">FigureCanvas</span>
+<span class="kn">from</span> <span class="nn">matplotlib.figure</span> <span class="kn">import</span> <span class="n">Figure</span>
+
+<span class="kn">import</span> <span class="nn">cmocean</span>
+
+<span class="c1"># Define the region to plot</span>
+<span class="n">latMin</span> <span class="o">=</span> <span class="o">-</span><span class="mi">6</span>
+<span class="n">latMax</span> <span class="o">=</span> <span class="mi">6</span>
+<span class="n">lonMin</span> <span class="o">=</span> <span class="o">-</span><span class="mf">3.75</span>
+<span class="n">lonMax</span> <span class="o">=</span> <span class="mf">4.25</span>
+<span class="n">pole_latitude</span> <span class="o">=</span> <span class="mi">35</span>
+<span class="n">pole_longitude</span> <span class="o">=</span> <span class="mi">175</span>
+<span class="n">aspect</span> <span class="o">=</span> <span class="p">(</span><span class="n">lonMax</span> <span class="o">-</span> <span class="n">lonMin</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">latMax</span> <span class="o">-</span> <span class="n">latMin</span><span class="p">)</span>
+
+<span class="n">fig</span> <span class="o">=</span> <span class="n">Figure</span><span class="p">(</span>
+    <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">24</span><span class="p">,</span> <span class="mi">36</span><span class="p">),</span>  <span class="c1"># Width, Height (inches)</span>
+    <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+    <span class="n">facecolor</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">edgecolor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">frameon</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">subplotpars</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">tight_layout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">canvas</span> <span class="o">=</span> <span class="n">FigureCanvas</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+<span class="n">font</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;family&quot;</span><span class="p">:</span> <span class="s2">&quot;sans-serif&quot;</span><span class="p">,</span> <span class="s2">&quot;sans-serif&quot;</span><span class="p">:</span> <span class="s2">&quot;Arial&quot;</span><span class="p">,</span> <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="s2">&quot;normal&quot;</span><span class="p">,</span> <span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="mi">16</span><span class="p">}</span>
+<span class="n">matplotlib</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s2">&quot;font&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">font</span><span class="p">)</span>
+<span class="n">axb</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+<span class="c1"># Map with background</span>
+<span class="n">ax_map</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span> <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">)</span>
+<span class="n">ax_map</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>
+<span class="n">ax_map</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">latMin</span><span class="p">,</span> <span class="n">latMax</span><span class="p">)</span>
+<span class="n">ax_map</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">lonMin</span><span class="p">,</span> <span class="n">lonMax</span><span class="p">)</span>
+<span class="n">ax_map</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;auto&quot;</span><span class="p">)</span>
+
+<span class="c1"># Make a dummy iris Cube for plotting.</span>
+<span class="c1"># Makes a cube in equirectangular projection.</span>
+<span class="c1"># Takes resolution, plot range, and pole location</span>
+<span class="c1">#  (all in degrees) as arguments, returns an</span>
+<span class="c1">#  iris cube.</span>
+<span class="k">def</span> <span class="nf">plot_cube</span><span class="p">(</span>
+    <span class="n">resolution</span><span class="p">,</span>
+    <span class="n">xmin</span><span class="o">=-</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">xmax</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">ymin</span><span class="o">=-</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">ymax</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">pole_latitude</span><span class="o">=</span><span class="mi">35</span><span class="p">,</span>
+    <span class="n">pole_longitude</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span>
+    <span class="n">npg_longitude</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+<span class="p">):</span>
+
+    <span class="n">cs</span> <span class="o">=</span> <span class="n">iris</span><span class="o">.</span><span class="n">coord_systems</span><span class="o">.</span><span class="n">RotatedGeogCS</span><span class="p">(</span><span class="n">pole_latitude</span><span class="p">,</span> <span class="n">pole_longitude</span><span class="p">,</span> <span class="n">npg_longitude</span><span class="p">)</span>
+    <span class="n">lat_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">+</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span>
+    <span class="n">latitude</span> <span class="o">=</span> <span class="n">iris</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">DimCoord</span><span class="p">(</span>
+        <span class="n">lat_values</span><span class="p">,</span> <span class="n">standard_name</span><span class="o">=</span><span class="s2">&quot;latitude&quot;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;degrees_north&quot;</span><span class="p">,</span> <span class="n">coord_system</span><span class="o">=</span><span class="n">cs</span>
+    <span class="p">)</span>
+    <span class="n">lon_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span> <span class="o">+</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span>
+    <span class="n">longitude</span> <span class="o">=</span> <span class="n">iris</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">DimCoord</span><span class="p">(</span>
+        <span class="n">lon_values</span><span class="p">,</span> <span class="n">standard_name</span><span class="o">=</span><span class="s2">&quot;longitude&quot;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;degrees_east&quot;</span><span class="p">,</span> <span class="n">coord_system</span><span class="o">=</span><span class="n">cs</span>
+    <span class="p">)</span>
+    <span class="n">dummy_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">lat_values</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">lon_values</span><span class="p">)))</span>
+    <span class="n">plot_cube</span> <span class="o">=</span> <span class="n">iris</span><span class="o">.</span><span class="n">cube</span><span class="o">.</span><span class="n">Cube</span><span class="p">(</span>
+        <span class="n">dummy_data</span><span class="p">,</span> <span class="n">dim_coords_and_dims</span><span class="o">=</span><span class="p">[(</span><span class="n">latitude</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">longitude</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">plot_cube</span>
+
+
+<span class="c1"># Turn a grey colourmap into a colour ramp</span>
+<span class="k">def</span> <span class="nf">recolourMap</span><span class="p">(</span><span class="n">col</span><span class="p">):</span>
+    <span class="n">gcm</span> <span class="o">=</span> <span class="n">cmocean</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">gray</span>
+    <span class="n">nm</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">fr</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">20</span><span class="p">):</span>
+        <span class="n">gc</span> <span class="o">=</span> <span class="n">gcm</span><span class="p">(</span><span class="n">fr</span><span class="p">)</span>
+        <span class="n">nc</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">col</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">col</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">gc</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+            <span class="n">col</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">col</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">gc</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+            <span class="n">col</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">col</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">gc</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>
+            <span class="n">gc</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="n">nm</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nc</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">ListedColormap</span><span class="p">(</span><span class="n">nm</span><span class="p">)</span>
+
+
+<span class="n">coord_s</span> <span class="o">=</span> <span class="n">iris</span><span class="o">.</span><span class="n">coord_systems</span><span class="o">.</span><span class="n">GeogCS</span><span class="p">(</span><span class="n">iris</span><span class="o">.</span><span class="n">fileformats</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">EARTH_RADIUS</span><span class="p">)</span>
+<span class="n">orog</span> <span class="o">=</span> <span class="n">iris</span><span class="o">.</span><span class="n">load_cube</span><span class="p">(</span>
+    <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/rivers/ETOPO1_Ice_g_gmt4.grd&quot;</span> <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;SCRATCH&quot;</span><span class="p">),</span>
+    <span class="n">iris</span><span class="o">.</span><span class="n">Constraint</span><span class="p">(</span><span class="n">latitude</span><span class="o">=</span><span class="k">lambda</span> <span class="n">cell</span><span class="p">:</span> <span class="mi">45</span> <span class="o">&lt;</span> <span class="n">cell</span> <span class="o">&lt;</span> <span class="mi">65</span><span class="p">)</span>
+    <span class="o">&amp;</span> <span class="n">iris</span><span class="o">.</span><span class="n">Constraint</span><span class="p">(</span><span class="n">longitude</span><span class="o">=</span><span class="k">lambda</span> <span class="n">cell</span><span class="p">:</span> <span class="o">-</span><span class="mi">15</span> <span class="o">&lt;</span> <span class="n">cell</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">orog</span><span class="o">.</span><span class="n">coord</span><span class="p">(</span><span class="s2">&quot;latitude&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">coord_system</span> <span class="o">=</span> <span class="n">coord_s</span>
+<span class="n">orog</span><span class="o">.</span><span class="n">coord</span><span class="p">(</span><span class="s2">&quot;longitude&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">coord_system</span> <span class="o">=</span> <span class="n">coord_s</span>
+<span class="n">pc</span> <span class="o">=</span> <span class="n">plot_cube</span><span class="p">(</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">lonMin</span><span class="p">,</span> <span class="n">lonMax</span><span class="p">,</span> <span class="n">latMin</span><span class="p">,</span> <span class="n">latMax</span><span class="p">,</span> <span class="n">pole_latitude</span><span class="p">,</span> <span class="n">pole_longitude</span><span class="p">)</span>
+<span class="n">orog</span> <span class="o">=</span> <span class="n">orog</span><span class="o">.</span><span class="n">regrid</span><span class="p">(</span><span class="n">pc</span><span class="p">,</span> <span class="n">iris</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">Linear</span><span class="p">())</span>
+<span class="n">omax</span> <span class="o">=</span> <span class="n">orog</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+<span class="n">lats</span> <span class="o">=</span> <span class="n">orog</span><span class="o">.</span><span class="n">coord</span><span class="p">(</span><span class="s2">&quot;latitude&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">points</span>
+<span class="n">lons</span> <span class="o">=</span> <span class="n">orog</span><span class="o">.</span><span class="n">coord</span><span class="p">(</span><span class="s2">&quot;longitude&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">points</span>
+<span class="n">mask_img</span> <span class="o">=</span> <span class="n">ax_map</span><span class="o">.</span><span class="n">pcolorfast</span><span class="p">(</span>
+    <span class="n">lons</span><span class="p">,</span>
+    <span class="n">lats</span><span class="p">,</span>
+    <span class="n">orog</span><span class="o">.</span><span class="n">data</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">,</span> <span class="n">orog</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="n">cmocean</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">gray</span><span class="p">,</span>
+    <span class="n">vmin</span><span class="o">=-</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">vmax</span><span class="o">=</span><span class="n">omax</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">zorder</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="c1"># Get sea from the land cover data</span>
+<span class="n">lct</span> <span class="o">=</span> <span class="n">iris</span><span class="o">.</span><span class="n">load_cube</span><span class="p">(</span>
+    <span class="s2">&quot;/scratch/hadpb/rivers/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.nc&quot;</span><span class="p">,</span>
+    <span class="n">iris</span><span class="o">.</span><span class="n">Constraint</span><span class="p">(</span><span class="n">latitude</span><span class="o">=</span><span class="k">lambda</span> <span class="n">cell</span><span class="p">:</span> <span class="mi">45</span> <span class="o">&lt;</span> <span class="n">cell</span> <span class="o">&lt;</span> <span class="mi">65</span><span class="p">)</span>
+    <span class="o">&amp;</span> <span class="n">iris</span><span class="o">.</span><span class="n">Constraint</span><span class="p">(</span><span class="n">longitude</span><span class="o">=</span><span class="k">lambda</span> <span class="n">cell</span><span class="p">:</span> <span class="o">-</span><span class="mi">15</span> <span class="o">&lt;</span> <span class="n">cell</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">lct</span><span class="o">.</span><span class="n">data</span><span class="p">[(</span><span class="n">lct</span><span class="o">.</span><span class="n">data</span> <span class="o">==</span> <span class="mi">200</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">lct</span><span class="o">.</span><span class="n">data</span> <span class="o">==</span> <span class="mi">80</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">lct</span><span class="o">.</span><span class="n">data</span> <span class="o">==</span> <span class="mi">90</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">lct</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">lct</span><span class="o">.</span><span class="n">data</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">lct</span><span class="o">.</span><span class="n">coord</span><span class="p">(</span><span class="s2">&quot;latitude&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">coord_system</span> <span class="o">=</span> <span class="n">coord_s</span>
+<span class="n">lct</span><span class="o">.</span><span class="n">coord</span><span class="p">(</span><span class="s2">&quot;longitude&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">coord_system</span> <span class="o">=</span> <span class="n">coord_s</span>
+<span class="n">lcr</span> <span class="o">=</span> <span class="n">lct</span><span class="o">.</span><span class="n">regrid</span><span class="p">(</span><span class="n">pc</span><span class="p">,</span> <span class="n">iris</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">Nearest</span><span class="p">())</span>
+<span class="n">osea</span> <span class="o">=</span> <span class="n">orog</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">osea</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">osea</span><span class="o">.</span><span class="n">data</span> <span class="o">&gt;</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">osea</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">osea</span><span class="o">.</span><span class="n">data</span> <span class="o">&lt;-</span><span class="mi">200</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">200</span>
+<span class="n">osea</span><span class="o">.</span><span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">osea</span><span class="o">.</span><span class="n">data</span><span class="o">*-</span><span class="mi">1</span><span class="p">)</span><span class="o">*-</span><span class="mi">1</span>
+
+<span class="n">sea_img</span> <span class="o">=</span> <span class="n">ax_map</span><span class="o">.</span><span class="n">pcolorfast</span><span class="p">(</span>
+    <span class="n">lons</span><span class="p">,</span>
+    <span class="n">lats</span><span class="p">,</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span><span class="p">(</span>
+        <span class="n">osea</span><span class="o">.</span><span class="n">data</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">osea</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="n">lcr</span><span class="o">.</span><span class="n">data</span>
+    <span class="p">),</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="n">recolourMap</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]),</span>
+    <span class="n">vmax</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">zorder</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Maximise the land orography contrast</span>
+<span class="n">orog</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">lcr</span><span class="o">.</span><span class="n">data</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">orog</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">orog</span><span class="o">.</span><span class="n">data</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">orog</span><span class="o">.</span><span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">orog</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+<span class="n">omax</span> <span class="o">=</span> <span class="n">orog</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">*</span><span class="mf">1.1</span>
+
+<span class="c1"># Get forest</span>
+<span class="n">lct</span> <span class="o">=</span> <span class="n">iris</span><span class="o">.</span><span class="n">load_cube</span><span class="p">(</span>
+    <span class="s2">&quot;/scratch/hadpb/rivers/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.nc&quot;</span><span class="p">,</span>
+    <span class="n">iris</span><span class="o">.</span><span class="n">Constraint</span><span class="p">(</span><span class="n">latitude</span><span class="o">=</span><span class="k">lambda</span> <span class="n">cell</span><span class="p">:</span> <span class="mi">45</span> <span class="o">&lt;</span> <span class="n">cell</span> <span class="o">&lt;</span> <span class="mi">65</span><span class="p">)</span>
+    <span class="o">&amp;</span> <span class="n">iris</span><span class="o">.</span><span class="n">Constraint</span><span class="p">(</span><span class="n">longitude</span><span class="o">=</span><span class="k">lambda</span> <span class="n">cell</span><span class="p">:</span> <span class="o">-</span><span class="mi">15</span> <span class="o">&lt;</span> <span class="n">cell</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="c1"># Various forest types</span>
+<span class="n">lct</span><span class="o">.</span><span class="n">data</span><span class="p">[(</span><span class="n">lct</span><span class="o">.</span><span class="n">data</span> <span class="o">&gt;=</span> <span class="mi">111</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">lct</span><span class="o">.</span><span class="n">data</span> <span class="o">&lt;=</span> <span class="mi">126</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">lct</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">lct</span><span class="o">.</span><span class="n">data</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">lct</span><span class="o">.</span><span class="n">coord</span><span class="p">(</span><span class="s2">&quot;latitude&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">coord_system</span> <span class="o">=</span> <span class="n">coord_s</span>
+<span class="n">lct</span><span class="o">.</span><span class="n">coord</span><span class="p">(</span><span class="s2">&quot;longitude&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">coord_system</span> <span class="o">=</span> <span class="n">coord_s</span>
+<span class="n">lcr</span> <span class="o">=</span> <span class="n">lct</span><span class="o">.</span><span class="n">regrid</span><span class="p">(</span><span class="n">pc</span><span class="p">,</span> <span class="n">iris</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">Nearest</span><span class="p">())</span>
+<span class="n">wtr_img</span> <span class="o">=</span> <span class="n">ax_map</span><span class="o">.</span><span class="n">pcolorfast</span><span class="p">(</span>
+    <span class="n">lons</span><span class="p">,</span>
+    <span class="n">lats</span><span class="p">,</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span><span class="p">(</span>
+        <span class="n">orog</span><span class="o">.</span><span class="n">data</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="n">orog</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="n">lcr</span><span class="o">.</span><span class="n">data</span>
+    <span class="p">),</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="n">recolourMap</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.55</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span>
+    <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">vmax</span><span class="o">=</span><span class="n">omax</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">zorder</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Get grassland/shrubland</span>
+<span class="n">lct</span> <span class="o">=</span> <span class="n">iris</span><span class="o">.</span><span class="n">load_cube</span><span class="p">(</span>
+    <span class="s2">&quot;/scratch/hadpb/rivers/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.nc&quot;</span><span class="p">,</span>
+    <span class="n">iris</span><span class="o">.</span><span class="n">Constraint</span><span class="p">(</span><span class="n">latitude</span><span class="o">=</span><span class="k">lambda</span> <span class="n">cell</span><span class="p">:</span> <span class="mi">45</span> <span class="o">&lt;</span> <span class="n">cell</span> <span class="o">&lt;</span> <span class="mi">65</span><span class="p">)</span>
+    <span class="o">&amp;</span> <span class="n">iris</span><span class="o">.</span><span class="n">Constraint</span><span class="p">(</span><span class="n">longitude</span><span class="o">=</span><span class="k">lambda</span> <span class="n">cell</span><span class="p">:</span> <span class="o">-</span><span class="mi">15</span> <span class="o">&lt;</span> <span class="n">cell</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">lct</span><span class="o">.</span><span class="n">data</span><span class="p">[(</span><span class="n">lct</span><span class="o">.</span><span class="n">data</span> <span class="o">==</span> <span class="mi">20</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">lct</span><span class="o">.</span><span class="n">data</span> <span class="o">==</span> <span class="mi">30</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">lct</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">lct</span><span class="o">.</span><span class="n">data</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">lct</span><span class="o">.</span><span class="n">coord</span><span class="p">(</span><span class="s2">&quot;latitude&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">coord_system</span> <span class="o">=</span> <span class="n">coord_s</span>
+<span class="n">lct</span><span class="o">.</span><span class="n">coord</span><span class="p">(</span><span class="s2">&quot;longitude&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">coord_system</span> <span class="o">=</span> <span class="n">coord_s</span>
+<span class="n">lcr</span> <span class="o">=</span> <span class="n">lct</span><span class="o">.</span><span class="n">regrid</span><span class="p">(</span><span class="n">pc</span><span class="p">,</span> <span class="n">iris</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">Nearest</span><span class="p">())</span>
+<span class="n">wtr_img</span> <span class="o">=</span> <span class="n">ax_map</span><span class="o">.</span><span class="n">pcolorfast</span><span class="p">(</span>
+    <span class="n">lons</span><span class="p">,</span>
+    <span class="n">lats</span><span class="p">,</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span><span class="p">(</span>
+        <span class="n">orog</span><span class="o">.</span><span class="n">data</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">omax</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="n">orog</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="n">lcr</span><span class="o">.</span><span class="n">data</span>
+    <span class="p">),</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="n">recolourMap</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span>
+    <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">vmax</span><span class="o">=</span><span class="n">omax</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">zorder</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Get cropland</span>
+<span class="n">lct</span> <span class="o">=</span> <span class="n">iris</span><span class="o">.</span><span class="n">load_cube</span><span class="p">(</span>
+    <span class="s2">&quot;/scratch/hadpb/rivers/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.nc&quot;</span><span class="p">,</span>
+    <span class="n">iris</span><span class="o">.</span><span class="n">Constraint</span><span class="p">(</span><span class="n">latitude</span><span class="o">=</span><span class="k">lambda</span> <span class="n">cell</span><span class="p">:</span> <span class="mi">45</span> <span class="o">&lt;</span> <span class="n">cell</span> <span class="o">&lt;</span> <span class="mi">65</span><span class="p">)</span>
+    <span class="o">&amp;</span> <span class="n">iris</span><span class="o">.</span><span class="n">Constraint</span><span class="p">(</span><span class="n">longitude</span><span class="o">=</span><span class="k">lambda</span> <span class="n">cell</span><span class="p">:</span> <span class="o">-</span><span class="mi">15</span> <span class="o">&lt;</span> <span class="n">cell</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">lct</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">lct</span><span class="o">.</span><span class="n">data</span> <span class="o">==</span> <span class="mi">40</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">lct</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">lct</span><span class="o">.</span><span class="n">data</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">lct</span><span class="o">.</span><span class="n">coord</span><span class="p">(</span><span class="s2">&quot;latitude&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">coord_system</span> <span class="o">=</span> <span class="n">coord_s</span>
+<span class="n">lct</span><span class="o">.</span><span class="n">coord</span><span class="p">(</span><span class="s2">&quot;longitude&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">coord_system</span> <span class="o">=</span> <span class="n">coord_s</span>
+<span class="n">lcr</span> <span class="o">=</span> <span class="n">lct</span><span class="o">.</span><span class="n">regrid</span><span class="p">(</span><span class="n">pc</span><span class="p">,</span> <span class="n">iris</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">Nearest</span><span class="p">())</span>
+<span class="n">wtr_img</span> <span class="o">=</span> <span class="n">ax_map</span><span class="o">.</span><span class="n">pcolorfast</span><span class="p">(</span>
+    <span class="n">lons</span><span class="p">,</span>
+    <span class="n">lats</span><span class="p">,</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span><span class="p">(</span>
+        <span class="n">orog</span><span class="o">.</span><span class="n">data</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">omax</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="n">orog</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="n">lcr</span><span class="o">.</span><span class="n">data</span>
+    <span class="p">),</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="n">recolourMap</span><span class="p">([</span><span class="mf">0.85</span><span class="p">,</span> <span class="mf">0.85</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span>
+    <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">vmax</span><span class="o">=</span><span class="n">omax</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">zorder</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Get built-up areas</span>
+<span class="n">lct</span> <span class="o">=</span> <span class="n">iris</span><span class="o">.</span><span class="n">load_cube</span><span class="p">(</span>
+    <span class="s2">&quot;/scratch/hadpb/rivers/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.nc&quot;</span><span class="p">,</span>
+    <span class="n">iris</span><span class="o">.</span><span class="n">Constraint</span><span class="p">(</span><span class="n">latitude</span><span class="o">=</span><span class="k">lambda</span> <span class="n">cell</span><span class="p">:</span> <span class="mi">45</span> <span class="o">&lt;</span> <span class="n">cell</span> <span class="o">&lt;</span> <span class="mi">65</span><span class="p">)</span>
+    <span class="o">&amp;</span> <span class="n">iris</span><span class="o">.</span><span class="n">Constraint</span><span class="p">(</span><span class="n">longitude</span><span class="o">=</span><span class="k">lambda</span> <span class="n">cell</span><span class="p">:</span> <span class="o">-</span><span class="mi">15</span> <span class="o">&lt;</span> <span class="n">cell</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">lct</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">lct</span><span class="o">.</span><span class="n">data</span> <span class="o">==</span> <span class="mi">50</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">lct</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">lct</span><span class="o">.</span><span class="n">data</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">lct</span><span class="o">.</span><span class="n">coord</span><span class="p">(</span><span class="s2">&quot;latitude&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">coord_system</span> <span class="o">=</span> <span class="n">coord_s</span>
+<span class="n">lct</span><span class="o">.</span><span class="n">coord</span><span class="p">(</span><span class="s2">&quot;longitude&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">coord_system</span> <span class="o">=</span> <span class="n">coord_s</span>
+<span class="n">lcr</span> <span class="o">=</span> <span class="n">lct</span><span class="o">.</span><span class="n">regrid</span><span class="p">(</span><span class="n">pc</span><span class="p">,</span> <span class="n">iris</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">Nearest</span><span class="p">())</span>
+
+<span class="n">built_img</span> <span class="o">=</span> <span class="n">ax_map</span><span class="o">.</span><span class="n">pcolorfast</span><span class="p">(</span>
+    <span class="n">lons</span><span class="p">,</span>
+    <span class="n">lats</span><span class="p">,</span>
+    <span class="n">lcr</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">ListedColormap</span><span class="p">(((</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))),</span>
+    <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">zorder</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="c1"># Output as png</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">&quot;UKLU.png&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/Poster.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../index.html">Table of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Spilhaus/ostia.html">Ostia data in the Spilhaus projection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ISPD4.7/index.html">Observations coverage (ISPD4.7)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Stripes/20CR.html">Warming Stripes (20CRv3 version)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../An_AI_reads_history/index.html">An AI reads history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Rhinoceros/index.html">A modern Rhinoceros</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">UK Land Use</a></li>
+</ul>
+<h3><a href="https://github.com/philip-brohan/Posters">Get the source code</a></h3>
+
+<a href="https://github.com/philip-brohan/Posters"
+           rel="nofollow">Github source repository</a>
+
+<h3>Found a bug, or have a suggestion?</h3>
+
+Please <a href="https://github.com/philip-brohan/Posters/issues/new">raise an issue</a>.
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../Rhinoceros/utils.html" title="Rhinoceros: Utilities"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Posters</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">UK Land Use</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    </div>
+  </body>
+</html>
