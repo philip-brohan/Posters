@@ -1,6 +1,9 @@
 Warming Stripes (20CRv3 version)
 ================================
 
+.. note::
+   This idea has been developed into the `generalised Stripes <http://brohan.org/Stripes/index.html>`_ .
+
 .. figure:: ../../../Stripes/20CR.png
    :target: https://s3-eu-west-1.amazonaws.com/philip.brohan.org.big-files/Posters/Stripes/20CR.pdf
    :width: 95%
@@ -11,7 +14,7 @@ The `warming stripes <https://en.wikipedia.org/wiki/Warming_stripes>`_ are a spe
 
 Hourly data proved a bit much, but we can go to monthly: The vertical axis of this plot is latitude (90S to 90N at 1 degree resolution), the horizontal axis is time (Jan 1836 to Dec 2015, at 1 month resolution), each vertical line is at a randomly sampled 1-degree of longitude. Colour gives temperature anomaly (w.r.t 1900-1950 climatology). Data are from `20CR version 3. <https://www.esrl.noaa.gov/psd/data/gridded/data.20thC_ReanV3.html>`_
 
-Note that, unlike the original warming stripes, this visualisation says more about the uncertainties and biases in the data set construction than about actual climate.
+Note that, unlike the original warming stripes, this visualization says more about the uncertainties and biases in the data set construction than about actual climate.
 
 * `Full resolution PDF (12Mb, printable) <https://s3-eu-west-1.amazonaws.com/philip.brohan.org.big-files/Posters/Stripes/20CR.pdf>`_
 
