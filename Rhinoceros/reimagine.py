@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Re-draw Durer's Rhinecerous using Matplotlib
+# Re-draw Durer's Rhinoceros using Matplotlib
 
 import sys
 import matplotlib
@@ -19,7 +19,7 @@ bg_im = bg_im.convert("RGB")
 # Convert to numpy array on 0-1
 bg_im = np.array(bg_im) / 255.0
 
-# Figure showing the original image, reconstructed image, and latent space
+# Figure setup
 fig = Figure(
     figsize=(3000 / 100, 2368 / 100),  # Width, Height (inches)
     dpi=300,
@@ -34,7 +34,7 @@ canvas = FigureCanvas(fig)
 font = {"family": "sans-serif", "sans-serif": "Arial", "weight": "normal", "size": 18}
 matplotlib.rc("font", **font)
 
-# Put image in as background
+# Put image in as background - hidden in final result
 axb = fig.add_axes([0, 0, 1, 1])
 axb.set_axis_off()
 axb.set_xlim(0, 1)

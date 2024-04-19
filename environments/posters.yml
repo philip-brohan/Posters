@@ -2,10 +2,17 @@ name: posters
 channels:
   - conda-forge
 dependencies:
-  - python=3.7.*
-  - numpy=1.15.*
-  - iris=2.2.*
-  - matplotlib=3.1.*
+  # Basics
+  - python=3.11
+  - iris=3.6
+  - parallel
+  # Plotting
+  - pillow=10.0
+  - aggdraw=1.3
+  - cmocean=2.0
+  # Security patch
+  - libwebp>=1.3.2
+  # Code formatter
   - black
-  - rasterio=1.*.*
-  - poppler=0.*.*
+  # Documentation generator
+  - sphinx=7.1
