@@ -136,10 +136,14 @@ dmypy.json
 
 # Apple crap
 Thumbs.db
+.DS_store
 
 # Temporary data 
 *.pkl
 *.out
+*.dat
+*.xcf
+
 
 # SCRATCH dir
 SCRATCH
