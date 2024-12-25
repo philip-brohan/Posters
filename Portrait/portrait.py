@@ -32,6 +32,13 @@ bg_im = Image.open(r"Face.jpeg")
 bg_im = bg_im.convert("RGB")
 # Convert to numpy array on 0-1
 bg_im = np.array(bg_im) / 255.0
+# Convert to greyscale
+bg_im = np.mean(bg_im, axis=2)
+# gamma = 0.5  # Example gamma value
+# bg_im = np.power(bg_im, 1 / gamma)
+
+# Quantize the image
+bg_im = np.round(bg_im * 255).astype(np.uint8)
 
 # Figure setup
 fig = Figure(
@@ -55,7 +62,7 @@ axb.set_xlim(0, 1)
 axb.set_ylim(0, 1)
 # Add the image
 bgi_extent = [0.0, 1.0, 0.0, 1.0]
-axb.imshow(bg_im, extent=bgi_extent, aspect="auto", alpha=0.5, zorder=0)
+axb.imshow(bg_im, extent=bgi_extent, aspect="auto", alpha=0.5, cmap="grey", zorder=0)
 axb.set_xticks(np.linspace(0.1, 0.9, 9))
 axb.set_xticks(np.linspace(0.01, 0.99, 99), minor=True)
 axb.set_yticks(np.linspace(0.1, 0.9, 9))
