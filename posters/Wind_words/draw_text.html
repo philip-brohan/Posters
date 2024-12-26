@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Draw text &#8212; Philip&#39;s Posters</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinxdoc.css?v=0a676766" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=af2ce170"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Posters</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Draw text</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="draw-text">
+<h1>Draw text<a class="headerlink" href="#draw-text" title="Permalink to this heading">¶</a></h1>
+<p>Matplotlib’s <a class="reference external" href="https://matplotlib.org/stable/gallery/text_labels_and_annotations/demo_text_path.html">TextPath</a> turns a text string into a <a class="reference external" href="https://matplotlib.org/stable/api/path_api.html">path</a> - a series of line and curve segments: a representation of the text as graphics components. That path can then be manipulated and scaled, like any other shape - so we can use it to draw text along a streamline.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Functions for manipulating Matplotlib textPaths</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">matplotlib.textpath</span> <span class="kn">import</span> <span class="n">TextPath</span>
+<span class="kn">from</span> <span class="nn">matplotlib.transforms</span> <span class="kn">import</span> <span class="n">Affine2D</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">splprep</span><span class="p">,</span> <span class="n">splev</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+
+
+<span class="c1"># Convert a string to a TextPath</span>
+<span class="c1"># They don&#39;t really have the same units - choose the size appropriately</span>
+<span class="c1"># or use the transformation factors sx, sy</span>
+<span class="c1"># sy is -ve by default as I like to have coordinates running bottom to top of the plot</span>
+<span class="k">def</span> <span class="nf">string_to_path</span><span class="p">(</span><span class="n">txt</span><span class="p">,</span> <span class="n">fsize</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">fprop</span><span class="o">=</span><span class="s2">&quot;Serif&quot;</span><span class="p">,</span> <span class="n">sx</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sy</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+    <span class="n">opath</span> <span class="o">=</span> <span class="n">TextPath</span><span class="p">(</span>
+        <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>  <span class="c1"># Arbitrary origin - we&#39;re not going to plot it - just get its size</span>
+        <span class="n">txt</span><span class="p">,</span>
+        <span class="n">size</span><span class="o">=</span><span class="n">fsize</span><span class="p">,</span>
+        <span class="n">prop</span><span class="o">=</span><span class="n">fprop</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">otransform</span> <span class="o">=</span> <span class="n">Affine2D</span><span class="p">()</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">sx</span><span class="o">=</span><span class="n">sx</span><span class="p">,</span> <span class="n">sy</span><span class="o">=</span><span class="n">sy</span><span class="p">)</span>
+    <span class="n">opath</span> <span class="o">=</span> <span class="n">otransform</span><span class="o">.</span><span class="n">transform_path</span><span class="p">(</span><span class="n">opath</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">opath</span>
+
+
+<span class="c1"># Find the length of a curve</span>
+<span class="k">def</span> <span class="nf">curve_length</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">dy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">dx</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">dy</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">distances</span><span class="p">)</span>
+
+
+<span class="c1"># Find the length of a path - assumes the path is straight</span>
+<span class="k">def</span> <span class="nf">path_length</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="n">Vx</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">vertices</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">Vx</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">Vx</span><span class="p">)</span>
+
+
+<span class="c1"># Trim a curve to a given length</span>
+<span class="k">def</span> <span class="nf">trim_curve</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
+    <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">dy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">dx</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">dy</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">distances</span><span class="p">)</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">distances</span> <span class="o">&gt;</span> <span class="n">length</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">x</span><span class="p">[:</span><span class="n">idx</span><span class="p">],</span> <span class="n">y</span><span class="p">[:</span><span class="n">idx</span><span class="p">]</span>
+
+
+<span class="c1"># Map a textPath onto a curve [x,y]</span>
+<span class="c1"># path is the textPath to be mapped</span>
+<span class="c1"># x,y are the curve to map onto - numpy arrays</span>
+<span class="k">def</span> <span class="nf">map_path</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="n">Vx</span><span class="p">,</span> <span class="n">Vy</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">vertices</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">path</span><span class="o">.</span><span class="n">vertices</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">dVx</span> <span class="o">=</span> <span class="p">(</span><span class="n">Vx</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">Vx</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">Vx</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">Vx</span><span class="p">))</span>  <span class="c1"># map onto 0-1</span>
+    <span class="n">dVy</span> <span class="o">=</span> <span class="n">Vy</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">Vy</span><span class="p">)</span>  <span class="c1"># Assume original path is // to x-axis</span>
+    <span class="c1"># We want to map Vx into distance along the curve</span>
+    <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">dy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">distancesL</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">dx</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">dy</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>  <span class="c1"># Local distance</span>
+    <span class="n">distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">distancesL</span><span class="p">)</span>  <span class="c1"># Integrated distance to point</span>
+    <span class="c1"># Trim the curve to the length of the path</span>
+    <span class="n">distances</span> <span class="o">=</span> <span class="n">distances</span><span class="p">[</span><span class="n">distances</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">Vx</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">Vx</span><span class="p">))]</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:</span> <span class="nb">len</span><span class="p">(</span><span class="n">distances</span><span class="p">)]</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[:</span> <span class="nb">len</span><span class="p">(</span><span class="n">distances</span><span class="p">)]</span>
+    <span class="n">distancesL</span> <span class="o">=</span> <span class="n">distancesL</span><span class="p">[:</span> <span class="nb">len</span><span class="p">(</span><span class="n">distances</span><span class="p">)]</span>
+    <span class="c1"># Create a mapping between a uniform 0-1 range and the distance along the curve</span>
+    <span class="c1"># interpolator = interp1d(np.linspace(0, 1, len(distances)), distances)</span>
+    <span class="c1"># Map the dVx to the distance along the curve</span>
+    <span class="c1"># dVxdist = interpolator(dVx)</span>
+    <span class="c1"># Create a mapping between the distance along the curve and the curve</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">tckC</span><span class="p">,</span> <span class="n">u</span> <span class="o">=</span> <span class="n">splprep</span><span class="p">([</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="p">(</span><span class="n">e</span><span class="p">)</span>
+    <span class="c1"># Map the distance along the curve to the curve</span>
+    <span class="n">nVy</span><span class="p">,</span> <span class="n">nVx</span> <span class="o">=</span> <span class="n">splev</span><span class="p">(</span><span class="n">dVx</span><span class="p">,</span> <span class="n">tckC</span><span class="p">)</span>
+    <span class="c1"># Get the gradients at the same points</span>
+    <span class="n">dy</span><span class="p">,</span> <span class="n">dx</span> <span class="o">=</span> <span class="n">splev</span><span class="p">(</span><span class="n">dVx</span><span class="p">,</span> <span class="n">tckC</span><span class="p">,</span> <span class="n">der</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="c1"># Generate the mapped-path vertices</span>
+    <span class="n">tan_g</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">dx</span><span class="p">)</span>
+    <span class="n">tan_g</span><span class="p">[</span><span class="n">dx</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">dy</span><span class="p">[</span><span class="n">dx</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">dx</span><span class="p">[</span><span class="n">dx</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">tan_g</span><span class="p">[</span><span class="n">dx</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0e6</span>
+    <span class="c1"># tan_g = dy / dx</span>
+    <span class="n">dVy</span><span class="p">[</span><span class="n">dx</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">dVy</span><span class="p">[</span><span class="n">dx</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">ndVx</span> <span class="o">=</span> <span class="o">-</span><span class="n">dVy</span> <span class="o">*</span> <span class="n">tan_g</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">tan_g</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">ndVy</span> <span class="o">=</span> <span class="n">dVy</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">tan_g</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">nVx</span> <span class="o">=</span> <span class="n">nVx</span> <span class="o">+</span> <span class="n">ndVx</span>
+    <span class="n">nVy</span> <span class="o">=</span> <span class="n">nVy</span> <span class="o">+</span> <span class="n">ndVy</span>
+    <span class="c1"># Make the new path with these vertices</span>
+    <span class="n">new_path</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">new_path</span><span class="o">.</span><span class="n">vertices</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">nVx</span>
+    <span class="n">new_path</span><span class="o">.</span><span class="n">vertices</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">nVy</span>
+    <span class="k">return</span> <span class="n">new_path</span>
+
+
+<span class="c1"># Render a single text string along a curve</span>
+<span class="c1"># ax is the matplotlib axis to render to</span>
+<span class="c1"># txt is the text string to render</span>
+<span class="c1"># x,y are the curve to render along - numpy arrays, in ax data units</span>
+<span class="c1"># colour is the colour of the text</span>
+<span class="c1"># collision_cube is a cube of points to avoid rendering collisions</span>
+<span class="c1"># Returns a TextPath object</span>
+<span class="k">def</span> <span class="nf">string_to_patch</span><span class="p">(</span>
+    <span class="n">ax</span><span class="p">,</span> <span class="n">txt</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">colour</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">fsize</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">fprop</span><span class="o">=</span><span class="s2">&quot;Serif&quot;</span><span class="p">,</span> <span class="n">collision_cube</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">):</span>
+    <span class="n">opath</span> <span class="o">=</span> <span class="n">TextPath</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+        <span class="n">txt</span><span class="p">,</span>
+        <span class="n">size</span><span class="o">=</span><span class="n">fsize</span><span class="p">,</span>
+        <span class="n">prop</span><span class="o">=</span><span class="n">fprop</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">otransform</span> <span class="o">=</span> <span class="n">Affine2D</span><span class="p">()</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">sx</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sy</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># y runs bottom to top</span>
+    <span class="n">opath</span> <span class="o">=</span> <span class="n">otransform</span><span class="o">.</span><span class="n">transform_path</span><span class="p">(</span><span class="n">opath</span><span class="p">)</span>
+    <span class="c1"># Map the textPath onto the curve</span>
+    <span class="n">npath</span> <span class="o">=</span> <span class="n">map_path</span><span class="p">(</span><span class="n">opath</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">npath</span>
+</pre></div>
+</div>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/Poster.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../index.html">Table of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Spilhaus/ostia.html">Ostia data in the Spilhaus projection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ISPD4.7/index.html">Observations coverage (ISPD4.7)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Stripes/20CR.html">Warming Stripes (20CRv3 version)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../An_AI_reads_history/index.html">An AI reads history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Rhinoceros/index.html">A modern Rhinoceros</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../UK_land_use/index.html">UK Land Use</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Yangtze_land_use/index.html">Yangtze Land Use</a></li>
+</ul>
+<h3><a href="https://github.com/philip-brohan/Posters">Get the source code</a></h3>
+
+<a href="https://github.com/philip-brohan/Posters"
+           rel="nofollow">Github source repository</a>
+
+<h3>Found a bug, or have a suggestion?</h3>
+
+Please <a href="https://github.com/philip-brohan/Posters/issues/new">raise an issue</a>.
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Posters</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Draw text</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    </div>
+  </body>
+</html>

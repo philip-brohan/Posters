@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Main render script &#8212; Philip&#39;s Posters</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinxdoc.css?v=0a676766" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=af2ce170"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Posters</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Main render script</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="main-render-script">
+<h1>Main render script<a class="headerlink" href="#main-render-script" title="Permalink to this heading">¶</a></h1>
+<ul class="simple">
+<li><p>Set up the geometry</p></li>
+<li><p>Load the data</p></li>
+<li><p>Find the streamline start points</p></li>
+<li><p>Propagate the streamlines</p></li>
+<li><p>Draw the text along the streamlines</p></li>
+<li><p>Add a land-sea mask</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="c1"># Plot a wind field using text strings from the shipping forecast</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">iris</span>
+<span class="kn">import</span> <span class="nn">iris.coords</span>
+<span class="kn">import</span> <span class="nn">iris.coord_systems</span>
+<span class="kn">import</span> <span class="nn">iris.fileformats</span>
+<span class="kn">import</span> <span class="nn">iris.util</span>
+
+<span class="n">iris</span><span class="o">.</span><span class="n">FUTURE</span><span class="o">.</span><span class="n">datum_support</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># I don&#39;t care about datums</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.stats.qmc</span> <span class="kn">import</span> <span class="n">PoissonDisk</span>
+<span class="kn">from</span> <span class="nn">Met_palettes</span> <span class="kn">import</span> <span class="n">MET_PALETTES</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="kn">from</span> <span class="nn">matplotlib.backends.backend_agg</span> <span class="kn">import</span> <span class="n">FigureCanvasAgg</span> <span class="k">as</span> <span class="n">FigureCanvas</span>
+<span class="kn">from</span> <span class="nn">matplotlib.figure</span> <span class="kn">import</span> <span class="n">Figure</span>
+<span class="kn">from</span> <span class="nn">matplotlib.patches</span> <span class="kn">import</span> <span class="n">PathPatch</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="kn">import</span> <span class="nn">random</span>
+
+<span class="kn">from</span> <span class="nn">cube</span> <span class="kn">import</span> <span class="n">plot_cube</span>
+<span class="kn">from</span> <span class="nn">streamlines</span> <span class="kn">import</span> <span class="n">wind_vectors</span>
+<span class="kn">from</span> <span class="nn">textPath</span> <span class="kn">import</span> <span class="n">map_path</span><span class="p">,</span> <span class="n">string_to_path</span><span class="p">,</span> <span class="n">curve_length</span><span class="p">,</span> <span class="n">path_length</span><span class="p">,</span> <span class="n">trim_curve</span>
+<span class="kn">from</span> <span class="nn">collisions</span> <span class="kn">import</span> <span class="n">collision_check</span><span class="p">,</span> <span class="n">collision_cut</span>
+
+<span class="c1"># Parameters</span>
+<span class="n">plot_width</span> <span class="o">=</span> <span class="mi">3200</span>
+<span class="n">plot_height</span> <span class="o">=</span> <span class="mi">2100</span>
+<span class="n">plot_x</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">18.3</span> <span class="o">/</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mi">3</span> <span class="o">/</span> <span class="mf">0.6</span><span class="p">]</span>  <span class="c1"># plot range lat &amp; lon</span>
+<span class="n">plot_y</span> <span class="o">=</span> <span class="p">[</span><span class="mi">48</span><span class="p">,</span> <span class="mi">62</span><span class="p">]</span>
+<span class="n">data_x</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">22.5</span> <span class="o">/</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mi">8</span> <span class="o">/</span> <span class="mf">0.6</span><span class="p">]</span>
+<span class="n">data_y</span> <span class="o">=</span> <span class="p">[</span><span class="mi">43</span><span class="p">,</span> <span class="mi">67</span><span class="p">]</span>
+<span class="n">data_resolution</span> <span class="o">=</span> <span class="mf">0.05</span>  <span class="c1"># degrees (units of u wind)</span>
+<span class="n">collision_resolution</span> <span class="o">=</span> <span class="mf">0.05</span>  <span class="c1"># same</span>
+<span class="c1"># Cube for the wind field</span>
+<span class="n">data_cube</span> <span class="o">=</span> <span class="n">plot_cube</span><span class="p">(</span>
+    <span class="n">data_resolution</span><span class="p">,</span> <span class="n">xmin</span><span class="o">=</span><span class="n">data_x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">xmax</span><span class="o">=</span><span class="n">data_x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">ymin</span><span class="o">=</span><span class="n">data_y</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ymax</span><span class="o">=</span><span class="n">data_y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="p">)</span>
+<span class="c1"># Cube for the collision detection</span>
+<span class="n">collision_cube</span> <span class="o">=</span> <span class="n">plot_cube</span><span class="p">(</span>
+    <span class="n">collision_resolution</span><span class="p">,</span> <span class="n">xmin</span><span class="o">=</span><span class="n">data_x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">xmax</span><span class="o">=</span><span class="n">data_x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">ymin</span><span class="o">=</span><span class="n">data_y</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ymax</span><span class="o">=</span><span class="n">data_y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="p">)</span>
+<span class="n">collision_cube</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">collision_cube</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+<span class="n">iterations</span> <span class="o">=</span> <span class="mi">250</span> <span class="o">*</span> <span class="mi">4</span>  <span class="c1"># How far the streamlines propagate (max)</span>
+<span class="n">epsilon</span> <span class="o">=</span> <span class="mf">0.005</span> <span class="o">/</span> <span class="mi">4</span>
+
+<span class="n">poisson_radius</span> <span class="o">=</span> <span class="mf">0.005</span>  <span class="c1"># Figure fraction - separation of streamline start points</span>
+
+<span class="n">scheme</span> <span class="o">=</span> <span class="n">MET_PALETTES</span><span class="p">[</span><span class="s2">&quot;Hokusai2&quot;</span><span class="p">]</span>
+<span class="n">bgcol</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># &quot;#ffe6b7&quot;  # (255 / 255, 255 / 255, 255 / 255, 1.0)</span>
+
+<span class="n">font_size</span> <span class="o">=</span> <span class="mf">0.35</span>  <span class="c1"># Scaling for the TextPath - 4 is about right to match the degrees</span>
+<span class="n">fprop</span> <span class="o">=</span> <span class="s2">&quot;Serif&quot;</span>  <span class="c1"># font choice</span>
+
+<span class="c1"># Load the land mask</span>
+<span class="n">land_mask</span> <span class="o">=</span> <span class="n">iris</span><span class="o">.</span><span class="n">load_cube</span><span class="p">(</span>
+    <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/fixed_fields/land_mask/opfc_global_2019.nc&quot;</span> <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;DATADIR&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="n">land_mask</span> <span class="o">=</span> <span class="n">land_mask</span><span class="o">.</span><span class="n">regrid</span><span class="p">(</span><span class="n">data_cube</span><span class="p">,</span> <span class="n">iris</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">Linear</span><span class="p">())</span>
+
+<span class="c1"># Load the wind field</span>
+<span class="n">fctime</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+<span class="n">vwnd</span> <span class="o">=</span> <span class="n">iris</span><span class="o">.</span><span class="n">load_cube</span><span class="p">(</span>
+    <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/opfc/glm/2024/12/07.pp&quot;</span> <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;SCRATCH&quot;</span><span class="p">),</span>
+    <span class="n">iris</span><span class="o">.</span><span class="n">AttributeConstraint</span><span class="p">(</span><span class="n">STASH</span><span class="o">=</span><span class="n">iris</span><span class="o">.</span><span class="n">fileformats</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">STASH</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">226</span><span class="p">))</span>
+    <span class="o">&amp;</span> <span class="n">iris</span><span class="o">.</span><span class="n">Constraint</span><span class="p">(</span><span class="n">forecast_period</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="o">&amp;</span> <span class="n">iris</span><span class="o">.</span><span class="n">Constraint</span><span class="p">(</span><span class="n">forecast_reference_time</span><span class="o">=</span><span class="n">fctime</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">uwnd</span> <span class="o">=</span> <span class="n">iris</span><span class="o">.</span><span class="n">load_cube</span><span class="p">(</span>
+    <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/opfc/glm/2024/12/07.pp&quot;</span> <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;SCRATCH&quot;</span><span class="p">),</span>
+    <span class="n">iris</span><span class="o">.</span><span class="n">AttributeConstraint</span><span class="p">(</span><span class="n">STASH</span><span class="o">=</span><span class="n">iris</span><span class="o">.</span><span class="n">fileformats</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">STASH</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">225</span><span class="p">))</span>
+    <span class="o">&amp;</span> <span class="n">iris</span><span class="o">.</span><span class="n">Constraint</span><span class="p">(</span><span class="n">forecast_period</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="o">&amp;</span> <span class="n">iris</span><span class="o">.</span><span class="n">Constraint</span><span class="p">(</span><span class="n">forecast_reference_time</span><span class="o">=</span><span class="n">fctime</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">u10m</span> <span class="o">=</span> <span class="n">uwnd</span><span class="o">.</span><span class="n">regrid</span><span class="p">(</span><span class="n">data_cube</span><span class="p">,</span> <span class="n">iris</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">Linear</span><span class="p">())</span>
+<span class="c1"># iris.save(u10m, &quot;u10m.nc&quot;)</span>
+<span class="n">v10m</span> <span class="o">=</span> <span class="n">vwnd</span><span class="o">.</span><span class="n">regrid</span><span class="p">(</span><span class="n">data_cube</span><span class="p">,</span> <span class="n">iris</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">Linear</span><span class="p">())</span>
+<span class="c1"># v10m.data *= -1  # Want +ve going north</span>
+<span class="c1"># iris.save(v10m, &quot;v10m.nc&quot;)</span>
+
+<span class="c1"># Load the shipping forecast</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;./forecast_20241207.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+    <span class="c1"># Read all lines into a list of strings</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+
+<span class="c1"># Remove blank lines from the list</span>
+<span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span> <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span>
+
+<span class="c1"># Strip out the lines with assigned start points</span>
+<span class="n">alines</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span> <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;[&quot;</span><span class="p">)]</span>
+<span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;[&quot;</span><span class="p">)]</span>
+
+
+<span class="c1"># Find longest line shorter than some given curve</span>
+<span class="k">def</span> <span class="nf">line_shorter_than</span><span class="p">(</span><span class="n">linePaths</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="n">max_length</span> <span class="o">=</span> <span class="n">curve_length</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+    <span class="n">short_line</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">linePaths</span><span class="p">:</span>
+        <span class="n">pl</span> <span class="o">=</span> <span class="n">path_length</span><span class="p">(</span><span class="n">linePaths</span><span class="p">[</span><span class="n">line</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">pl</span> <span class="o">&lt;</span> <span class="n">max_length</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">short_line</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">pl</span> <span class="o">&gt;</span> <span class="n">path_length</span><span class="p">(</span><span class="n">linePaths</span><span class="p">[</span><span class="n">short_line</span><span class="p">]):</span>
+                <span class="n">short_line</span> <span class="o">=</span> <span class="n">line</span>
+    <span class="k">return</span> <span class="n">short_line</span>
+
+
+<span class="c1"># Set up the plot</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">Figure</span><span class="p">(</span>
+    <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">plot_width</span> <span class="o">/</span> <span class="mi">100</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">plot_height</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)),</span>
+    <span class="n">dpi</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">facecolor</span><span class="o">=</span><span class="n">bgcol</span><span class="p">,</span>
+    <span class="n">edgecolor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">frameon</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">subplotpars</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">tight_layout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">canvas</span> <span class="o">=</span> <span class="n">FigureCanvas</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>  <span class="c1"># Don&#39;t want surrounding x and y axis</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">plot_x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">plot_x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">plot_y</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">plot_y</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;auto&quot;</span><span class="p">)</span>
+
+<span class="c1"># Add the assigned lines</span>
+<span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">alines</span><span class="p">:</span>
+    <span class="n">udx</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="n">udx</span><span class="p">])</span>
+    <span class="n">udx2</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="n">udx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">udx</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">udx2</span><span class="p">])</span>
+    <span class="n">udx3</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;]&quot;</span><span class="p">,</span> <span class="n">udx2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">fonts</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">udx2</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">udx3</span><span class="p">])</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="n">udx3</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:]</span>
+    <span class="n">wv</span> <span class="o">=</span> <span class="n">wind_vectors</span><span class="p">(</span>
+        <span class="n">u10m</span><span class="p">,</span>
+        <span class="n">v10m</span><span class="p">,</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">]),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">y</span><span class="p">]),</span>
+        <span class="n">epsilon</span><span class="o">=</span><span class="n">epsilon</span><span class="p">,</span>
+        <span class="n">iterations</span><span class="o">=</span><span class="n">iterations</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">lp</span> <span class="o">=</span> <span class="n">string_to_path</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">fsize</span><span class="o">=</span><span class="n">fonts</span><span class="p">,</span> <span class="n">fprop</span><span class="o">=</span><span class="n">fprop</span><span class="p">,</span> <span class="n">sy</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">npath</span> <span class="o">=</span> <span class="n">map_path</span><span class="p">(</span><span class="n">lp</span><span class="p">,</span> <span class="n">wv</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="n">wv</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:])</span>
+    <span class="n">npatch</span> <span class="o">=</span> <span class="n">PathPatch</span><span class="p">(</span>
+        <span class="n">npath</span><span class="p">,</span>
+        <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+        <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+        <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span>
+        <span class="n">zorder</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">npatch2</span> <span class="o">=</span> <span class="n">PathPatch</span><span class="p">(</span>
+        <span class="n">npath</span><span class="p">,</span>
+        <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+        <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+        <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span>
+        <span class="n">alpha</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span>
+        <span class="n">zorder</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">add_artist</span><span class="p">(</span><span class="n">npatch</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">add_artist</span><span class="p">(</span><span class="n">npatch2</span><span class="p">)</span>
+    <span class="n">collision_check</span><span class="p">(</span><span class="n">collision_cube</span><span class="p">,</span> <span class="n">npath</span><span class="o">.</span><span class="n">vertices</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">npath</span><span class="o">.</span><span class="n">vertices</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+
+<span class="k">if</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="c1"># Generate a set of origin points for the text strings</span>
+    <span class="n">engine</span> <span class="o">=</span> <span class="n">PoissonDisk</span><span class="p">(</span><span class="n">d</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">poisson_radius</span><span class="p">)</span>
+    <span class="n">sample</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">fill_space</span><span class="p">()</span>
+    <span class="n">sample</span> <span class="o">=</span> <span class="n">sample</span> <span class="o">*</span> <span class="p">(</span><span class="n">data_x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">data_x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">sample</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="n">data_x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">sample</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">data_y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">sample</span> <span class="o">=</span> <span class="n">sample</span><span class="p">[(</span><span class="n">sample</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">data_y</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">sample</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">data_y</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+    <span class="n">wpx</span> <span class="o">=</span> <span class="n">sample</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">wpy</span> <span class="o">=</span> <span class="n">sample</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">text_points</span> <span class="o">=</span> <span class="n">wind_vectors</span><span class="p">(</span>
+        <span class="n">u10m</span><span class="p">,</span>
+        <span class="n">v10m</span><span class="p">,</span>
+        <span class="n">wpx</span><span class="p">,</span>
+        <span class="n">wpy</span><span class="p">,</span>
+        <span class="n">epsilon</span><span class="o">=</span><span class="n">epsilon</span><span class="p">,</span>
+        <span class="n">iterations</span><span class="o">=</span><span class="n">iterations</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">fontSize</span> <span class="ow">in</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.45</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.35</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">]:</span>
+        <span class="c1"># # Add the streamlines in random order</span>
+        <span class="n">line_sequence</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+            <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">text_points</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])),</span> <span class="n">text_points</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="c1"># Make a TextPath for each line (to get the size)</span>
+        <span class="n">linePaths</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+            <span class="n">linePaths</span><span class="p">[</span><span class="n">line</span><span class="p">]</span> <span class="o">=</span> <span class="n">string_to_path</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">fsize</span><span class="o">=</span><span class="n">fontSize</span><span class="p">,</span> <span class="n">fprop</span><span class="o">=</span><span class="n">fprop</span><span class="p">,</span> <span class="n">sy</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">olinePaths</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">linePaths</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">streamline</span> <span class="ow">in</span> <span class="n">line_sequence</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">text_points</span><span class="p">[</span><span class="n">streamline</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">text_points</span><span class="p">[</span><span class="n">streamline</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">collision_cut</span><span class="p">(</span><span class="n">collision_cube</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+                <span class="n">short_line</span> <span class="o">=</span> <span class="n">line_shorter_than</span><span class="p">(</span><span class="n">linePaths</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">short_line</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="c1"># random_line = random.choice(short_lines)</span>
+                <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">trim_curve</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">path_length</span><span class="p">(</span><span class="n">linePaths</span><span class="p">[</span><span class="n">short_line</span><span class="p">]))</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>  <span class="c1"># Too short - try again</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;short x&quot;</span><span class="p">)</span>
+                    <span class="k">continue</span>
+                <span class="n">npath</span> <span class="o">=</span> <span class="n">map_path</span><span class="p">(</span><span class="n">linePaths</span><span class="p">[</span><span class="n">short_line</span><span class="p">],</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+                <span class="n">fcol</span> <span class="o">=</span> <span class="n">facecolor</span> <span class="o">=</span> <span class="n">scheme</span><span class="p">[</span><span class="s2">&quot;colors&quot;</span><span class="p">][</span><span class="n">count</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">scheme</span><span class="p">[</span><span class="s2">&quot;colors&quot;</span><span class="p">])]</span>
+                <span class="n">npatch</span> <span class="o">=</span> <span class="n">PathPatch</span><span class="p">(</span>
+                    <span class="n">npath</span><span class="p">,</span>
+                    <span class="n">facecolor</span><span class="o">=</span><span class="n">fcol</span><span class="p">,</span>
+                    <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+                    <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span>
+                    <span class="n">zorder</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">npatch2</span> <span class="o">=</span> <span class="n">PathPatch</span><span class="p">(</span>
+                    <span class="n">npath</span><span class="p">,</span>
+                    <span class="n">facecolor</span><span class="o">=</span><span class="n">fcol</span><span class="p">,</span>
+                    <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+                    <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span>
+                    <span class="n">alpha</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span>
+                    <span class="n">zorder</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">collision_check</span><span class="p">(</span>
+                    <span class="n">collision_cube</span><span class="p">,</span> <span class="n">npath</span><span class="o">.</span><span class="n">vertices</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">npath</span><span class="o">.</span><span class="n">vertices</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="p">):</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">add_artist</span><span class="p">(</span><span class="n">npatch</span><span class="p">)</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">add_artist</span><span class="p">(</span><span class="n">npatch2</span><span class="p">)</span>
+                    <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="c1"># del linePaths[random_line]</span>
+                    <span class="n">line_sequence</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">streamline</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">linePaths</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">linePaths</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">olinePaths</span><span class="p">)</span>
+                    <span class="k">continue</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+<span class="c1"># Add the land mask - temporary addition</span>
+<span class="n">lats</span> <span class="o">=</span> <span class="n">land_mask</span><span class="o">.</span><span class="n">coord</span><span class="p">(</span><span class="s2">&quot;latitude&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">points</span>
+<span class="n">lons</span> <span class="o">=</span> <span class="n">land_mask</span><span class="o">.</span><span class="n">coord</span><span class="p">(</span><span class="s2">&quot;longitude&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">points</span>
+<span class="n">mask_img</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">pcolorfast</span><span class="p">(</span>
+    <span class="n">lons</span><span class="p">,</span>
+    <span class="n">lats</span><span class="p">,</span>
+    <span class="n">land_mask</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">ListedColormap</span><span class="p">(</span>
+        <span class="p">((</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.975</span><span class="p">,</span> <span class="mf">0.975</span><span class="p">,</span> <span class="mf">0.95</span> <span class="o">*</span> <span class="mf">0.975</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span>
+    <span class="p">),</span>
+    <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">zorder</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">&quot;wind_words.webp&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/Poster.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../index.html">Table of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Spilhaus/ostia.html">Ostia data in the Spilhaus projection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ISPD4.7/index.html">Observations coverage (ISPD4.7)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Stripes/20CR.html">Warming Stripes (20CRv3 version)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../An_AI_reads_history/index.html">An AI reads history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Rhinoceros/index.html">A modern Rhinoceros</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../UK_land_use/index.html">UK Land Use</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Yangtze_land_use/index.html">Yangtze Land Use</a></li>
+</ul>
+<h3><a href="https://github.com/philip-brohan/Posters">Get the source code</a></h3>
+
+<a href="https://github.com/philip-brohan/Posters"
+           rel="nofollow">Github source repository</a>
+
+<h3>Found a bug, or have a suggestion?</h3>
+
+Please <a href="https://github.com/philip-brohan/Posters/issues/new">raise an issue</a>.
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Posters</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Main render script</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    </div>
+  </body>
+</html>

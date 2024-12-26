@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Storm Darragh drawn with the Shipping Forecast &#8212; Philip&#39;s Posters</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinxdoc.css?v=0a676766" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=af2ce170"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Posters</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Storm Darragh drawn with the Shipping Forecast</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="storm-darragh-drawn-with-the-shipping-forecast">
+<h1>Storm Darragh drawn with the Shipping Forecast<a class="headerlink" href="#storm-darragh-drawn-with-the-shipping-forecast" title="Permalink to this heading">¶</a></h1>
+<figure class="align-center" style="width: 95%">
+<a class="reference internal image-reference" href="../../_images/wind_words.webp"><img alt="../../_images/wind_words.webp" src="../../_images/wind_words.webp" style="width: 95%;" /></a>
+</figure>
+<p>I’m no mariner, but - like so many people - I love the <a class="reference external" href="https://en.wikipedia.org/wiki/Shipping_Forecast">Shipping Forecast</a> (<a class="reference external" href="https://www.metoffice.gov.uk/weather/specialist-forecasts/coast-and-sea/print/shipping-forecast">read</a> or <a class="reference external" href="https://www.bbc.co.uk/programmes/b006qfvv">listen to</a> today’s). It’s justly famous for rhythm, cadence, and the poetry of its names, but it’s really a picture of the weather around the British Isles. Can we make that picture - a weather map - from the words of the Shipping Forecast? It’s a timely project, as the the centenery of the first broadcast of the shipping forecast is Jan 1st 2025 (next week, as I write this) - also, I need a picture to decorate my new laptop.</p>
+<section id="setup">
+<h2>Setup<a class="headerlink" href="#setup" title="Permalink to this heading">¶</a></h2>
+<p>I’m going to make the map using python and <a class="reference external" href="https://matplotlib.org/">matplotlib</a>. Step one is to set up a conda environment with the necessary packages:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">name</span><span class="p">:</span> <span class="n">ww</span>
+<span class="n">channels</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
+<span class="n">dependencies</span><span class="p">:</span>
+  <span class="c1"># Basics</span>
+  <span class="o">-</span> <span class="n">python</span><span class="o">=</span><span class="mf">3.11</span>
+  <span class="o">-</span> <span class="n">iris</span><span class="o">=</span><span class="mf">3.6</span>
+  <span class="o">-</span> <span class="n">nco</span><span class="o">=</span><span class="mf">5.3</span>  <span class="c1"># Need ncks to fix broken CDS files</span>
+  <span class="c1"># Older matplotlib - 3.10 screws up pcolorfast and background colour (why?)</span>
+  <span class="o">-</span> <span class="n">matplotlib</span><span class="o">=</span><span class="mf">3.9.2</span>
+  <span class="c1"># Security patch</span>
+  <span class="o">-</span> <span class="n">libwebp</span><span class="o">&gt;=</span><span class="mf">1.3.2</span>
+  <span class="c1"># Code formatter</span>
+  <span class="o">-</span> <span class="n">black</span>
+  <span class="c1"># Documentation generator</span>
+  <span class="o">-</span> <span class="n">sphinx</span><span class="o">=</span><span class="mf">7.1</span>
+<span class="c1"># Get data from ERA5</span>
+<span class="c1"># You&#39;ll need to register, see https://cds.climate.copernicus.eu/api-how-to</span>
+  <span class="o">-</span> <span class="n">cdsapi</span><span class="o">&gt;=</span><span class="mf">0.7.2</span>
+</pre></div>
+</div>
+</section>
+<section id="getting-the-forecast">
+<h2>Getting the forecast<a class="headerlink" href="#getting-the-forecast" title="Permalink to this heading">¶</a></h2>
+<p>Generally, the worse the weather the better it looks when presented as a map - and the more dramatic the words of the forecast. So I chose <a class="reference internal" href="forecast_raw.html"><span class="doc">the forecast</span></a> for the recent <a class="reference external" href="https://en.wikipedia.org/wiki/Storm_Darragh">Storm Darragh</a> (7th December 2024) as my source. I <a class="reference internal" href="forecast.html"><span class="doc">split it into short lines</span></a> - partly to emphasise the phrasing, and partly because long lines won’t fit on the plot.</p>
+<p>We also need a reconstruction of the weather at the time of the forecast. I used the <a class="reference external" href="https://www.ecmwf.int/en/forecasts/dataset/ecmwf-reanalysis-v5">ERA5 reanalysis</a> for this. I retrieved near-surface winds (and a land mask) from the <a class="reference external" href="https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels?tab=download">Copernicus Climate Data Store (CDS)</a>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="c1"># Retrieve surface weather variables from ERA5</span>
+<span class="c1">#  for one hour.</span>
+
+<span class="kn">import</span> <span class="nn">cdsapi</span>
+
+<span class="n">dataset</span> <span class="o">=</span> <span class="s2">&quot;reanalysis-era5-single-levels&quot;</span>
+<span class="n">request</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;product_type&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;reanalysis&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;variable&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;10m_u_component_of_wind&quot;</span><span class="p">,</span> <span class="s2">&quot;10m_v_component_of_wind&quot;</span><span class="p">,</span> <span class="s2">&quot;land_sea_mask&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;year&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;2024&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;month&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;12&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;day&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;7&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;06:00&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;data_format&quot;</span><span class="p">:</span> <span class="s2">&quot;netcdf&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;download_format&quot;</span><span class="p">:</span> <span class="s2">&quot;unarchived&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="n">client</span> <span class="o">=</span> <span class="n">cdsapi</span><span class="o">.</span><span class="n">Client</span><span class="p">()</span>
+<span class="n">client</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="s2">&quot;Wind_2024120706.nc&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The CDS is awesome - but its current version does terrible things to the netCDF files it makes. So we need to hack them a bit to make them useable:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+
+<span class="c1"># Make the ERA5 .nc files iris-compatible</span>
+<span class="c1">#  That is, delete the &#39;expver&#39; variable</span>
+
+<span class="n">ncks</span> <span class="o">-</span><span class="n">C</span> <span class="o">-</span><span class="n">x</span> <span class="o">-</span><span class="n">v</span> <span class="n">expver</span> <span class="n">Wind_2024120706</span><span class="o">.</span><span class="n">nc</span> <span class="n">Wind_2024120706_no_expver</span><span class="o">.</span><span class="n">nc</span>
+
+</pre></div>
+</div>
+</section>
+<section id="making-the-image">
+<h2>Making the image<a class="headerlink" href="#making-the-image" title="Permalink to this heading">¶</a></h2>
+<p>So we have the words of the shipping forecast, and the wind fields for the time of the forecast. We now want to draw a picture of the wind fields, using the words. The basic process is:</p>
+<ul class="simple">
+<li><p>Identify a set of points (lat,lon) evenly spaced over the region of the plot. (I used the <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.qmc.PoissonDisk.html">scipy PoissonDisk function</a>)</p></li>
+<li><p>For each point, use the wind fields to advect a line along the path of the wind.</p></li>
+<li><p>For each such line, pick a phrase from the forecast, and render it along the advected path. (I used <a class="reference external" href="https://matplotlib.org/stable/gallery/text_labels_and_annotations/demo_text_path.html">matplotlib’s TextPath</a>)</p></li>
+</ul>
+<p>We need to make sure that the phrases are legible, and that they don’t overlap. To do this I chose way too many starting points, and then used each in turn - discarding any that would overlap with existing phrases.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="main_script.html">Main Script</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cube.html">Define_geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="streamlines.html">Propagate Streamlines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="draw_text.html">Draw Text</a></li>
+<li class="toctree-l1"><a class="reference internal" href="collisions.html">Track Overlaps</a></li>
+</ul>
+</div>
+<p>And then of course, there’s the difficult bit - what colours should we use to draw the phrases?
+I took an idea from the excellent <a class="reference external" href="https://github.com/BlakeRMills/MetBrewer">MetBrewer</a> and pinched a set of blue shades from <a class="reference external" href="https://www.metmuseum.org/art/collection/search/56240">Katsushika Hokusai</a>. To which I added red as a highlight colour.</p>
+<p>This document is licensed under <a class="reference external" href="https://creativecommons.org/licenses/by/4.0/?ref=chooser-v1">CC BY 4.0</a>. All code included is licensed under the terms of the <a class="reference external" href="https://opensource.org/license/bsd-3-clause">BSD licence</a>.</p>
+<p>Note that the forecast text is <a class="reference external" href="https://www.metoffice.gov.uk/policies/legal#licences">Crown Copyright</a>, and the ERA5 data used is licensed by <a class="reference external" href="https://www.copernicus.eu/en/access-data/copyright-and-licences">Copernicus</a></p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/Poster.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../index.html">Table of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Spilhaus/ostia.html">Ostia data in the Spilhaus projection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ISPD4.7/index.html">Observations coverage (ISPD4.7)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Stripes/20CR.html">Warming Stripes (20CRv3 version)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../An_AI_reads_history/index.html">An AI reads history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Rhinoceros/index.html">A modern Rhinoceros</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../UK_land_use/index.html">UK Land Use</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Yangtze_land_use/index.html">Yangtze Land Use</a></li>
+</ul>
+<h3><a href="https://github.com/philip-brohan/Posters">Get the source code</a></h3>
+
+<a href="https://github.com/philip-brohan/Posters"
+           rel="nofollow">Github source repository</a>
+
+<h3>Found a bug, or have a suggestion?</h3>
+
+Please <a href="https://github.com/philip-brohan/Posters/issues/new">raise an issue</a>.
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Posters</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Storm Darragh drawn with the Shipping Forecast</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    </div>
+  </body>
+</html>

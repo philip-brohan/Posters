@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Define geometry &#8212; Philip&#39;s Posters</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinxdoc.css?v=0a676766" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=af2ce170"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Posters</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Define geometry</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="define-geometry">
+<h1>Define geometry<a class="headerlink" href="#define-geometry" title="Permalink to this heading">¶</a></h1>
+<p>My laptop measures 31x21 cm so the picture must be this size. So the associated weather map could be 31x21 degrees (lat-lon), but the geographic projection is substantially distorted at the latitude of the UK (~55N) so I divide the longitude range by Cos(55) - about 0.6 - to adjust for this.</p>
+<p>We’ll need several grids on this geometry, with various different resolutions. I’m using <a class="reference external" href="https://scitools-iris.readthedocs.io/en/stable/">Iris</a> to handle the grids.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="c1"># Cube utility functions</span>
+
+<span class="kn">import</span> <span class="nn">iris</span>
+<span class="kn">import</span> <span class="nn">iris.coords</span>
+<span class="kn">import</span> <span class="nn">iris.coord_systems</span>
+<span class="kn">import</span> <span class="nn">iris.fileformats</span>
+<span class="kn">import</span> <span class="nn">iris.util</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<span class="k">def</span> <span class="nf">plot_cube</span><span class="p">(</span><span class="n">resolution</span><span class="p">,</span> <span class="n">xmin</span><span class="o">=-</span><span class="mi">180</span><span class="p">,</span> <span class="n">xmax</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span> <span class="n">ymin</span><span class="o">=-</span><span class="mi">90</span><span class="p">,</span> <span class="n">ymax</span><span class="o">=</span><span class="mi">90</span><span class="p">):</span>
+    <span class="n">cs</span> <span class="o">=</span> <span class="n">iris</span><span class="o">.</span><span class="n">coord_systems</span><span class="o">.</span><span class="n">GeogCS</span><span class="p">(</span><span class="n">iris</span><span class="o">.</span><span class="n">fileformats</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">EARTH_RADIUS</span><span class="p">)</span>
+    <span class="n">lat_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">+</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span>
+    <span class="n">latitude</span> <span class="o">=</span> <span class="n">iris</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">DimCoord</span><span class="p">(</span>
+        <span class="n">lat_values</span><span class="p">,</span> <span class="n">standard_name</span><span class="o">=</span><span class="s2">&quot;latitude&quot;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;degrees_north&quot;</span><span class="p">,</span> <span class="n">coord_system</span><span class="o">=</span><span class="n">cs</span>
+    <span class="p">)</span>
+    <span class="n">lon_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span> <span class="o">+</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span>
+    <span class="n">longitude</span> <span class="o">=</span> <span class="n">iris</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">DimCoord</span><span class="p">(</span>
+        <span class="n">lon_values</span><span class="p">,</span> <span class="n">standard_name</span><span class="o">=</span><span class="s2">&quot;longitude&quot;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;degrees_east&quot;</span><span class="p">,</span> <span class="n">coord_system</span><span class="o">=</span><span class="n">cs</span>
+    <span class="p">)</span>
+    <span class="n">dummy_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">lat_values</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">lon_values</span><span class="p">)))</span>
+    <span class="n">plot_cube</span> <span class="o">=</span> <span class="n">iris</span><span class="o">.</span><span class="n">cube</span><span class="o">.</span><span class="n">Cube</span><span class="p">(</span>
+        <span class="n">dummy_data</span><span class="p">,</span> <span class="n">dim_coords_and_dims</span><span class="o">=</span><span class="p">[(</span><span class="n">latitude</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">longitude</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">plot_cube</span>
+</pre></div>
+</div>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/Poster.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../index.html">Table of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Spilhaus/ostia.html">Ostia data in the Spilhaus projection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ISPD4.7/index.html">Observations coverage (ISPD4.7)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Stripes/20CR.html">Warming Stripes (20CRv3 version)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../An_AI_reads_history/index.html">An AI reads history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Rhinoceros/index.html">A modern Rhinoceros</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../UK_land_use/index.html">UK Land Use</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Yangtze_land_use/index.html">Yangtze Land Use</a></li>
+</ul>
+<h3><a href="https://github.com/philip-brohan/Posters">Get the source code</a></h3>
+
+<a href="https://github.com/philip-brohan/Posters"
+           rel="nofollow">Github source repository</a>
+
+<h3>Found a bug, or have a suggestion?</h3>
+
+Please <a href="https://github.com/philip-brohan/Posters/issues/new">raise an issue</a>.
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Posters</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Define geometry</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    </div>
+  </body>
+</html>
