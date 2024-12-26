@@ -1,0 +1,19 @@
+name: ww
+channels:
+  - conda-forge
+dependencies:
+  # Basics
+  - python=3.11
+  - iris=3.6
+  - nco=5.3  # Need ncks to fix broken CDS files
+  # Older matplotlib - 3.10 screws up pcolorfast and background colour (why?)
+  - matplotlib=3.9.2
+  # Security patch
+  - libwebp>=1.3.2
+  # Code formatter
+  - black
+  # Documentation generator
+  - sphinx=7.1
+# Get data from ERA5
+# You'll need to register, see https://cds.climate.copernicus.eu/api-how-to
+  - cdsapi>=0.7.2
