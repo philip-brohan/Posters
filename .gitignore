@@ -143,6 +143,7 @@ Thumbs.db
 *.out
 *.dat
 *.xcf
+*.nc
 
 
 # SCRATCH dir
