@@ -7,7 +7,7 @@ Storm Darragh drawn with the Shipping Forecast
    :figwidth: 95%
 
 
-I'm no mariner, but - like so many people - I love the `Shipping Forecast <https://en.wikipedia.org/wiki/Shipping_Forecast>`_ (`read <https://www.metoffice.gov.uk/weather/specialist-forecasts/coast-and-sea/print/shipping-forecast>`_ or `listen to <https://www.bbc.co.uk/programmes/b006qfvv>`_ today's). It's justly famous for rhythm, cadence, and the poetry of its names, but it's really a picture of the weather around the British Isles. Can we make that picture - a weather map - from the words of the Shipping Forecast? It's a timely project, as the the centenery of the first broadcast of the shipping forecast is Jan 1st 2025 (next week, as I write this) - also, I need a picture to decorate my new laptop.
+I'm no mariner, but - like so many people - I love the `Shipping Forecast <https://en.wikipedia.org/wiki/Shipping_Forecast>`_ (`read <https://www.metoffice.gov.uk/weather/specialist-forecasts/coast-and-sea/print/shipping-forecast>`_ or `listen to <https://www.bbc.co.uk/programmes/b006qfvv>`_ today's). It's justly famous for rhythm, cadence, and the poetry of its names, but it's really a picture of the weather around the British Isles. Can we make that picture - a weather map - from the words of the Shipping Forecast? It's a timely project, as the centenary of the first broadcast of the shipping forecast is Jan 1st 2025 (next week, as I write this) - also, I need a picture to decorate my new laptop.
 
 Setup
 -----

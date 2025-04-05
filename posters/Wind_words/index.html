@@ -6,13 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Storm Darragh drawn with the Shipping Forecast &#8212; Philip&#39;s Posters</title>
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinxdoc.css?v=0a676766" />
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=af2ce170"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
     <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" /> 
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Main render script" href="main_script.html" />
+    <link rel="prev" title="Yangtze Land Use" href="../Yangtze_land_use/index.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
@@ -20,6 +22,12 @@
         <li class="right" style="margin-right: 10px">
           <a href="../../genindex.html" title="General Index"
              accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="main_script.html" title="Main render script"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../Yangtze_land_use/index.html" title="Yangtze Land Use"
+             accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../index.html">Posters</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Storm Darragh drawn with the Shipping Forecast</a></li> 
       </ul>
@@ -35,7 +43,7 @@
 <figure class="align-center" style="width: 95%">
 <a class="reference internal image-reference" href="../../_images/wind_words.webp"><img alt="../../_images/wind_words.webp" src="../../_images/wind_words.webp" style="width: 95%;" /></a>
 </figure>
-<p>I’m no mariner, but - like so many people - I love the <a class="reference external" href="https://en.wikipedia.org/wiki/Shipping_Forecast">Shipping Forecast</a> (<a class="reference external" href="https://www.metoffice.gov.uk/weather/specialist-forecasts/coast-and-sea/print/shipping-forecast">read</a> or <a class="reference external" href="https://www.bbc.co.uk/programmes/b006qfvv">listen to</a> today’s). It’s justly famous for rhythm, cadence, and the poetry of its names, but it’s really a picture of the weather around the British Isles. Can we make that picture - a weather map - from the words of the Shipping Forecast? It’s a timely project, as the the centenery of the first broadcast of the shipping forecast is Jan 1st 2025 (next week, as I write this) - also, I need a picture to decorate my new laptop.</p>
+<p>I’m no mariner, but - like so many people - I love the <a class="reference external" href="https://en.wikipedia.org/wiki/Shipping_Forecast">Shipping Forecast</a> (<a class="reference external" href="https://www.metoffice.gov.uk/weather/specialist-forecasts/coast-and-sea/print/shipping-forecast">read</a> or <a class="reference external" href="https://www.bbc.co.uk/programmes/b006qfvv">listen to</a> today’s). It’s justly famous for rhythm, cadence, and the poetry of its names, but it’s really a picture of the weather around the British Isles. Can we make that picture - a weather map - from the words of the Shipping Forecast? It’s a timely project, as the centenary of the first broadcast of the shipping forecast is Jan 1st 2025 (next week, as I write this) - also, I need a picture to decorate my new laptop.</p>
 <section id="setup">
 <h2>Setup<a class="headerlink" href="#setup" title="Permalink to this heading">¶</a></h2>
 <p>I’m going to make the map using python and <a class="reference external" href="https://matplotlib.org/">matplotlib</a>. Step one is to set up a conda environment with the necessary packages:</p>
@@ -70,7 +78,7 @@
 <span class="c1"># Retrieve surface weather variables from ERA5</span>
 <span class="c1">#  for one hour.</span>
 
-<span class="kn">import</span> <span class="nn">cdsapi</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">cdsapi</span>
 
 <span class="n">dataset</span> <span class="o">=</span> <span class="s2">&quot;reanalysis-era5-single-levels&quot;</span>
 <span class="n">request</span> <span class="o">=</span> <span class="p">{</span>
@@ -134,7 +142,7 @@ I took an idea from the excellent <a class="reference external" href="https://gi
               <img class="logo" src="../../_static/Poster.png" alt="Logo"/>
             </a></p>
 <h3><a href="../../index.html">Table of Contents</a></h3>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../Spilhaus/ostia.html">Ostia data in the Spilhaus projection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ISPD4.7/index.html">Observations coverage (ISPD4.7)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Stripes/20CR.html">Warming Stripes (20CRv3 version)</a></li>
@@ -142,6 +150,8 @@ I took an idea from the excellent <a class="reference external" href="https://gi
 <li class="toctree-l1"><a class="reference internal" href="../Rhinoceros/index.html">A modern Rhinoceros</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../UK_land_use/index.html">UK Land Use</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Yangtze_land_use/index.html">Yangtze Land Use</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Storm Darragh drawn with the Shipping Forecast</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ML_Kirby/index.html">ML as a superpower for climate modelling</a></li>
 </ul>
 <h3><a href="https://github.com/philip-brohan/Posters">Get the source code</a></h3>
 
@@ -161,6 +171,12 @@ Please <a href="https://github.com/philip-brohan/Posters/issues/new">raise an is
         <li class="right" style="margin-right: 10px">
           <a href="../../genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="main_script.html" title="Main render script"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../Yangtze_land_use/index.html" title="Yangtze Land Use"
+             >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../../index.html">Posters</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Storm Darragh drawn with the Shipping Forecast</a></li> 
       </ul>
