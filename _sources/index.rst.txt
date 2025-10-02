@@ -18,6 +18,6 @@ This is a set of visualizations designed to be printed out as large posters. Som
    posters/Yangtze_land_use/index
    posters/Wind_words/index
    posters/ML_Kirby/index
+   posters/Cartoon_stripes/index
 
-
-This document and the data associated with it are crown copyright (2019) and licensed under the terms of the `Open Government Licence <https://www.nationalarchives.gov.uk/doc/open-government-licence/version/2/>`_. All code included is licensed under the terms of the `BSD licence <https://opensource.org/licenses/BSD-2-Clause>`_.
+This document and the data associated with it are crown copyright (2025) and licensed under the terms of the `Open Government Licence <https://www.nationalarchives.gov.uk/doc/open-government-licence/version/2/>`_. All code included is licensed under the terms of the `BSD licence <https://opensource.org/licenses/BSD-2-Clause>`_.

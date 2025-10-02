@@ -1,0 +1,23 @@
+Show more stripes
+=================
+
+.. note::
+
+   This poster is shamelessly derivative of the `Climate Stripes <https://showyourstripes.info/>`_.
+
+
+.. figure:: Show_more_stripes.jpg
+   :width: 95%
+   :align: center
+   :figwidth: 95%
+
+
+I like the climate stripes (I'm not the only one) but I want to see more details. So this version's less well suited to painting on the side of a bus, but does give a tremendous amount of information on climate variability and change. It's also a fast and effective way to demonstrate both the power and limitations of a climate model.
+
+The cartoon images were drawn for me by `google Gemini <https://g.co/gemini/share/097a58de39bf>`_.
+
+Here's the `final PowerPoint file (14Mb) <../../_static/Show_more_stripes.pptx>`_.
+
+
+
+This document is licensed under `CC BY 4.0 <https://creativecommons.org/licenses/by/4.0/?ref=chooser-v1>`_. All code included is licensed under the terms of the `BSD licence <https://opensource.org/license/bsd-3-clause>`_. 
